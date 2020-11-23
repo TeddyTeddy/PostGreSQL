@@ -1,0 +1,40 @@
+// dot 2.40.1 on Linux 5.4.0-51-generic
+// SchemaSpy rev 590
+digraph "vproductmodelinstructions" {
+  graph [
+    rankdir="RL"
+    bgcolor="#f7f7f7"
+    nodesep="0.18"
+    ranksep="0.46"
+    fontname="Helvetica"
+    fontsize="11"
+  ];
+  node [
+    fontname="Helvetica"
+    fontsize="11"
+    shape="plaintext"
+  ];
+  edge [
+    arrowsize="0.8"
+  ];
+  "vproductmodelinstructions" [
+    label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" BGCOLOR="#ffffff">
+      <TR><TD COLSPAN="3" BGCOLOR="#9bab96" ALIGN="CENTER">vproductmodelinstructions</TD></TR>
+      <TR><TD PORT="productmodelid" COLSPAN="3" ALIGN="LEFT">productmodelid</TD></TR>
+      <TR><TD PORT="name" COLSPAN="3" ALIGN="LEFT">name</TD></TR>
+      <TR><TD PORT="instructions" COLSPAN="3" ALIGN="LEFT">instructions</TD></TR>
+      <TR><TD PORT="LocationID" COLSPAN="3" ALIGN="LEFT">LocationID</TD></TR>
+      <TR><TD PORT="SetupHours" COLSPAN="3" ALIGN="LEFT">SetupHours</TD></TR>
+      <TR><TD PORT="MachineHours" COLSPAN="3" ALIGN="LEFT">MachineHours</TD></TR>
+      <TR><TD PORT="LaborHours" COLSPAN="3" ALIGN="LEFT">LaborHours</TD></TR>
+      <TR><TD PORT="LotSize" COLSPAN="3" ALIGN="LEFT">LotSize</TD></TR>
+      <TR><TD PORT="Step" COLSPAN="3" ALIGN="LEFT">Step</TD></TR>
+      <TR><TD PORT="rowguid" COLSPAN="3" ALIGN="LEFT">rowguid</TD></TR>
+      <TR><TD PORT="modifieddate" COLSPAN="3" ALIGN="LEFT">modifieddate</TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#f7f7f7">  </TD><TD ALIGN="RIGHT" BGCOLOR="#f7f7f7">view</TD><TD ALIGN="RIGHT" BGCOLOR="#f7f7f7">  </TD></TR>
+    </TABLE>>
+    URL="tables/vproductmodelinstructions.html"
+    tooltip="vproductmodelinstructions"
+  ];
+}

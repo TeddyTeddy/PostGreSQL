@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<database name="AdventureWorks" schema="person" type="PostgreSQL - 13.0 (Ubuntu 13.0-1.pgdg18.04+1)">
+   <tables>
+      <table name="address" numRows="19614" remarks="Street address information for customers, employees, and vendors." schema="person" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('person.address_addressid_seq'::regclass)" digits="0" id="0" name="addressid" nullable="false" remarks="Primary key for Address records." size="10" type="serial">
+            <child column="addressid" foreignKey="FK_BusinessEntityAddress_Address_AddressID" implied="false" onDeleteCascade="false" table="businessentityaddress"/>
+            <child column="billtoaddressid" foreignKey="FK_SalesOrderHeader_Address_BillToAddressID" implied="false" onDeleteCascade="false" table="salesorderheader"/>
+            <child column="shiptoaddressid" foreignKey="FK_SalesOrderHeader_Address_ShipToAddressID" implied="false" onDeleteCascade="false" table="salesorderheader"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="addressline1" nullable="false" remarks="First street address line." size="60" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="addressline2" nullable="true" remarks="Second street address line." size="60" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="city" nullable="false" remarks="Name of the city." size="30" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="stateprovinceid" nullable="false" remarks="Unique identification number for the state or province. Foreign key to StateProvince table." size="10" type="int4">
+            <parent column="stateprovinceid" foreignKey="FK_Address_StateProvince_StateProvinceID" implied="false" onDeleteCascade="false" table="stateprovince"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="5" name="postalcode" nullable="false" remarks="Postal code for the street address." size="15" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="spatiallocation" nullable="true" remarks="Latitude and longitude of this address." size="44" type="varchar"/>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="7" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="8" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="addressid" sequenceNumberInPK="1"/>
+         <index name="PK_Address_AddressID" unique="true">
+            <column ascending="true" name="addressid"/>
+         </index>
+      </table>
+      <table name="addresstype" numRows="6" remarks="Types of addresses stored in the Address table." schema="person" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('person.addresstype_addresstypeid_seq'::regclass)" digits="0" id="0" name="addresstypeid" nullable="false" remarks="Primary key for AddressType records." size="10" type="serial">
+            <child column="addresstypeid" foreignKey="FK_BusinessEntityAddress_AddressType_AddressTypeID" implied="false" onDeleteCascade="false" table="businessentityaddress"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="Address type description. For example, Billing, Home, or Shipping." size="54" type="Name"/>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="2" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="3" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="addresstypeid" sequenceNumberInPK="1"/>
+         <index name="PK_AddressType_AddressTypeID" unique="true">
+            <column ascending="true" name="addresstypeid"/>
+         </index>
+      </table>
+      <table name="businessentity" numRows="20777" remarks="Source of the ID that connects vendors, customers, and employees with address and contact information." schema="person" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('person.businessentity_businessentityid_seq'::regclass)" digits="0" id="0" name="businessentityid" nullable="false" remarks="Primary key for all customers, vendors, and employees." size="10" type="serial">
+            <child column="businessentityid" foreignKey="FK_BusinessEntityAddress_BusinessEntity_BusinessEntityID" implied="false" onDeleteCascade="false" table="businessentityaddress"/>
+            <child column="businessentityid" foreignKey="FK_BusinessEntityContact_BusinessEntity_BusinessEntityID" implied="false" onDeleteCascade="false" table="businessentitycontact"/>
+            <child column="businessentityid" foreignKey="FK_Person_BusinessEntity_BusinessEntityID" implied="false" onDeleteCascade="false" table="person"/>
+            <child column="businessentityid" foreignKey="FK_Store_BusinessEntity_BusinessEntityID" implied="false" onDeleteCascade="false" table="store"/>
+            <child column="businessentityid" foreignKey="FK_Vendor_BusinessEntity_BusinessEntityID" implied="false" onDeleteCascade="false" table="vendor"/>
+         </column>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="1" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="2" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="businessentityid" sequenceNumberInPK="1"/>
+         <index name="PK_BusinessEntity_BusinessEntityID" unique="true">
+            <column ascending="true" name="businessentityid"/>
+         </index>
+      </table>
+      <table name="businessentityaddress" numRows="19614" remarks="Cross-reference table mapping customers, vendors, and employees to their addresses." schema="person" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="false" remarks="Primary key. Foreign key to BusinessEntity.BusinessEntityID." size="10" type="int4">
+            <parent column="businessentityid" foreignKey="FK_BusinessEntityAddress_BusinessEntity_BusinessEntityID" implied="false" onDeleteCascade="false" table="businessentity"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="addressid" nullable="false" remarks="Primary key. Foreign key to Address.AddressID." size="10" type="int4">
+            <parent column="addressid" foreignKey="FK_BusinessEntityAddress_Address_AddressID" implied="false" onDeleteCascade="false" table="address"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="addresstypeid" nullable="false" remarks="Primary key. Foreign key to AddressType.AddressTypeID." size="10" type="int4">
+            <parent column="addresstypeid" foreignKey="FK_BusinessEntityAddress_AddressType_AddressTypeID" implied="false" onDeleteCascade="false" table="addresstype"/>
+         </column>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="3" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="4" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="businessentityid" sequenceNumberInPK="1"/>
+         <primaryKey column="addressid" sequenceNumberInPK="2"/>
+         <primaryKey column="addresstypeid" sequenceNumberInPK="3"/>
+         <index name="PK_BusinessEntityAddress_BusinessEntityID_AddressID_AddressType" unique="true">
+            <column ascending="true" name="businessentityid"/>
+            <column ascending="true" name="addressid"/>
+            <column ascending="true" name="addresstypeid"/>
+         </index>
+      </table>
+      <table name="businessentitycontact" numRows="909" remarks="Cross-reference table mapping stores, vendors, and employees to people" schema="person" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="false" remarks="Primary key. Foreign key to BusinessEntity.BusinessEntityID." size="10" type="int4">
+            <parent column="businessentityid" foreignKey="FK_BusinessEntityContact_BusinessEntity_BusinessEntityID" implied="false" onDeleteCascade="false" table="businessentity"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="personid" nullable="false" remarks="Primary key. Foreign key to Person.BusinessEntityID." size="10" type="int4">
+            <parent column="businessentityid" foreignKey="FK_BusinessEntityContact_Person_PersonID" implied="false" onDeleteCascade="false" table="person"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="contacttypeid" nullable="false" remarks="Primary key.  Foreign key to ContactType.ContactTypeID." size="10" type="int4">
+            <parent column="contacttypeid" foreignKey="FK_BusinessEntityContact_ContactType_ContactTypeID" implied="false" onDeleteCascade="false" table="contacttype"/>
+         </column>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="3" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="4" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="businessentityid" sequenceNumberInPK="1"/>
+         <primaryKey column="personid" sequenceNumberInPK="2"/>
+         <primaryKey column="contacttypeid" sequenceNumberInPK="3"/>
+         <index name="PK_BusinessEntityContact_BusinessEntityID_PersonID_ContactTypeI" unique="true">
+            <column ascending="true" name="businessentityid"/>
+            <column ascending="true" name="personid"/>
+            <column ascending="true" name="contacttypeid"/>
+         </index>
+      </table>
+      <table name="contacttype" numRows="20" remarks="Lookup table containing the types of business entity contacts." schema="person" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('person.contacttype_contacttypeid_seq'::regclass)" digits="0" id="0" name="contacttypeid" nullable="false" remarks="Primary key for ContactType records." size="10" type="serial">
+            <child column="contacttypeid" foreignKey="FK_BusinessEntityContact_ContactType_ContactTypeID" implied="false" onDeleteCascade="false" table="businessentitycontact"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="Contact type description." size="54" type="Name"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="2" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="contacttypeid" sequenceNumberInPK="1"/>
+         <index name="PK_ContactType_ContactTypeID" unique="true">
+            <column ascending="true" name="contacttypeid"/>
+         </index>
+      </table>
+      <table name="countryregion" numRows="238" remarks="Lookup table containing the ISO standard codes for countries and regions." schema="person" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="countryregioncode" nullable="false" remarks="ISO standard code for countries and regions." size="3" type="varchar">
+            <child column="countryregioncode" foreignKey="FK_CountryRegionCurrency_CountryRegion_CountryRegionCode" implied="false" onDeleteCascade="false" table="countryregioncurrency"/>
+            <child column="countryregioncode" foreignKey="FK_SalesTerritory_CountryRegion_CountryRegionCode" implied="false" onDeleteCascade="false" table="salesterritory"/>
+            <child column="countryregioncode" foreignKey="FK_StateProvince_CountryRegion_CountryRegionCode" implied="false" onDeleteCascade="false" table="stateprovince"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="Country or region name." size="54" type="Name"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="2" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="countryregioncode" sequenceNumberInPK="1"/>
+         <index name="PK_CountryRegion_CountryRegionCode" unique="true">
+            <column ascending="true" name="countryregioncode"/>
+         </index>
+      </table>
+      <table name="emailaddress" numRows="19972" remarks="Where to send a person email." schema="person" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="false" remarks="Primary key. Person associated with this email address.  Foreign key to Person.BusinessEntityID" size="10" type="int4">
+            <parent column="businessentityid" foreignKey="FK_EmailAddress_Person_BusinessEntityID" implied="false" onDeleteCascade="false" table="person"/>
+         </column>
+         <column autoUpdated="true" defaultValue="nextval('person.emailaddress_emailaddressid_seq'::regclass)" digits="0" id="1" name="emailaddressid" nullable="false" remarks="Primary key. ID of this email address." size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="2" name="emailaddress" nullable="true" remarks="E-mail address for the person." size="50" type="varchar"/>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="3" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="4" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="businessentityid" sequenceNumberInPK="1"/>
+         <primaryKey column="emailaddressid" sequenceNumberInPK="2"/>
+         <index name="PK_EmailAddress_BusinessEntityID_EmailAddressID" unique="true">
+            <column ascending="true" name="businessentityid"/>
+            <column ascending="true" name="emailaddressid"/>
+         </index>
+      </table>
+      <table name="password" numRows="19972" remarks="One way hashed authentication information" schema="person" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="false" remarks="" size="10" type="int4">
+            <child column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="vadditionalcontactinfo"/>
+            <parent column="businessentityid" foreignKey="FK_Password_Person_BusinessEntityID" implied="false" onDeleteCascade="false" table="person"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="passwordhash" nullable="false" remarks="Password for the e-mail account." size="128" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="passwordsalt" nullable="false" remarks="Random value concatenated with the password string before the password is hashed." size="10" type="varchar"/>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="3" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="4" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="businessentityid" sequenceNumberInPK="1"/>
+         <index name="PK_Password_BusinessEntityID" unique="true">
+            <column ascending="true" name="businessentityid"/>
+         </index>
+      </table>
+      <table name="person" numRows="19972" remarks="Human beings involved with AdventureWorks: employees, customer contacts, and vendor contacts." schema="person" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="false" remarks="Primary key for Person records." size="10" type="int4">
+            <child column="personid" foreignKey="FK_BusinessEntityContact_Person_PersonID" implied="false" onDeleteCascade="false" table="businessentitycontact"/>
+            <child column="personid" foreignKey="FK_Customer_Person_PersonID" implied="false" onDeleteCascade="false" table="customer"/>
+            <child column="businessentityid" foreignKey="FK_EmailAddress_Person_BusinessEntityID" implied="false" onDeleteCascade="false" table="emailaddress"/>
+            <child column="businessentityid" foreignKey="FK_Employee_Person_BusinessEntityID" implied="false" onDeleteCascade="false" table="employee"/>
+            <child column="businessentityid" foreignKey="FK_Password_Person_BusinessEntityID" implied="false" onDeleteCascade="false" table="password"/>
+            <child column="businessentityid" foreignKey="FK_PersonCreditCard_Person_BusinessEntityID" implied="false" onDeleteCascade="false" table="personcreditcard"/>
+            <child column="businessentityid" foreignKey="FK_PersonPhone_Person_BusinessEntityID" implied="false" onDeleteCascade="false" table="personphone"/>
+            <parent column="businessentityid" foreignKey="FK_Person_BusinessEntity_BusinessEntityID" implied="false" onDeleteCascade="false" table="businessentity"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="persontype" nullable="false" remarks="Primary type of person: SC = Store Contact, IN = Individual (retail) customer, SP = Sales person, EM = Employee (non-sales), VC = Vendor contact, GC = General contact" size="2" type="bpchar"/>
+         <column autoUpdated="false" defaultValue="false" digits="0" id="2" name="namestyle" nullable="false" remarks="0 = The data in FirstName and LastName are stored in western style (first name, last name) order.  1 = Eastern style (last name, first name) order." size="1" type="NameStyle"/>
+         <column autoUpdated="false" digits="0" id="3" name="title" nullable="true" remarks="A courtesy title. For example, Mr. or Ms." size="8" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="firstname" nullable="false" remarks="First name of the person." size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="5" name="middlename" nullable="true" remarks="Middle name or middle initial of the person." size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="6" name="lastname" nullable="false" remarks="Last name of the person." size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="7" name="suffix" nullable="true" remarks="Surname suffix. For example, Sr. or Jr." size="10" type="varchar"/>
+         <column autoUpdated="false" defaultValue="0" digits="0" id="8" name="emailpromotion" nullable="false" remarks="0 = Contact does not wish to receive e-mail promotions, 1 = Contact does wish to receive e-mail promotions from AdventureWorks, 2 = Contact does wish to receive e-mail promotions from AdventureWorks and selected partners." size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="9" name="additionalcontactinfo" nullable="true" remarks="Additional contact information about the person stored in xml format." size="2147483647" type="xml"/>
+         <column autoUpdated="false" digits="0" id="10" name="demographics" nullable="true" remarks="Personal information such as hobbies, and income collected from online shoppers. Used for sales analysis." size="2147483647" type="xml"/>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="11" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="12" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="businessentityid" sequenceNumberInPK="1"/>
+         <index name="PK_Person_BusinessEntityID" unique="true">
+            <column ascending="true" name="businessentityid"/>
+         </index>
+      </table>
+      <table name="personphone" numRows="19972" remarks="Telephone number and type of a person." schema="person" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="false" remarks="Business entity identification number. Foreign key to Person.BusinessEntityID." size="10" type="int4">
+            <parent column="businessentityid" foreignKey="FK_PersonPhone_Person_BusinessEntityID" implied="false" onDeleteCascade="false" table="person"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="phonenumber" nullable="false" remarks="Telephone number identification number." size="29" type="Phone"/>
+         <column autoUpdated="false" digits="0" id="2" name="phonenumbertypeid" nullable="false" remarks="Kind of phone number. Foreign key to PhoneNumberType.PhoneNumberTypeID." size="10" type="int4">
+            <parent column="phonenumbertypeid" foreignKey="FK_PersonPhone_PhoneNumberType_PhoneNumberTypeID" implied="false" onDeleteCascade="false" table="phonenumbertype"/>
+         </column>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="3" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="businessentityid" sequenceNumberInPK="1"/>
+         <primaryKey column="phonenumber" sequenceNumberInPK="2"/>
+         <primaryKey column="phonenumbertypeid" sequenceNumberInPK="3"/>
+         <index name="PK_PersonPhone_BusinessEntityID_PhoneNumber_PhoneNumberTypeID" unique="true">
+            <column ascending="true" name="businessentityid"/>
+            <column ascending="true" name="phonenumber"/>
+            <column ascending="true" name="phonenumbertypeid"/>
+         </index>
+      </table>
+      <table name="phonenumbertype" numRows="3" remarks="Type of phone number of a person." schema="person" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('person.phonenumbertype_phonenumbertypeid_seq'::regclass)" digits="0" id="0" name="phonenumbertypeid" nullable="false" remarks="Primary key for telephone number type records." size="10" type="serial">
+            <child column="phonenumbertypeid" foreignKey="FK_PersonPhone_PhoneNumberType_PhoneNumberTypeID" implied="false" onDeleteCascade="false" table="personphone"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="Name of the telephone number type" size="54" type="Name"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="2" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="phonenumbertypeid" sequenceNumberInPK="1"/>
+         <index name="PK_PhoneNumberType_PhoneNumberTypeID" unique="true">
+            <column ascending="true" name="phonenumbertypeid"/>
+         </index>
+      </table>
+      <table name="stateprovince" numRows="181" remarks="State and province lookup table." schema="person" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('person.stateprovince_stateprovinceid_seq'::regclass)" digits="0" id="0" name="stateprovinceid" nullable="false" remarks="Primary key for StateProvince records." size="10" type="serial">
+            <child column="stateprovinceid" foreignKey="FK_Address_StateProvince_StateProvinceID" implied="false" onDeleteCascade="false" table="address"/>
+            <child column="stateprovinceid" foreignKey="FK_SalesTaxRate_StateProvince_StateProvinceID" implied="false" onDeleteCascade="false" table="salestaxrate"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="stateprovincecode" nullable="false" remarks="ISO standard state or province code." size="3" type="bpchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="countryregioncode" nullable="false" remarks="ISO standard country or region code. Foreign key to CountryRegion.CountryRegionCode." size="3" type="varchar">
+            <parent column="countryregioncode" foreignKey="FK_StateProvince_CountryRegion_CountryRegionCode" implied="false" onDeleteCascade="false" table="countryregion"/>
+         </column>
+         <column autoUpdated="false" defaultValue="true" digits="0" id="3" name="isonlystateprovinceflag" nullable="false" remarks="0 = StateProvinceCode exists. 1 = StateProvinceCode unavailable, using CountryRegionCode." size="1" type="Flag"/>
+         <column autoUpdated="false" digits="0" id="4" name="name" nullable="false" remarks="State or province description." size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="5" name="territoryid" nullable="false" remarks="ID of the territory in which the state or province is located. Foreign key to SalesTerritory.SalesTerritoryID." size="10" type="int4">
+            <parent column="territoryid" foreignKey="FK_StateProvince_SalesTerritory_TerritoryID" implied="false" onDeleteCascade="false" table="salesterritory"/>
+         </column>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="6" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="7" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="stateprovinceid" sequenceNumberInPK="1"/>
+         <index name="PK_StateProvince_StateProvinceID" unique="true">
+            <column ascending="true" name="stateprovinceid"/>
+         </index>
+      </table>
+      <table name="vadditionalcontactinfo" numRows="0" remarks="" schema="person" type="VIEW">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="true" remarks="" size="10" type="int4">
+            <parent column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="password"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="firstname" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="2" name="middlename" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="3" name="lastname" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="4" name="telephonenumber" nullable="true" remarks="" size="2147483647" type="xml"/>
+         <column autoUpdated="false" digits="0" id="5" name="telephonespecialinstructions" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="6" name="street" nullable="true" remarks="" size="2147483647" type="xml"/>
+         <column autoUpdated="false" digits="0" id="7" name="city" nullable="true" remarks="" size="2147483647" type="xml"/>
+         <column autoUpdated="false" digits="0" id="8" name="stateprovince" nullable="true" remarks="" size="2147483647" type="xml"/>
+         <column autoUpdated="false" digits="0" id="9" name="postalcode" nullable="true" remarks="" size="2147483647" type="xml"/>
+         <column autoUpdated="false" digits="0" id="10" name="countryregion" nullable="true" remarks="" size="2147483647" type="xml"/>
+         <column autoUpdated="false" digits="0" id="11" name="homeaddressspecialinstructions" nullable="true" remarks="" size="2147483647" type="xml"/>
+         <column autoUpdated="false" digits="0" id="12" name="emailaddress" nullable="true" remarks="" size="2147483647" type="xml"/>
+         <column autoUpdated="false" digits="0" id="13" name="emailspecialinstructions" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="14" name="emailtelephonenumber" nullable="true" remarks="" size="2147483647" type="xml"/>
+         <column autoUpdated="false" digits="0" id="15" name="rowguid" nullable="true" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" digits="6" id="16" name="modifieddate" nullable="true" remarks="" size="29" type="timestamp"/>
+      </table>
+   </tables>
+</database>

@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<database name="AdventureWorks" schema="production" type="PostgreSQL - 13.0 (Ubuntu 13.0-1.pgdg18.04+1)">
+   <tables>
+      <table name="billofmaterials" numRows="2679" remarks="Items required to make bicycles and bicycle subassemblies. It identifies the heirarchical relationship between a parent product and its components." schema="production" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('production.billofmaterials_billofmaterialsid_seq'::regclass)" digits="0" id="0" name="billofmaterialsid" nullable="false" remarks="Primary key for BillOfMaterials records." size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="productassemblyid" nullable="true" remarks="Parent product identification number. Foreign key to Product.ProductID." size="10" type="int4">
+            <parent column="productid" foreignKey="FK_BillOfMaterials_Product_ProductAssemblyID" implied="false" onDeleteCascade="false" table="product"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="componentid" nullable="false" remarks="Component identification number. Foreign key to Product.ProductID." size="10" type="int4">
+            <parent column="productid" foreignKey="FK_BillOfMaterials_Product_ComponentID" implied="false" onDeleteCascade="false" table="product"/>
+         </column>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="3" name="startdate" nullable="false" remarks="Date the component started being used in the assembly item." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="6" id="4" name="enddate" nullable="true" remarks="Date the component stopped being used in the assembly item." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="0" id="5" name="unitmeasurecode" nullable="false" remarks="Standard code identifying the unit of measure for the quantity." size="3" type="bpchar">
+            <parent column="unitmeasurecode" foreignKey="FK_BillOfMaterials_UnitMeasure_UnitMeasureCode" implied="false" onDeleteCascade="false" table="unitmeasure"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="6" name="bomlevel" nullable="false" remarks="Indicates the depth the component is from its parent (AssemblyID)." size="5" type="int2"/>
+         <column autoUpdated="false" defaultValue="1.00" digits="2" id="7" name="perassemblyqty" nullable="false" remarks="Quantity of the component needed to create the assembly." size="8" type="numeric"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="8" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="billofmaterialsid" sequenceNumberInPK="1"/>
+         <index name="PK_BillOfMaterials_BillOfMaterialsID" unique="true">
+            <column ascending="true" name="billofmaterialsid"/>
+         </index>
+      </table>
+      <table name="culture" numRows="8" remarks="Lookup table containing the languages in which some AdventureWorks data is stored." schema="production" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="cultureid" nullable="false" remarks="Primary key for Culture records." size="6" type="bpchar">
+            <child column="cultureid" foreignKey="FK_ProductModelProductDescriptionCulture_Culture_CultureID" implied="false" onDeleteCascade="false" table="productmodelproductdescriptionculture"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="Culture description." size="54" type="Name"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="2" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="cultureid" sequenceNumberInPK="1"/>
+         <index name="PK_Culture_CultureID" unique="true">
+            <column ascending="true" name="cultureid"/>
+         </index>
+      </table>
+      <table name="document" numRows="13" remarks="Product maintenance documents." schema="production" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="title" nullable="false" remarks="Title of the document." size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="1" name="owner" nullable="false" remarks="Employee who controls the document.  Foreign key to Employee.BusinessEntityID" size="10" type="int4">
+            <parent column="businessentityid" foreignKey="FK_Document_Employee_Owner" implied="false" onDeleteCascade="false" table="employee"/>
+         </column>
+         <column autoUpdated="false" defaultValue="false" digits="0" id="2" name="folderflag" nullable="false" remarks="0 = This is a folder, 1 = This is a document." size="1" type="Flag"/>
+         <column autoUpdated="false" digits="0" id="3" name="filename" nullable="false" remarks="File name of the document" size="400" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="fileextension" nullable="true" remarks="File extension indicating the document type. For example, .doc or .txt." size="8" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="5" name="revision" nullable="false" remarks="Revision number of the document." size="5" type="bpchar"/>
+         <column autoUpdated="false" defaultValue="0" digits="0" id="6" name="changenumber" nullable="false" remarks="Engineering change approval number." size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="7" name="status" nullable="false" remarks="1 = Pending approval, 2 = Approved, 3 = Obsolete" size="5" type="int2"/>
+         <column autoUpdated="false" digits="0" id="8" name="documentsummary" nullable="true" remarks="Document abstract." size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="9" name="document" nullable="true" remarks="Complete document." size="2147483647" type="bytea"/>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="10" name="rowguid" nullable="false" remarks="ROWGUIDCOL number uniquely identifying the record. Required for FileStream." size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="11" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <column autoUpdated="false" defaultValue="'/'::character varying" digits="0" id="12" name="documentnode" nullable="false" remarks="Primary key for Document records." size="2147483647" type="varchar">
+            <child column="documentnode" foreignKey="FK_ProductDocument_Document_DocumentNode" implied="false" onDeleteCascade="false" table="productdocument"/>
+         </column>
+         <primaryKey column="documentnode" sequenceNumberInPK="1"/>
+         <index name="PK_Document_DocumentNode" unique="true">
+            <column ascending="true" name="documentnode"/>
+         </index>
+         <index name="document_rowguid_key" unique="true">
+            <column ascending="true" name="rowguid"/>
+         </index>
+      </table>
+      <table name="illustration" numRows="5" remarks="Bicycle assembly diagrams." schema="production" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('production.illustration_illustrationid_seq'::regclass)" digits="0" id="0" name="illustrationid" nullable="false" remarks="Primary key for Illustration records." size="10" type="serial">
+            <child column="illustrationid" foreignKey="FK_ProductModelIllustration_Illustration_IllustrationID" implied="false" onDeleteCascade="false" table="productmodelillustration"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="diagram" nullable="true" remarks="Illustrations used in manufacturing instructions. Stored as XML." size="2147483647" type="xml"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="2" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="illustrationid" sequenceNumberInPK="1"/>
+         <index name="PK_Illustration_IllustrationID" unique="true">
+            <column ascending="true" name="illustrationid"/>
+         </index>
+      </table>
+      <table name="location" numRows="14" remarks="Product inventory and manufacturing locations." schema="production" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('production.location_locationid_seq'::regclass)" digits="0" id="0" name="locationid" nullable="false" remarks="Primary key for Location records." size="10" type="serial">
+            <child column="locationid" foreignKey="FK_ProductInventory_Location_LocationID" implied="false" onDeleteCascade="false" table="productinventory"/>
+            <child column="locationid" foreignKey="FK_WorkOrderRouting_Location_LocationID" implied="false" onDeleteCascade="false" table="workorderrouting"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="Location description." size="54" type="Name"/>
+         <column autoUpdated="false" defaultValue="0.00" digits="0" id="2" name="costrate" nullable="false" remarks="Standard hourly cost of the manufacturing location." size="131089" type="numeric"/>
+         <column autoUpdated="false" defaultValue="0.00" digits="2" id="3" name="availability" nullable="false" remarks="Work capacity (in hours) of the manufacturing location." size="8" type="numeric"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="4" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="locationid" sequenceNumberInPK="1"/>
+         <index name="PK_Location_LocationID" unique="true">
+            <column ascending="true" name="locationid"/>
+         </index>
+      </table>
+      <table name="product" numRows="504" remarks="Products sold or used in the manfacturing of sold products." schema="production" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('production.product_productid_seq'::regclass)" digits="0" id="0" name="productid" nullable="false" remarks="Primary key for Product records." size="10" type="serial">
+            <child column="componentid" foreignKey="FK_BillOfMaterials_Product_ComponentID" implied="false" onDeleteCascade="false" table="billofmaterials"/>
+            <child column="productassemblyid" foreignKey="FK_BillOfMaterials_Product_ProductAssemblyID" implied="false" onDeleteCascade="false" table="billofmaterials"/>
+            <child column="productid" foreignKey="FK_ProductCostHistory_Product_ProductID" implied="false" onDeleteCascade="false" table="productcosthistory"/>
+            <child column="productid" foreignKey="FK_ProductDocument_Product_ProductID" implied="false" onDeleteCascade="false" table="productdocument"/>
+            <child column="productid" foreignKey="FK_ProductInventory_Product_ProductID" implied="false" onDeleteCascade="false" table="productinventory"/>
+            <child column="productid" foreignKey="FK_ProductListPriceHistory_Product_ProductID" implied="false" onDeleteCascade="false" table="productlistpricehistory"/>
+            <child column="productid" foreignKey="FK_ProductProductPhoto_Product_ProductID" implied="false" onDeleteCascade="false" table="productproductphoto"/>
+            <child column="productid" foreignKey="FK_ProductReview_Product_ProductID" implied="false" onDeleteCascade="false" table="productreview"/>
+            <child column="productid" foreignKey="FK_ProductVendor_Product_ProductID" implied="false" onDeleteCascade="false" table="productvendor"/>
+            <child column="productid" foreignKey="FK_PurchaseOrderDetail_Product_ProductID" implied="false" onDeleteCascade="false" table="purchaseorderdetail"/>
+            <child column="productid" foreignKey="FK_ShoppingCartItem_Product_ProductID" implied="false" onDeleteCascade="false" table="shoppingcartitem"/>
+            <child column="productid" foreignKey="FK_SpecialOfferProduct_Product_ProductID" implied="false" onDeleteCascade="false" table="specialofferproduct"/>
+            <child column="productid" foreignKey="FK_TransactionHistory_Product_ProductID" implied="false" onDeleteCascade="false" table="transactionhistory"/>
+            <child column="productid" foreignKey="FK_WorkOrder_Product_ProductID" implied="false" onDeleteCascade="false" table="workorder"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="Name of the product." size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="2" name="productnumber" nullable="false" remarks="Unique product identification number." size="25" type="varchar"/>
+         <column autoUpdated="false" defaultValue="true" digits="0" id="3" name="makeflag" nullable="false" remarks="0 = Product is purchased, 1 = Product is manufactured in-house." size="1" type="Flag"/>
+         <column autoUpdated="false" defaultValue="true" digits="0" id="4" name="finishedgoodsflag" nullable="false" remarks="0 = Product is not a salable item. 1 = Product is salable." size="1" type="Flag"/>
+         <column autoUpdated="false" digits="0" id="5" name="color" nullable="true" remarks="Product color." size="15" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="safetystocklevel" nullable="false" remarks="Minimum inventory quantity." size="5" type="int2"/>
+         <column autoUpdated="false" digits="0" id="7" name="reorderpoint" nullable="false" remarks="Inventory level that triggers a purchase order or work order." size="5" type="int2"/>
+         <column autoUpdated="false" digits="0" id="8" name="standardcost" nullable="false" remarks="Standard cost of the product." size="131089" type="numeric"/>
+         <column autoUpdated="false" digits="0" id="9" name="listprice" nullable="false" remarks="Selling price." size="131089" type="numeric"/>
+         <column autoUpdated="false" digits="0" id="10" name="size" nullable="true" remarks="Product size." size="5" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="11" name="sizeunitmeasurecode" nullable="true" remarks="Unit of measure for Size column." size="3" type="bpchar">
+            <parent column="unitmeasurecode" foreignKey="FK_Product_UnitMeasure_SizeUnitMeasureCode" implied="false" onDeleteCascade="false" table="unitmeasure"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="12" name="weightunitmeasurecode" nullable="true" remarks="Unit of measure for Weight column." size="3" type="bpchar">
+            <parent column="unitmeasurecode" foreignKey="FK_Product_UnitMeasure_WeightUnitMeasureCode" implied="false" onDeleteCascade="false" table="unitmeasure"/>
+         </column>
+         <column autoUpdated="false" digits="2" id="13" name="weight" nullable="true" remarks="Product weight." size="8" type="numeric"/>
+         <column autoUpdated="false" digits="0" id="14" name="daystomanufacture" nullable="false" remarks="Number of days required to manufacture the product." size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="15" name="productline" nullable="true" remarks="R = Road, M = Mountain, T = Touring, S = Standard" size="2" type="bpchar"/>
+         <column autoUpdated="false" digits="0" id="16" name="class" nullable="true" remarks="H = High, M = Medium, L = Low" size="2" type="bpchar"/>
+         <column autoUpdated="false" digits="0" id="17" name="style" nullable="true" remarks="W = Womens, M = Mens, U = Universal" size="2" type="bpchar"/>
+         <column autoUpdated="false" digits="0" id="18" name="productsubcategoryid" nullable="true" remarks="Product is a member of this product subcategory. Foreign key to ProductSubCategory.ProductSubCategoryID." size="10" type="int4">
+            <parent column="productsubcategoryid" foreignKey="FK_Product_ProductSubcategory_ProductSubcategoryID" implied="false" onDeleteCascade="false" table="productsubcategory"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="19" name="productmodelid" nullable="true" remarks="Product is a member of this product model. Foreign key to ProductModel.ProductModelID." size="10" type="int4">
+            <parent column="productmodelid" foreignKey="FK_Product_ProductModel_ProductModelID" implied="false" onDeleteCascade="false" table="productmodel"/>
+         </column>
+         <column autoUpdated="false" digits="6" id="20" name="sellstartdate" nullable="false" remarks="Date the product was available for sale." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="6" id="21" name="sellenddate" nullable="true" remarks="Date the product was no longer available for sale." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="6" id="22" name="discontinueddate" nullable="true" remarks="Date the product was discontinued." size="29" type="timestamp"/>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="23" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="24" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="productid" sequenceNumberInPK="1"/>
+         <index name="PK_Product_ProductID" unique="true">
+            <column ascending="true" name="productid"/>
+         </index>
+      </table>
+      <table name="productcategory" numRows="4" remarks="High-level product categorization." schema="production" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('production.productcategory_productcategoryid_seq'::regclass)" digits="0" id="0" name="productcategoryid" nullable="false" remarks="Primary key for ProductCategory records." size="10" type="serial">
+            <child column="productcategoryid" foreignKey="FK_ProductSubcategory_ProductCategory_ProductCategoryID" implied="false" onDeleteCascade="false" table="productsubcategory"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="Category description." size="54" type="Name"/>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="2" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="3" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="productcategoryid" sequenceNumberInPK="1"/>
+         <index name="PK_ProductCategory_ProductCategoryID" unique="true">
+            <column ascending="true" name="productcategoryid"/>
+         </index>
+      </table>
+      <table name="productcosthistory" numRows="395" remarks="Changes in the cost of a product over time." schema="production" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="productid" nullable="false" remarks="Product identification number. Foreign key to Product.ProductID" size="10" type="int4">
+            <parent column="productid" foreignKey="FK_ProductCostHistory_Product_ProductID" implied="false" onDeleteCascade="false" table="product"/>
+         </column>
+         <column autoUpdated="false" digits="6" id="1" name="startdate" nullable="false" remarks="Product cost start date." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="6" id="2" name="enddate" nullable="true" remarks="Product cost end date." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="0" id="3" name="standardcost" nullable="false" remarks="Standard cost of the product." size="131089" type="numeric"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="4" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="productid" sequenceNumberInPK="1"/>
+         <primaryKey column="startdate" sequenceNumberInPK="2"/>
+         <index name="PK_ProductCostHistory_ProductID_StartDate" unique="true">
+            <column ascending="true" name="productid"/>
+            <column ascending="true" name="startdate"/>
+         </index>
+      </table>
+      <table name="productdescription" numRows="762" remarks="Product descriptions in several languages." schema="production" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('production.productdescription_productdescriptionid_seq'::regclass)" digits="0" id="0" name="productdescriptionid" nullable="false" remarks="Primary key for ProductDescription records." size="10" type="serial">
+            <child column="productdescriptionid" foreignKey="FK_ProductModelProductDescriptionCulture_ProductDescription_Pro" implied="false" onDeleteCascade="false" table="productmodelproductdescriptionculture"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="description" nullable="false" remarks="Description of the product." size="400" type="varchar"/>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="2" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="3" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="productdescriptionid" sequenceNumberInPK="1"/>
+         <index name="PK_ProductDescription_ProductDescriptionID" unique="true">
+            <column ascending="true" name="productdescriptionid"/>
+         </index>
+      </table>
+      <table name="productdocument" numRows="32" remarks="Cross-reference table mapping products to related product documents." schema="production" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="productid" nullable="false" remarks="Product identification number. Foreign key to Product.ProductID." size="10" type="int4">
+            <parent column="productid" foreignKey="FK_ProductDocument_Product_ProductID" implied="false" onDeleteCascade="false" table="product"/>
+         </column>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="1" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <column autoUpdated="false" defaultValue="'/'::character varying" digits="0" id="2" name="documentnode" nullable="false" remarks="Document identification number. Foreign key to Document.DocumentNode." size="2147483647" type="varchar">
+            <parent column="documentnode" foreignKey="FK_ProductDocument_Document_DocumentNode" implied="false" onDeleteCascade="false" table="document"/>
+         </column>
+         <primaryKey column="productid" sequenceNumberInPK="1"/>
+         <primaryKey column="documentnode" sequenceNumberInPK="2"/>
+         <index name="PK_ProductDocument_ProductID_DocumentNode" unique="true">
+            <column ascending="true" name="productid"/>
+            <column ascending="true" name="documentnode"/>
+         </index>
+      </table>
+      <table name="productinventory" numRows="1069" remarks="Product inventory information." schema="production" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="productid" nullable="false" remarks="Product identification number. Foreign key to Product.ProductID." size="10" type="int4">
+            <parent column="productid" foreignKey="FK_ProductInventory_Product_ProductID" implied="false" onDeleteCascade="false" table="product"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="locationid" nullable="false" remarks="Inventory location identification number. Foreign key to Location.LocationID." size="5" type="int2">
+            <parent column="locationid" foreignKey="FK_ProductInventory_Location_LocationID" implied="false" onDeleteCascade="false" table="location"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="shelf" nullable="false" remarks="Storage compartment within an inventory location." size="10" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="bin" nullable="false" remarks="Storage container on a shelf in an inventory location." size="5" type="int2"/>
+         <column autoUpdated="false" defaultValue="0" digits="0" id="4" name="quantity" nullable="false" remarks="Quantity of products in the inventory location." size="5" type="int2"/>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="5" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="6" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="productid" sequenceNumberInPK="1"/>
+         <primaryKey column="locationid" sequenceNumberInPK="2"/>
+         <index name="PK_ProductInventory_ProductID_LocationID" unique="true">
+            <column ascending="true" name="productid"/>
+            <column ascending="true" name="locationid"/>
+         </index>
+      </table>
+      <table name="productlistpricehistory" numRows="395" remarks="Changes in the list price of a product over time." schema="production" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="productid" nullable="false" remarks="Product identification number. Foreign key to Product.ProductID" size="10" type="int4">
+            <parent column="productid" foreignKey="FK_ProductListPriceHistory_Product_ProductID" implied="false" onDeleteCascade="false" table="product"/>
+         </column>
+         <column autoUpdated="false" digits="6" id="1" name="startdate" nullable="false" remarks="List price start date." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="6" id="2" name="enddate" nullable="true" remarks="List price end date" size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="0" id="3" name="listprice" nullable="false" remarks="Product list price." size="131089" type="numeric"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="4" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="productid" sequenceNumberInPK="1"/>
+         <primaryKey column="startdate" sequenceNumberInPK="2"/>
+         <index name="PK_ProductListPriceHistory_ProductID_StartDate" unique="true">
+            <column ascending="true" name="productid"/>
+            <column ascending="true" name="startdate"/>
+         </index>
+      </table>
+      <table name="productmodel" numRows="128" remarks="Product model classification." schema="production" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('production.productmodel_productmodelid_seq'::regclass)" digits="0" id="0" name="productmodelid" nullable="false" remarks="Primary key for ProductModel records." size="10" type="serial">
+            <child column="productmodelid" foreignKey="FK_Product_ProductModel_ProductModelID" implied="false" onDeleteCascade="false" table="product"/>
+            <child column="productmodelid" foreignKey="FK_ProductModelIllustration_ProductModel_ProductModelID" implied="false" onDeleteCascade="false" table="productmodelillustration"/>
+            <child column="productmodelid" foreignKey="FK_ProductModelProductDescriptionCulture_ProductModel_ProductMo" implied="false" onDeleteCascade="false" table="productmodelproductdescriptionculture"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="Product model description." size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="2" name="catalogdescription" nullable="true" remarks="Detailed product catalog information in xml format." size="2147483647" type="xml"/>
+         <column autoUpdated="false" digits="0" id="3" name="instructions" nullable="true" remarks="Manufacturing instructions in xml format." size="2147483647" type="xml"/>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="4" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="5" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="productmodelid" sequenceNumberInPK="1"/>
+         <index name="PK_ProductModel_ProductModelID" unique="true">
+            <column ascending="true" name="productmodelid"/>
+         </index>
+      </table>
+      <table name="productmodelillustration" numRows="7" remarks="Cross-reference table mapping product models and illustrations." schema="production" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="productmodelid" nullable="false" remarks="Primary key. Foreign key to ProductModel.ProductModelID." size="10" type="int4">
+            <parent column="productmodelid" foreignKey="FK_ProductModelIllustration_ProductModel_ProductModelID" implied="false" onDeleteCascade="false" table="productmodel"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="illustrationid" nullable="false" remarks="Primary key. Foreign key to Illustration.IllustrationID." size="10" type="int4">
+            <parent column="illustrationid" foreignKey="FK_ProductModelIllustration_Illustration_IllustrationID" implied="false" onDeleteCascade="false" table="illustration"/>
+         </column>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="2" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="productmodelid" sequenceNumberInPK="1"/>
+         <primaryKey column="illustrationid" sequenceNumberInPK="2"/>
+         <index name="PK_ProductModelIllustration_ProductModelID_IllustrationID" unique="true">
+            <column ascending="true" name="productmodelid"/>
+            <column ascending="true" name="illustrationid"/>
+         </index>
+      </table>
+      <table name="productmodelproductdescriptionculture" numRows="762" remarks="Cross-reference table mapping product descriptions and the language the description is written in." schema="production" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="productmodelid" nullable="false" remarks="Primary key. Foreign key to ProductModel.ProductModelID." size="10" type="int4">
+            <parent column="productmodelid" foreignKey="FK_ProductModelProductDescriptionCulture_ProductModel_ProductMo" implied="false" onDeleteCascade="false" table="productmodel"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="productdescriptionid" nullable="false" remarks="Primary key. Foreign key to ProductDescription.ProductDescriptionID." size="10" type="int4">
+            <parent column="productdescriptionid" foreignKey="FK_ProductModelProductDescriptionCulture_ProductDescription_Pro" implied="false" onDeleteCascade="false" table="productdescription"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="cultureid" nullable="false" remarks="Culture identification number. Foreign key to Culture.CultureID." size="6" type="bpchar">
+            <parent column="cultureid" foreignKey="FK_ProductModelProductDescriptionCulture_Culture_CultureID" implied="false" onDeleteCascade="false" table="culture"/>
+         </column>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="3" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="productmodelid" sequenceNumberInPK="1"/>
+         <primaryKey column="productdescriptionid" sequenceNumberInPK="2"/>
+         <primaryKey column="cultureid" sequenceNumberInPK="3"/>
+         <index name="PK_ProductModelProductDescriptionCulture_ProductModelID_Product" unique="true">
+            <column ascending="true" name="productmodelid"/>
+            <column ascending="true" name="productdescriptionid"/>
+            <column ascending="true" name="cultureid"/>
+         </index>
+      </table>
+      <table name="productphoto" numRows="101" remarks="Product images." schema="production" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('production.productphoto_productphotoid_seq'::regclass)" digits="0" id="0" name="productphotoid" nullable="false" remarks="Primary key for ProductPhoto records." size="10" type="serial">
+            <child column="productphotoid" foreignKey="FK_ProductProductPhoto_ProductPhoto_ProductPhotoID" implied="false" onDeleteCascade="false" table="productproductphoto"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="thumbnailphoto" nullable="true" remarks="Small image of the product." size="2147483647" type="bytea"/>
+         <column autoUpdated="false" digits="0" id="2" name="thumbnailphotofilename" nullable="true" remarks="Small image file name." size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="largephoto" nullable="true" remarks="Large image of the product." size="2147483647" type="bytea"/>
+         <column autoUpdated="false" digits="0" id="4" name="largephotofilename" nullable="true" remarks="Large image file name." size="50" type="varchar"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="5" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="productphotoid" sequenceNumberInPK="1"/>
+         <index name="PK_ProductPhoto_ProductPhotoID" unique="true">
+            <column ascending="true" name="productphotoid"/>
+         </index>
+      </table>
+      <table name="productproductphoto" numRows="504" remarks="Cross-reference table mapping products and product photos." schema="production" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="productid" nullable="false" remarks="Product identification number. Foreign key to Product.ProductID." size="10" type="int4">
+            <parent column="productid" foreignKey="FK_ProductProductPhoto_Product_ProductID" implied="false" onDeleteCascade="false" table="product"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="productphotoid" nullable="false" remarks="Product photo identification number. Foreign key to ProductPhoto.ProductPhotoID." size="10" type="int4">
+            <parent column="productphotoid" foreignKey="FK_ProductProductPhoto_ProductPhoto_ProductPhotoID" implied="false" onDeleteCascade="false" table="productphoto"/>
+         </column>
+         <column autoUpdated="false" defaultValue="false" digits="0" id="2" name="primary" nullable="false" remarks="0 = Photo is not the principal image. 1 = Photo is the principal image." size="1" type="Flag"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="3" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="productid" sequenceNumberInPK="1"/>
+         <primaryKey column="productphotoid" sequenceNumberInPK="2"/>
+         <index name="PK_ProductProductPhoto_ProductID_ProductPhotoID" unique="true">
+            <column ascending="true" name="productid"/>
+            <column ascending="true" name="productphotoid"/>
+         </index>
+      </table>
+      <table name="productreview" numRows="4" remarks="Customer reviews of products they have purchased." schema="production" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('production.productreview_productreviewid_seq'::regclass)" digits="0" id="0" name="productreviewid" nullable="false" remarks="Primary key for ProductReview records." size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="productid" nullable="false" remarks="Product identification number. Foreign key to Product.ProductID." size="10" type="int4">
+            <parent column="productid" foreignKey="FK_ProductReview_Product_ProductID" implied="false" onDeleteCascade="false" table="product"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="reviewername" nullable="false" remarks="Name of the reviewer." size="54" type="Name"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="3" name="reviewdate" nullable="false" remarks="Date review was submitted." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="0" id="4" name="emailaddress" nullable="false" remarks="Reviewer's e-mail address." size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="5" name="rating" nullable="false" remarks="Product rating given by the reviewer. Scale is 1 to 5 with 5 as the highest rating." size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="6" name="comments" nullable="true" remarks="Reviewer's comments" size="3850" type="varchar"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="7" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="productreviewid" sequenceNumberInPK="1"/>
+         <index name="PK_ProductReview_ProductReviewID" unique="true">
+            <column ascending="true" name="productreviewid"/>
+         </index>
+      </table>
+      <table name="productsubcategory" numRows="37" remarks="Product subcategories. See ProductCategory table." schema="production" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('production.productsubcategory_productsubcategoryid_seq'::regclass)" digits="0" id="0" name="productsubcategoryid" nullable="false" remarks="Primary key for ProductSubcategory records." size="10" type="serial">
+            <child column="productsubcategoryid" foreignKey="FK_Product_ProductSubcategory_ProductSubcategoryID" implied="false" onDeleteCascade="false" table="product"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="productcategoryid" nullable="false" remarks="Product category identification number. Foreign key to ProductCategory.ProductCategoryID." size="10" type="int4">
+            <parent column="productcategoryid" foreignKey="FK_ProductSubcategory_ProductCategory_ProductCategoryID" implied="false" onDeleteCascade="false" table="productcategory"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="name" nullable="false" remarks="Subcategory description." size="54" type="Name"/>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="3" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="4" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="productsubcategoryid" sequenceNumberInPK="1"/>
+         <index name="PK_ProductSubcategory_ProductSubcategoryID" unique="true">
+            <column ascending="true" name="productsubcategoryid"/>
+         </index>
+      </table>
+      <table name="scrapreason" numRows="16" remarks="Manufacturing failure reasons lookup table." schema="production" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('production.scrapreason_scrapreasonid_seq'::regclass)" digits="0" id="0" name="scrapreasonid" nullable="false" remarks="Primary key for ScrapReason records." size="10" type="serial">
+            <child column="scrapreasonid" foreignKey="FK_WorkOrder_ScrapReason_ScrapReasonID" implied="false" onDeleteCascade="false" table="workorder"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="Failure description." size="54" type="Name"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="2" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="scrapreasonid" sequenceNumberInPK="1"/>
+         <index name="PK_ScrapReason_ScrapReasonID" unique="true">
+            <column ascending="true" name="scrapreasonid"/>
+         </index>
+      </table>
+      <table name="transactionhistory" numRows="113443" remarks="Record of each purchase order, sales order, or work order transaction year to date." schema="production" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('production.transactionhistory_transactionid_seq'::regclass)" digits="0" id="0" name="transactionid" nullable="false" remarks="Primary key for TransactionHistory records." size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="productid" nullable="false" remarks="Product identification number. Foreign key to Product.ProductID." size="10" type="int4">
+            <parent column="productid" foreignKey="FK_TransactionHistory_Product_ProductID" implied="false" onDeleteCascade="false" table="product"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="referenceorderid" nullable="false" remarks="Purchase order, sales order, or work order identification number." size="10" type="int4"/>
+         <column autoUpdated="false" defaultValue="0" digits="0" id="3" name="referenceorderlineid" nullable="false" remarks="Line number associated with the purchase order, sales order, or work order." size="10" type="int4"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="4" name="transactiondate" nullable="false" remarks="Date and time of the transaction." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="0" id="5" name="transactiontype" nullable="false" remarks="W = WorkOrder, S = SalesOrder, P = PurchaseOrder" size="1" type="bpchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="quantity" nullable="false" remarks="Product quantity." size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="7" name="actualcost" nullable="false" remarks="Product cost." size="131089" type="numeric"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="8" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="transactionid" sequenceNumberInPK="1"/>
+         <index name="PK_TransactionHistory_TransactionID" unique="true">
+            <column ascending="true" name="transactionid"/>
+         </index>
+      </table>
+      <table name="transactionhistoryarchive" numRows="89253" remarks="Transactions for previous years." schema="production" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="transactionid" nullable="false" remarks="Primary key for TransactionHistoryArchive records." size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="1" name="productid" nullable="false" remarks="Product identification number. Foreign key to Product.ProductID." size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="2" name="referenceorderid" nullable="false" remarks="Purchase order, sales order, or work order identification number." size="10" type="int4"/>
+         <column autoUpdated="false" defaultValue="0" digits="0" id="3" name="referenceorderlineid" nullable="false" remarks="Line number associated with the purchase order, sales order, or work order." size="10" type="int4"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="4" name="transactiondate" nullable="false" remarks="Date and time of the transaction." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="0" id="5" name="transactiontype" nullable="false" remarks="W = Work Order, S = Sales Order, P = Purchase Order" size="1" type="bpchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="quantity" nullable="false" remarks="Product quantity." size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="7" name="actualcost" nullable="false" remarks="Product cost." size="131089" type="numeric"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="8" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="transactionid" sequenceNumberInPK="1"/>
+         <index name="PK_TransactionHistoryArchive_TransactionID" unique="true">
+            <column ascending="true" name="transactionid"/>
+         </index>
+      </table>
+      <table name="unitmeasure" numRows="38" remarks="Unit of measure lookup table." schema="production" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="unitmeasurecode" nullable="false" remarks="Primary key." size="3" type="bpchar">
+            <child column="unitmeasurecode" foreignKey="FK_BillOfMaterials_UnitMeasure_UnitMeasureCode" implied="false" onDeleteCascade="false" table="billofmaterials"/>
+            <child column="sizeunitmeasurecode" foreignKey="FK_Product_UnitMeasure_SizeUnitMeasureCode" implied="false" onDeleteCascade="false" table="product"/>
+            <child column="weightunitmeasurecode" foreignKey="FK_Product_UnitMeasure_WeightUnitMeasureCode" implied="false" onDeleteCascade="false" table="product"/>
+            <child column="unitmeasurecode" foreignKey="FK_ProductVendor_UnitMeasure_UnitMeasureCode" implied="false" onDeleteCascade="false" table="productvendor"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="Unit of measure description." size="54" type="Name"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="2" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="unitmeasurecode" sequenceNumberInPK="1"/>
+         <index name="PK_UnitMeasure_UnitMeasureCode" unique="true">
+            <column ascending="true" name="unitmeasurecode"/>
+         </index>
+      </table>
+      <table name="vproductmodelcatalogdescription" numRows="0" remarks="" schema="production" type="VIEW">
+         <column autoUpdated="false" digits="0" id="0" name="productmodelid" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="2" name="Summary" nullable="true" remarks="" size="2147483647" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="manufacturer" nullable="true" remarks="" size="2147483647" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="copyright" nullable="true" remarks="" size="30" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="5" name="producturl" nullable="true" remarks="" size="256" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="warrantyperiod" nullable="true" remarks="" size="256" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="7" name="warrantydescription" nullable="true" remarks="" size="256" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="8" name="noofyears" nullable="true" remarks="" size="256" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="9" name="maintenancedescription" nullable="true" remarks="" size="256" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="10" name="wheel" nullable="true" remarks="" size="256" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="11" name="saddle" nullable="true" remarks="" size="256" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="12" name="pedal" nullable="true" remarks="" size="256" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="13" name="bikeframe" nullable="true" remarks="" size="2147483647" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="14" name="crankset" nullable="true" remarks="" size="256" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="15" name="pictureangle" nullable="true" remarks="" size="256" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="16" name="picturesize" nullable="true" remarks="" size="256" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="17" name="productphotoid" nullable="true" remarks="" size="256" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="18" name="material" nullable="true" remarks="" size="256" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="19" name="color" nullable="true" remarks="" size="256" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="20" name="productline" nullable="true" remarks="" size="256" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="21" name="style" nullable="true" remarks="" size="256" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="22" name="riderexperience" nullable="true" remarks="" size="1024" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="23" name="rowguid" nullable="true" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" digits="6" id="24" name="modifieddate" nullable="true" remarks="" size="29" type="timestamp"/>
+      </table>
+      <table name="vproductmodelinstructions" numRows="0" remarks="" schema="production" type="VIEW">
+         <column autoUpdated="false" digits="0" id="0" name="productmodelid" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="2" name="instructions" nullable="true" remarks="" size="2147483647" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="LocationID" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="4" id="4" name="SetupHours" nullable="true" remarks="" size="9" type="numeric"/>
+         <column autoUpdated="false" digits="4" id="5" name="MachineHours" nullable="true" remarks="" size="9" type="numeric"/>
+         <column autoUpdated="false" digits="4" id="6" name="LaborHours" nullable="true" remarks="" size="9" type="numeric"/>
+         <column autoUpdated="false" digits="0" id="7" name="LotSize" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="8" name="Step" nullable="true" remarks="" size="1024" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="9" name="rowguid" nullable="true" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" digits="6" id="10" name="modifieddate" nullable="true" remarks="" size="29" type="timestamp"/>
+      </table>
+      <table name="workorder" numRows="72591" remarks="Manufacturing work orders." schema="production" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('production.workorder_workorderid_seq'::regclass)" digits="0" id="0" name="workorderid" nullable="false" remarks="Primary key for WorkOrder records." size="10" type="serial">
+            <child column="workorderid" foreignKey="FK_WorkOrderRouting_WorkOrder_WorkOrderID" implied="false" onDeleteCascade="false" table="workorderrouting"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="productid" nullable="false" remarks="Product identification number. Foreign key to Product.ProductID." size="10" type="int4">
+            <parent column="productid" foreignKey="FK_WorkOrder_Product_ProductID" implied="false" onDeleteCascade="false" table="product"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="orderqty" nullable="false" remarks="Product quantity to build." size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="3" name="scrappedqty" nullable="false" remarks="Quantity that failed inspection." size="5" type="int2"/>
+         <column autoUpdated="false" digits="6" id="4" name="startdate" nullable="false" remarks="Work order start date." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="6" id="5" name="enddate" nullable="true" remarks="Work order end date." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="6" id="6" name="duedate" nullable="false" remarks="Work order due date." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="0" id="7" name="scrapreasonid" nullable="true" remarks="Reason for inspection failure." size="5" type="int2">
+            <parent column="scrapreasonid" foreignKey="FK_WorkOrder_ScrapReason_ScrapReasonID" implied="false" onDeleteCascade="false" table="scrapreason"/>
+         </column>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="8" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="workorderid" sequenceNumberInPK="1"/>
+         <index name="PK_WorkOrder_WorkOrderID" unique="true">
+            <column ascending="true" name="workorderid"/>
+         </index>
+      </table>
+      <table name="workorderrouting" numRows="67131" remarks="Work order details." schema="production" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="workorderid" nullable="false" remarks="Primary key. Foreign key to WorkOrder.WorkOrderID." size="10" type="int4">
+            <parent column="workorderid" foreignKey="FK_WorkOrderRouting_WorkOrder_WorkOrderID" implied="false" onDeleteCascade="false" table="workorder"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="productid" nullable="false" remarks="Primary key. Foreign key to Product.ProductID." size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="2" name="operationsequence" nullable="false" remarks="Primary key. Indicates the manufacturing process sequence." size="5" type="int2"/>
+         <column autoUpdated="false" digits="0" id="3" name="locationid" nullable="false" remarks="Manufacturing location where the part is processed. Foreign key to Location.LocationID." size="5" type="int2">
+            <parent column="locationid" foreignKey="FK_WorkOrderRouting_Location_LocationID" implied="false" onDeleteCascade="false" table="location"/>
+         </column>
+         <column autoUpdated="false" digits="6" id="4" name="scheduledstartdate" nullable="false" remarks="Planned manufacturing start date." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="6" id="5" name="scheduledenddate" nullable="false" remarks="Planned manufacturing end date." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="6" id="6" name="actualstartdate" nullable="true" remarks="Actual start date." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="6" id="7" name="actualenddate" nullable="true" remarks="Actual end date." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="4" id="8" name="actualresourcehrs" nullable="true" remarks="Number of manufacturing hours used." size="9" type="numeric"/>
+         <column autoUpdated="false" digits="0" id="9" name="plannedcost" nullable="false" remarks="Estimated manufacturing cost." size="131089" type="numeric"/>
+         <column autoUpdated="false" digits="0" id="10" name="actualcost" nullable="true" remarks="Actual manufacturing cost." size="131089" type="numeric"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="11" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="workorderid" sequenceNumberInPK="1"/>
+         <primaryKey column="productid" sequenceNumberInPK="2"/>
+         <primaryKey column="operationsequence" sequenceNumberInPK="3"/>
+         <index name="PK_WorkOrderRouting_WorkOrderID_ProductID_OperationSequence" unique="true">
+            <column ascending="true" name="workorderid"/>
+            <column ascending="true" name="productid"/>
+            <column ascending="true" name="operationsequence"/>
+         </index>
+      </table>
+   </tables>
+</database>

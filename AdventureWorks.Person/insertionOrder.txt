@@ -1,0 +1,13 @@
+businessentity
+countryregion
+addresstype
+contacttype
+phonenumbertype
+person
+password
+address
+stateprovince
+emailaddress
+personphone
+businessentityaddress
+businessentitycontact

@@ -1,0 +1,54 @@
+// dot 2.40.1 on Linux 5.4.0-51-generic
+// SchemaSpy rev 590
+digraph "vproductmodelcatalogdescription" {
+  graph [
+    rankdir="RL"
+    bgcolor="#f7f7f7"
+    nodesep="0.18"
+    ranksep="0.46"
+    fontname="Helvetica"
+    fontsize="11"
+  ];
+  node [
+    fontname="Helvetica"
+    fontsize="11"
+    shape="plaintext"
+  ];
+  edge [
+    arrowsize="0.8"
+  ];
+  "vproductmodelcatalogdescription" [
+    label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" BGCOLOR="#ffffff">
+      <TR><TD COLSPAN="3" BGCOLOR="#9bab96" ALIGN="CENTER">vproductmodelcatalogdescription</TD></TR>
+      <TR><TD PORT="productmodelid" COLSPAN="3" ALIGN="LEFT">productmodelid</TD></TR>
+      <TR><TD PORT="name" COLSPAN="3" ALIGN="LEFT">name</TD></TR>
+      <TR><TD PORT="Summary" COLSPAN="3" ALIGN="LEFT">Summary</TD></TR>
+      <TR><TD PORT="manufacturer" COLSPAN="3" ALIGN="LEFT">manufacturer</TD></TR>
+      <TR><TD PORT="copyright" COLSPAN="3" ALIGN="LEFT">copyright</TD></TR>
+      <TR><TD PORT="producturl" COLSPAN="3" ALIGN="LEFT">producturl</TD></TR>
+      <TR><TD PORT="warrantyperiod" COLSPAN="3" ALIGN="LEFT">warrantyperiod</TD></TR>
+      <TR><TD PORT="warrantydescription" COLSPAN="3" ALIGN="LEFT">warrantydescription</TD></TR>
+      <TR><TD PORT="noofyears" COLSPAN="3" ALIGN="LEFT">noofyears</TD></TR>
+      <TR><TD PORT="maintenancedescription" COLSPAN="3" ALIGN="LEFT">maintenancedescription</TD></TR>
+      <TR><TD PORT="wheel" COLSPAN="3" ALIGN="LEFT">wheel</TD></TR>
+      <TR><TD PORT="saddle" COLSPAN="3" ALIGN="LEFT">saddle</TD></TR>
+      <TR><TD PORT="pedal" COLSPAN="3" ALIGN="LEFT">pedal</TD></TR>
+      <TR><TD PORT="bikeframe" COLSPAN="3" ALIGN="LEFT">bikeframe</TD></TR>
+      <TR><TD PORT="crankset" COLSPAN="3" ALIGN="LEFT">crankset</TD></TR>
+      <TR><TD PORT="pictureangle" COLSPAN="3" ALIGN="LEFT">pictureangle</TD></TR>
+      <TR><TD PORT="picturesize" COLSPAN="3" ALIGN="LEFT">picturesize</TD></TR>
+      <TR><TD PORT="productphotoid" COLSPAN="3" ALIGN="LEFT">productphotoid</TD></TR>
+      <TR><TD PORT="material" COLSPAN="3" ALIGN="LEFT">material</TD></TR>
+      <TR><TD PORT="color" COLSPAN="3" ALIGN="LEFT">color</TD></TR>
+      <TR><TD PORT="productline" COLSPAN="3" ALIGN="LEFT">productline</TD></TR>
+      <TR><TD PORT="style" COLSPAN="3" ALIGN="LEFT">style</TD></TR>
+      <TR><TD PORT="riderexperience" COLSPAN="3" ALIGN="LEFT">riderexperience</TD></TR>
+      <TR><TD PORT="rowguid" COLSPAN="3" ALIGN="LEFT">rowguid</TD></TR>
+      <TR><TD PORT="modifieddate" COLSPAN="3" ALIGN="LEFT">modifieddate</TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#f7f7f7">  </TD><TD ALIGN="RIGHT" BGCOLOR="#f7f7f7">view</TD><TD ALIGN="RIGHT" BGCOLOR="#f7f7f7">  </TD></TR>
+    </TABLE>>
+    URL="tables/vproductmodelcatalogdescription.html"
+    tooltip="vproductmodelcatalogdescription"
+  ];
+}

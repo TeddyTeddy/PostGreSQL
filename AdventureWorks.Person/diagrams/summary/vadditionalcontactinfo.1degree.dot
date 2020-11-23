@@ -1,0 +1,46 @@
+// dot 2.40.1 on Linux 5.4.0-51-generic
+// SchemaSpy rev 590
+digraph "vadditionalcontactinfo" {
+  graph [
+    rankdir="RL"
+    bgcolor="#f7f7f7"
+    nodesep="0.18"
+    ranksep="0.46"
+    fontname="Helvetica"
+    fontsize="11"
+  ];
+  node [
+    fontname="Helvetica"
+    fontsize="11"
+    shape="plaintext"
+  ];
+  edge [
+    arrowsize="0.8"
+  ];
+  "vadditionalcontactinfo" [
+    label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" BGCOLOR="#ffffff">
+      <TR><TD COLSPAN="3" BGCOLOR="#9bab96" ALIGN="CENTER">vadditionalcontactinfo</TD></TR>
+      <TR><TD PORT="businessentityid" COLSPAN="3" ALIGN="LEFT">businessentityid</TD></TR>
+      <TR><TD PORT="firstname" COLSPAN="3" ALIGN="LEFT">firstname</TD></TR>
+      <TR><TD PORT="middlename" COLSPAN="3" ALIGN="LEFT">middlename</TD></TR>
+      <TR><TD PORT="lastname" COLSPAN="3" ALIGN="LEFT">lastname</TD></TR>
+      <TR><TD PORT="telephonenumber" COLSPAN="3" ALIGN="LEFT">telephonenumber</TD></TR>
+      <TR><TD PORT="telephonespecialinstructions" COLSPAN="3" ALIGN="LEFT">telephonespecialinstructions</TD></TR>
+      <TR><TD PORT="street" COLSPAN="3" ALIGN="LEFT">street</TD></TR>
+      <TR><TD PORT="city" COLSPAN="3" ALIGN="LEFT">city</TD></TR>
+      <TR><TD PORT="stateprovince" COLSPAN="3" ALIGN="LEFT">stateprovince</TD></TR>
+      <TR><TD PORT="postalcode" COLSPAN="3" ALIGN="LEFT">postalcode</TD></TR>
+      <TR><TD PORT="countryregion" COLSPAN="3" ALIGN="LEFT">countryregion</TD></TR>
+      <TR><TD PORT="homeaddressspecialinstructions" COLSPAN="3" ALIGN="LEFT">homeaddressspecialinstructions</TD></TR>
+      <TR><TD PORT="emailaddress" COLSPAN="3" ALIGN="LEFT">emailaddress</TD></TR>
+      <TR><TD PORT="emailspecialinstructions" COLSPAN="3" ALIGN="LEFT">emailspecialinstructions</TD></TR>
+      <TR><TD PORT="emailtelephonenumber" COLSPAN="3" ALIGN="LEFT">emailtelephonenumber</TD></TR>
+      <TR><TD PORT="rowguid" COLSPAN="3" ALIGN="LEFT">rowguid</TD></TR>
+      <TR><TD PORT="modifieddate" COLSPAN="3" ALIGN="LEFT">modifieddate</TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#f7f7f7">  </TD><TD ALIGN="RIGHT" BGCOLOR="#f7f7f7">view</TD><TD ALIGN="RIGHT" BGCOLOR="#f7f7f7">  </TD></TR>
+    </TABLE>>
+    URL="tables/vadditionalcontactinfo.html"
+    tooltip="vadditionalcontactinfo"
+  ];
+}

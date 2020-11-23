@@ -1,0 +1,38 @@
+// dot 2.40.1 on Linux 5.4.0-51-generic
+// SchemaSpy rev 590
+digraph "transactionhistoryarchive" {
+  graph [
+    rankdir="RL"
+    bgcolor="#f7f7f7"
+    nodesep="0.18"
+    ranksep="0.46"
+    fontname="Helvetica"
+    fontsize="11"
+  ];
+  node [
+    fontname="Helvetica"
+    fontsize="11"
+    shape="plaintext"
+  ];
+  edge [
+    arrowsize="0.8"
+  ];
+  "transactionhistoryarchive" [
+    label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" BGCOLOR="#ffffff">
+      <TR><TD COLSPAN="3" BGCOLOR="#9bab96" ALIGN="CENTER">transactionhistoryarchive</TD></TR>
+      <TR><TD PORT="transactionid" COLSPAN="3" BGCOLOR="#bed1b8" ALIGN="LEFT">transactionid</TD></TR>
+      <TR><TD PORT="productid" COLSPAN="3" ALIGN="LEFT">productid</TD></TR>
+      <TR><TD PORT="referenceorderid" COLSPAN="3" ALIGN="LEFT">referenceorderid</TD></TR>
+      <TR><TD PORT="referenceorderlineid" COLSPAN="3" ALIGN="LEFT">referenceorderlineid</TD></TR>
+      <TR><TD PORT="transactiondate" COLSPAN="3" ALIGN="LEFT">transactiondate</TD></TR>
+      <TR><TD PORT="transactiontype" COLSPAN="3" ALIGN="LEFT">transactiontype</TD></TR>
+      <TR><TD PORT="quantity" COLSPAN="3" ALIGN="LEFT">quantity</TD></TR>
+      <TR><TD PORT="actualcost" COLSPAN="3" ALIGN="LEFT">actualcost</TD></TR>
+      <TR><TD PORT="modifieddate" COLSPAN="3" ALIGN="LEFT">modifieddate</TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#f7f7f7">  </TD><TD ALIGN="RIGHT" BGCOLOR="#f7f7f7">89,253 rows</TD><TD ALIGN="RIGHT" BGCOLOR="#f7f7f7">  </TD></TR>
+    </TABLE>>
+    URL="tables/transactionhistoryarchive.html"
+    tooltip="transactionhistoryarchive"
+  ];
+}
