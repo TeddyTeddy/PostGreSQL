@@ -2500,7 +2500,8 @@ create table pets (
 );
 insert into pets(petname) values('Dobby') returning petid;
 
--- Section 18: Common Table Expressions (CTE) (i.e. With Queries)
+-- Section 18: Common Table Expressions (CTE) (i.e. WITH Queries)
+-- Lecture 102: WITH Queries
 -- Doc: https://www.postgresql.org/docs/current/queries-with.html#QUERIES-WITH-SELECT
 -- Syntax:
 with cte_name as (
@@ -2511,8 +2512,8 @@ select statement that includes cte_name from with part
 
 -- We want to find out the number of units ordered and amount of sales
 -- for all the products from the top three categories by total_sales
--- grouped by category & product
--- ordered by category & product
+-- grouped by categoryname & productname
+-- ordered by categoryname & productname
 -- The desired end result:
 -- categoryname, productname, units_ordered, total_sales
 with top_three_categories_by_total_sales as (
@@ -2745,8 +2746,9 @@ select s.supplierid, s.companyname, s.contactname, s.contacttitle, s.address, s.
        o.shipaddress, o.shipcity, o.shipregion, o.shippostalcode, o.shipcountry
 from suppliers as s inner join products as p using(supplierid)
                inner join order_details as od using(productid)
-               inner join orders as o using(orderid)
-select * from suppler_order_details where supplierid = 5
+               inner join orders as o using(orderid);
+    -- Then select all the order_details for supplierid = 5
+    select * from suppler_order_details where supplierid = 5;
 
 -- Lecture 107: Modify a View
 -- Syntax:
@@ -2908,8 +2910,6 @@ FROM customers;
 
 -- A list of product names, unitprice and label corresponding to inexpensive
 -- if the unitprice is below $10, mid-range if price $10 up to $50 and expensive if over $50
--- A list of product names, unitprice and label corresponding to inexpensive
--- if the unitprice is below $10, mid-range if price $10 up to $50 and expensive if over $50
 select productname, unitprice,
 case when unitprice < 10 then 'inexpensive'
 	 when unitprice <= 50 then 'mid-range'
@@ -2923,7 +2923,7 @@ case field when value1 then result1
            else default
 end
 
--- Pull back orders with orderid, customerid and year1 of orderdate is 1996,
+-- Pull back orders with orderid, customerid and year1 if orderdate is 1996,
 -- year2 if orderdate is 1997 and year3 if orderdate is 1998
 -- Hint: use date_part('year', orderdate) to select the year out of orderdate field
 select orderid, customerid,
@@ -2955,7 +2955,7 @@ from suppliers;
 nullif(field1, value1)
 -- returns null if two values are equal, otherwise returns field1 value
 -- usa case: imagine instead of having nulls in your tables, there are empty strings
--- instead of null values:
+-- instead of null values. You want to treat empty strings as nulls:
 UPDATE suppliers
 SET homepage = ''
 WHERE homepage IS NULL;
@@ -2973,4 +2973,824 @@ select supplierid, coalesce(nullif(homepage, ''), 'call to find') from suppliers
 -- number as the second option
 select companyname, coalesce(nullif(fax, ''), phone, 'contact info missing') as contact_info
 from customers
+
+-- Section 21: Using Date/Time in PostgreSQL
+-- Lecture 114: Date, time and Timestamp Data types
+-- timestamp - both date and time
+-- date - date only
+-- time - time only
+-- Timestamp/Time Options
+-- You can specify the precision of the seconds value (number of digits after the decimal point)
+-- from 0 to 6 digits
+timestamp(3) --> 1/8/2017 12:22:22.321
+time(4)      --> 02:12:01.4321
+
+-- IMPORTANT!!! The SQL data types date, time, and timestamp are field based time values
+-- which are intended to be zone offset independent:
+-- they are actually, technically, floating time values!
+-- The data type "timestamp with time zone" is the zone offset-dependent equivalent of timestamp in SQL.
+-- you can allow time zones or not -- default is no TZ if not specified
+    -- Use "timestamp" if you want to use floating times
+    -- Use "timestamp with timezone" if you want to use local times
+    timestamp  -- by default floating time, not attached to any TZ
+    timestamp with time zone -- maps to an incremental time
+
+-- Inputting Dates:
+-- PostgreSQL accepts many styles/timestamp formats but there can be confusion around month and day order
+    -- i.e. '2017-01-10' is Jan 10, 2017 (ISO 8601 style) but it could be Oct 1, 2017 in some countries
+    -- 'Jan 8,2018' will always work
+-- To ensure that we use the correct month and day order, use DATESTYLE setting
+show datestyle  --> returns ISO, DMY  --> European style
+    -- datestyle is stored in a PostgreSQL configuration file. When db server starts
+    -- it reads datestyle from the config file and uses it. We can set datestyle for the session
+    -- but next time we re-start PostgreSQL server, it will use the config file's datestyle value.
+    set datestyle = 'ISO,MDY'  --> American style
+
+-- Inputting Times:
+-- Consists of time of day followed by optional TZ (covered in the next lecture)
+04:05 AM
+04:05 PM
+04:04:06.789
+
+-- Inputting Timestamp
+-- Consists of the concetenation of a date and a time, followed by an optional TZ (covered in the next lecture)
+
+-- Special Date/Time Inputs
+-- Input,       DATA TYPE,                  VALUE
+-- epoch,       date, timestamp             1970-01-01 00:00:00
+-- infinity     date, timestamp             later than all other timestamps
+-- -infinity    date, timestamp             earlier than all other timestamps
+-- now          date, timestamp, timestamp  Current transaction's start time
+-- today        date, timestamp             Midnight today
+-- tomorrow     date, timestamp             Midnight tomorrow
+-- yesterday    date, timestamp             Midnight yesterday
+-- allballs     time                        00:00:00.0 UTC
+
+CREATE TABLE test_time (
+	startdate DATE,        --> floating time
+	startstamp TIMESTAMP,  --> floating time
+	starttime TIME         --> floating time
+);
+
+Insert INTO test_time (startdate, startstamp,starttime)
+VALUES ('epoch','infinity','allballs');
+
+Insert INTO test_time (startdate, startstamp)
+VALUES ('NOW','today');
+
+select * from test_time;
+
+show datestyle;  --> ISO, DMY
+insert into test_time (startdate, startstamp, starttime)
+values ('27-04-1978', '27-04-1978 04:05:06', '04:05:06')
+
+select * from test_time;
+
+-- Lecture 115: Time Zones
+-- Depend on geography (TZ) and politics (daylight savings)
+-- PostgreSQL recommends using timestamps (date + time) when using time zones
+-- SQL standard allows timezones with 'time' data type. Should try to avoid
+-- because it can't handle daylight-saving-time.
+
+-- ??? Avoid using a numeric offset (e.g. UTC+2) because it cant handle daylight-saving time either
+    -- If the offset mentioned is zone/UTC offset, but not TZ identifier, then we do not know
+    -- about the location, which in turn means we do not know about DST.
+
+-- 3 different format for timezones:
+-- 1. Full zone name: America/Los Angeles    <<< Focus of this lecture, maps to incremental time
+-- 2. Abbreviation: EST (Eastern Standard Time)
+-- POSIX-style: EST+5 or EST+5EDT  (Eastern Standard Time + daylight saving)
+    -- Full names allow the db to calculate if daylight saving time is present
+    -- depending on the date. The appreviation does not let you do this (???)
+
+-- How to see the available TZ names?
+select * from pg_timezone_names   --> a pre-set view
+select * from pg_timezone_abbrevs --> a pre-set view
+
+-- add new columns to test_time
+alter table test_time
+add column endtime time with time zone   --> ??? How to have time without date with time zone?
+
+alter table test_time
+add column endstamp timestamp with time zone --> handles DST correctly
+
+INSERT INTO test_time
+(endstamp,endtime)
+VALUES ('01/20/2018 10:30:00 US/Pacific', '10:30:00+5');  --> shows local 2018-01-20 20:30:00+02
+INSERT INTO test_time (endstamp,endtime)
+VALUES ('06/20/2018 10:30:00 US/Pacific', '10:30:00+5');
+    -- 06/20/2018 10:30:00 US/Pacific  -> TZ identifier = UTC-7h (DST applied)
+    -- local machine geo location is Helsinki. On 06/20/2018, Helsinki TZ identifier was UTC+3h
+    select * from test_time
+    --> shows local 2018-06-20 20:30:00+03 (+03 is TZ identifier)
+
+-- See Time zone for session
+show time zone   --> 'Europe/Helsinki'
+
+-- notice the offset of time
+select * from test_time   --> Observation: note that endstamp & endtime values shown in local time zone
+    --> shows local 2018-06-20 20:30:00+03 (+03 is TZ identifier)
+set time zone 'US/Pacific'
+select * from test_time   --> Observation: note that endstamp & endtime values shown in local time zone
+    -- endstamp = 2018-06-20 10:30:00-07 (YYYY-MM-DD hh:mm:ssZZZZ)
+set time zone 'Europe/Helsinki'
+
+-- Lecture 116: Interval Data Type
+-- Documentation: https://www.postgresql.org/docs/11/datatype-datetime.html#DATATYPE-INTERVAL-INPUT
+-- Syntax used in a table schema:
+interval
+interval [fields][precision]
+
+-- [fields] options
+year
+month
+day
+hour
+minute
+second
+year to month
+day to hour
+day to minute
+day to second
+hour to minute
+hour to second
+minute to second
+
+-- There are 3 different formatting we can use to input intervals:
+-- (1) Interval Input - Postgres Format
+    quantity unit [direction]
+        -- where unit can be
+        microsecond
+        millisecond
+        second
+        minute
+        hour
+        day
+        week
+        month
+        year
+        decade
+        century
+        millenium
+        -- using the plurals is also needed
+
+        [direction] can be ago or blank. If ago is used, the interval is in the past. Otherwise it is in the future
+
+        -- Examples:
+        1 day 13 hours 20 minutes 10 seconds
+        5 millenium 2 centuries ago
+
+-- (2) Interval Input - SQL Standard Format
+    YYYY-MM-DD HH:MM:SS
+    -- Examples:
+    200-10-4 32:12:10  --> 200 years, 10 months, 4 days, 32 hours, 12 minutes, 10 seconds
+    1-2   --> 1 year, 2 months
+    4 32:12:10  --> 4 days, 32 hours, 12 minutes, 10 seconds
+
+-- (3) Interval Input - ISO 8601 Interval Input
+    P [quantity unit]xn T [quantity unit]xn
+    units: Y (years), M (months), D (days), H (hours), M (minutes), S (seconds)
+    -- Example:
+    P5Y3M4DT7H10M23S
+
+-- At this point, we know 3 different formats to input intervals
+    -- (1) Interval Input - Postgres Format
+    -- (2) Interval Input - SQL Standard Format
+    -- (3) Interval Input - ISO 8601 Interval Input
+
+-- We can use any of these formats to input an interval to Postgres.
+
+-- So, lets add a field of type interval to test_time table:
+alter table test_time
+add column span interval
+-- Lets insert rows with span field using the 3 different format
+    -- (1) Interval Input - Postgres Format
+        insert into test_time (span)
+        values ('5 decades 3 years 6 months 3 days')
+    -- (2) Interval Input - SQL Standard Format
+        insert into test_time (span)
+        values ('4 32:12:10')
+        insert into test_time (span)
+        values ('1-2')
+    -- (3) Interval Input - ISO 8601 Interval Input
+        insert into test_time (span)
+        values ('P5Y3MT7H3M')
+
+        insert into test_time (span)
+        values ('P25Y2M30DT17H33M10S')
+
+-- Now we have test_time table's span field filled with timespan values.
+
+-- We can use the following 3 different formats to input intervals:
+    -- Interval Input - Postgres Format
+    -- Interval Input - SQL Standard Format
+    -- Interval Input - ISO 8601 Interval Input
+-- Depending on the intervalstyle setting (show intervalstyle), Postgres will show the interval values
+-- in one of the following formats:
+    -- postgres             (set intervalstyle='postgres')
+    -- postgres_verbose     (set intervalstyle='postgres_verbose')
+    -- sql_standard         (set intervalstyle='sql_standard')
+    -- iso_8601             (set intervalstyle='iso_8601')
+    select span from test_time where span is not null;
+
+-- Lecture 117: The interval/date/time arithmetic (???)
+-- Observation: You can say that Postgres has calendars for all calendar years (e.g. 1999,2000,2001,etc)
+-- Observation: The interval/date/time arithmetic presented in this lecture is made using floating times
+-- Documentation: https://www.postgresql.org/docs/11/functions-datetime.html
+-- To another interval, you can ADD date, time, timestamp, or interval
+    SELECT DATE '2018-09-28' + INTERVAL '5 days 1 hour';  --> 2018-10-03 01:00:00 (timestamp without tz)
+    SELECT TIME '5:30:10' + INTERVAL '70 minutes 80 seconds';  --> 06:41:30       (time without tz)
+    SELECT TIMESTAMP '1917-06-20 12:30:10.222' +
+    INTERVAL '30 years 6 months 7 days 3 hours 17 minutes 3 seconds'; --> 1947-12-27 15:47:13.222 (timestamp without tz)
+    SELECT INTERVAL '5 hours 30 minutes 2 seconds' + INTERVAL '5 days 3 hours 13 minutes';  --> 5 days 08:43:02 (interval)
+    SELECT DATE '2017-04-05' +  INTEGER '7';  --> 2017-04-12 (date)
+
+-- subtracting intervals from date,time, timestamp
+    SELECT DATE '2018-10-20' - INTERVAL '2 months 5 days';  --> ??? 2018-08-15 00:00:00 (timestamp without tz)
+    SELECT TIME '23:39:17' - INTERVAL '12 hours 7 minutes 3 seconds'  --> 11:32:14 (time without tz)
+    SELECT TIMESTAMP '2016-12-30' - INTERVAL '27 years 3 months 17 days 3 hours 37 minutes'; --> 1989-09-12 20:23:00 (timestamp without tz)
+
+-- subtracting integer(days) from date
+    SELECT DATE '2016-12-30' - INTEGER '300';  --> 2016-03-05 (date)
+
+--subtracting 2 dates
+    SELECT DATE '2016-12-30' - DATE '2009-04-7';  --> 2824 days as integer
+
+-- subtracting 2 times
+    SELECT TIME '17:54:01' - TIME '03:23:45';  --> 14:30:16 (interval)
+-- subtracting  and 2 timestamps
+    SELECT TIMESTAMP '2001-02-15 12:00:00' - TIMESTAMP '1655-08-30 21:33:05';  --> 126177 days 14:26:55 (interval)
+
+--Multiply and divide intervals
+    SELECT 5 * INTERVAL '7 hours 5 minutes';  --> 35:25:00 (interval)
+    SELECT INTERVAL '30 days 20 minutes' / 2; --> 15 days 00:10:00 (interval)
+
+-- How to calculate an age of a person/event?
+SELECT age(TIMESTAMP '2025-10-03', TIMESTAMP '1999-10-03');  -- 26 years (interval)
+SELECT age (TIMESTAMP '1978-04-27');                         --> 42 years 7 months 11 days
+
+-- Observation: The interval/date/time arithmetic presented above so far is made using floating times
+-- Question: Can Postgres do interval/date/time arithmetic in local times? The answer is yes:
+    select timestamp with time zone '20-06-2018 10:30:00 US/Pacific' - interval '30 years 6 months 7 days 3 hours 17 minutes 3 seconds';
+        -- 1987-12-13 17:12:57+02 (timestamp with time zone identifier, note that it is shown in my machines local time!)
+
+-- Lecture 118: Pulling out parts of dates & times
+-- This lecture uses northwind database
+-- Documentation: https://www.postgresql.org/docs/11/functions-datetime.html#FUNCTIONS-DATETIME-EXTRACT
+-- 2 methods to use:
+extract (field from source)
+    field can be century, day, decade, dow, doy, hour, minute, month, second and timezone
+    source must be a value expression of type timestamp, time, or interval
+date_part('field', source)
+    field can be century, day, decade, dow, doy, hour, minute, month, second and timezone
+
+-- How many years are old the employees? Use extract
+select employeeid, firstname, lastname, birthdate from employees
+select employeeid, firstname, lastname, extract(years from age(birthdate)) as age_in_years from employees
+
+-- Find the day part of the ship date on all orders. Use date_part
+select shippeddate from orders
+select date_part('day', shippeddate) as day_part from orders
+
+-- using extract, find how many decades old each employee is
+select extract(decade from age(birthdate)) as decades_old from employees
+
+-- using date_part, find how many decades old each employee is
+select date_part('decade', age(birthdate)) as decades_old from employees
+
+-- Lecture 119: Converting one data type into another
+-- Use Northwind database
+-- Syntax:
+cast(value as type)
+value::type
+
+-- cast hiredate as timestamp
+select cast(hiredate as timestamp) from employees
+select hiredate::timestamp from employees
+
+-- For each order_details, print the total purchase amount as 'X dollars spent'
+select ((unitprice*quantity)-discount)::text || ' dollars spent' from order_details
+
+-- Convert the string '2015-10-03' to a date and 375 to text in one shot
+-- Use CAST for the first one and :: syntax for the second
+select cast('2015-10-03' as date), 375::text
+
+-- Section 22: Window Functions
+-- Lecture 120: Basic Window Function Example
+-- Documentation: https://www.postgresqltutorial.com/postgresql-window-function/
+    -- use practice database which has products & product_groups tables
+
+-- What is a window?
+-- A window is a set of rows returned by group by/partition by clause
+
+-- What is a window function?
+-- A function that operates on the window X and returns a value per row in X.
+-- In other words, a window function returns values from the rows in X in a window Y.
+-- (i.e. it does not reduce the number of rows in the window)
+-- Note that aggregate functions operate on a window as well, but they produce a single row per window
+-- (i.e. aggregate functions reduce the number of rows in the window to one row)
+
+-- When to use Window Functions? Use Case Example:
+-- Referring to the documentation, considering the products & product_groups tables join:
+select  group_name,
+        product_name,
+        price,
+	    avg(price) over (           --> avg() as window function over group_name
+	   		partition by group_name
+	    )
+from products inner join product_groups using(group_id)
+    -- if we want to print the price & avg(price) side by side for each product row
+    -- then we need a window function, because per row in a window (i.e. per row in partition by group_name)
+    -- the window function (i.e. avg(price)) will be calculated and placed into that row
+    -- In this syntax, the PARTITION BY distributes the rows of the result set into groups/windows and
+    -- the AVG() function is applied to each group to return the average price for each.
+
+-- Use Northwind database & the lecture 120 video content:
+-- Lets find out product prices in a category compared to average for each category
+-- ordered by categoryname and unitprice in desc order
+select
+	categoryname, productname, unitprice,
+	avg(unitprice) over(partition by categoryid)
+from products inner join categories using(categoryid)
+order by categoryname desc, unitprice desc
+
+-- We are looking for orders of the product 'Alice Mutton'.
+-- For this product, list all its order details' quantities
+-- compared to the average order quantity
+-- order by quantity in desc order
+select productname, quantity,
+	   avg(quantity) over(
+	   		partition by productid
+	   )
+from products inner join order_details using(productid)
+where productname = 'Alice Mutton'
+order by quantity desc
+
+-- Lecture 121: Using Window functions Within Subqueries
+-- Nesting Queries Gives You Great Power
+-- Imagine that in Northwind company, we consider an order a fraud if an order's total amount
+-- is 5 times greater than the customers's average order total amount
+-- Get a list of only fraud orders with companyname, orderid, orderamount and average
+-- order amount for the customer
+
+        -- Step 1: Lets get a list of customerid, companyname, orderid and order details's sum
+        select
+            c.customerid, companyname, o.orderid, ((unitprice*quantity)-discount) as order_details_sum
+        from customers as c inner join orders as o using(customerid)
+                    inner join order_details using(orderid)
+
+        -- Step 2: Using Step 1's result, per customerid, per orderid, lets find
+        -- the sum of each order as customerid, companyname, orderid, order_sum
+        select
+                customerid, companyname, orderid, sum(order_details_sum) as order_sum
+        from(
+            select
+            c.customerid, companyname, o.orderid, ((unitprice*quantity)-discount) as order_details_sum
+            from customers as c inner join orders as o using(customerid)
+                                inner join order_details using(orderid)
+        ) as per_customer_per_order_details
+        group by customerid, companyname, orderid
+        order by customerid
+
+
+        -- Step 3: To Step 2's result, lets add a column named avg_order_sum. Use avg() as window function
+        -- and utilize the Step 2's result as subquery
+        select
+            customerid, companyname, orderid, order_sum,
+            avg(order_sum) over( partition by customerid) as avg_customers_order_sum
+        from (
+            select
+                customerid, companyname, orderid, sum(order_details_sum) as order_sum
+            from(
+                select
+                    c.customerid, companyname, o.orderid, ((unitprice*quantity)-discount) as order_details_sum
+                from customers as c inner join orders as o using(customerid)
+                    inner join order_details using(orderid)
+            ) as per_customer_per_order_details
+            group by customerid, companyname, orderid
+            order by customerid
+        ) as per_customer_per_order
+
+        -- Step 4: Detect the fraud; if order_sum is more than 5 times greater than avg_customers_order_sum
+        -- Then list those orders. Use the result of Step 3 as a subquery.
+        select
+        customerid, companyname, orderid, order_sum, avg_customers_order_sum
+        from (
+            select
+                customerid, companyname, orderid, order_sum,
+                avg(order_sum) over( partition by customerid) as avg_customers_order_sum
+            from (
+                select
+                    customerid, companyname, orderid, sum(order_details_sum) as order_sum
+                from(
+                    select
+                        c.customerid, companyname, o.orderid, ((unitprice*quantity)-discount) as order_details_sum
+                    from customers as c inner join orders as o using(customerid)
+                                        inner join order_details using(orderid)
+                ) as per_customer_per_order_details
+                group by customerid, companyname, orderid
+                order by customerid
+            ) as per_customer_per_order
+        ) as final_table
+        where order_sum > (5*avg_customers_order_sum)
+
+
+-- Find any suppliers that had 3 times the total
+-- quantity of orders over all their products
+-- versus the average order quantity per month per year
+    -- !!! My interpretation, which seems to be different from teachers solution, of the requirement
+
+    -- Step 1: get s.companyname, productname, quantity, ordermonth, orderyear
+    -- from supplier & products & order_details and orders joint
+	select
+		supplierid, companyname, productid, productname,
+		extract(month from orderdate) as order_month,
+		extract(year from orderdate) as order_year,
+		quantity
+	from suppliers inner join products using(supplierid)
+				   inner join order_details using(productid)
+				   inner join orders using(orderid)
+
+    -- Step 2: Referring to Step 1's result, note that a product can be ordered within the same months.
+    -- We want to know total_quantity_ordered_per_month_per_year for each product.
+    -- Use Step 1 in a subquery:
+    select
+		supplierid, companyname, productid, productname, order_month, order_year,
+		sum(quantity) as total_quantity_ordered_per_month_per_year
+	from (
+		select
+			supplierid, companyname, productid, productname,
+			extract(month from orderdate) as order_month,
+			extract(year from orderdate) as order_year,
+			quantity
+		from suppliers inner join products using(supplierid)
+					   inner join order_details using(productid)
+					   inner join orders using(orderid)
+	) as step_one
+	group by supplierid, companyname, productid, productname, order_month, order_year
+
+    -- Step 3: Using Step 2 in a subquery, append a new column named avg_quantity_per_month_per_year, which
+    -- lists the average quantity sold for a company's all products in a given month & year
+        -- i.e. a window of supplierid, order_month, order_year needs to be defined within a window function
+    select
+            companyname, productname, order_month, order_year, total_quantity_ordered_per_month_per_year,
+            avg(total_quantity_ordered_per_month_per_year) over(partition by supplierid, order_month, order_year) as avg_quantity_per_month_per_year
+    from (
+        select
+			supplierid, companyname, productid, productname, order_month, order_year,
+			sum(quantity) as total_quantity_ordered_per_month_per_year
+		from (
+				select
+					supplierid, companyname, productid, productname,
+					extract(month from orderdate) as order_month,
+					extract(year from orderdate) as order_year,
+					quantity
+				from suppliers inner join products using(supplierid)
+							inner join order_details using(productid)
+							inner join orders using(orderid)
+		) as step_one
+		group by supplierid, companyname, productid, productname, order_month, order_year
+    ) as step_two
+
+    -- Step 4 (Final Step): Using Step 3 in a subquery, list the suppliers' products, where
+    -- total_quantity_ordered_per_month_per_year > (3*avg_total_quantity_ordered). In other
+    -- words; Find any suppliers that had 3 times the total
+    -- quantity of orders over all their products
+    -- versus the average order quantity per month per year
+    select
+        companyname, productname, order_month, order_year, total_quantity_ordered_per_month_per_year, avg_quantity_per_month_per_year
+    from (
+        select
+            companyname, productname, order_month, order_year, total_quantity_ordered_per_month_per_year,
+            avg(total_quantity_ordered_per_month_per_year) over(partition by supplierid, order_month, order_year) as avg_quantity_per_month_per_year
+        from (
+            select
+				supplierid, companyname, productid, productname, order_month, order_year,
+				sum(quantity) as total_quantity_ordered_per_month_per_year
+			from (
+				select
+					supplierid, companyname, productid, productname,
+					extract(month from orderdate) as order_month,
+					extract(year from orderdate) as order_year,
+					quantity
+				from suppliers inner join products using(supplierid)
+							inner join order_details using(productid)
+							inner join orders using(orderid)
+			) as step_one
+			group by supplierid, companyname, productid, productname, order_month, order_year
+        ) as step_two
+    ) as step_three
+    where total_quantity_ordered_per_month_per_year > (3*avg_quantity_per_month_per_year)
+
+    -- Teacher's implementation of the same requirement:
+    -- My question in Udemy about it: https://www.udemy.com/course/postgresql-from-zero-to-hero/learn/lecture/14284344#questions/13382268
+        SELECT
+                companyname,order_month,order_year,total_orders,company_average
+        FROM (
+                SELECT
+                    companyname, total_orders, order_month, order_year,
+                    AVG(total_orders) OVER (PARTITION BY companyname) as company_average
+                FROM (
+                        SELECT companyname,SUM(quantity) as total_orders,
+                            date_part('month',orderdate) as order_month,
+                            date_part('year',orderdate) as order_year
+                        FROM order_details INNER JOIN products USING(productid)
+                                        INNER JOIN suppliers USING(supplierid)
+                                        INNER JOIN orders USING(orderid)
+                        GROUP BY companyname,order_month,order_year
+                )  as order_by_month
+        ) as final_subquery
+        WHERE total_orders > 3 * company_average
+
+-- Find any suppliers that had 3 times the normal
+-- quantity of orders over all their products
+-- versus the average order quantity per month per year
+    -- Desired outcome: companyname, productname, order_month, order_year,
+    -- total_quantity_ordered, avg_quantity_per_month_per_year
+    -- This time, implement the solution with chained CTEs/WITH clauses (Lecture 102).
+    -- One of the CTE must use a Window Function
+    with step_one as (
+        select
+            s.supplierid, companyname, p.productid, productname,
+            extract(month from orderdate) as order_month,
+            extract(year from orderdate) as order_year,
+            quantity
+        from suppliers as s inner join products as p using(supplierid)
+                       inner join order_details using(productid)
+                       inner join orders using(orderid)
+    ),
+    step_two as(
+        select
+            supplierid, companyname, productid, productname,
+            order_month, order_year,
+            sum(quantity) as total_quantity_ordered_per_month_per_year
+        from step_one
+        group by supplierid, companyname, productid, productname, order_month, order_year
+    ),
+    step_three as(
+        select
+            supplierid, companyname, productid, productname,
+            order_month, order_year,
+            total_quantity_ordered_per_month_per_year,
+            avg(total_quantity_ordered_per_month_per_year) over (partition by supplierid, order_month, order_year) as avg_total_quantity_ordered
+        from step_two
+    )
+    select companyname, productname, order_month, order_year,
+           total_quantity_ordered_per_month_per_year, avg_total_quantity_ordered
+    from step_three
+    where total_quantity_ordered_per_month_per_year > (3*avg_total_quantity_ordered)
+
+
+-- Lecture 122: Using Rank() to Find First N / Last N Records in Join
+-- Documentation: https://www.postgresqltutorial.com/postgresql-rank-function/
+-- Use practice_db
+-- Referring to the documentation:
+-- Example Use Cases: The RANK() function can be useful for creating top-N and bottom-N reports.
+   -- Top 2 most expensive totals for each order
+   -- Top 2 most expensive products for each product group
+   --
+-- Syntax:
+select  <column1>, <column2>, ...
+        RANK() OVER (
+            [PARTITION BY partition_expression, ... ]   --> optional, if not given the result_set is used as the partition
+            ORDER BY sort_expression [ASC | DESC], ...
+        )
+From result_set
+
+-- Example from the documentation:
+SELECT
+	product_id,
+	product_name,
+	group_name,
+	price,
+	RANK () OVER (
+		PARTITION BY p.group_id
+		ORDER BY price DESC
+	) price_rank
+FROM
+	products as p INNER JOIN product_groups using(group_id);
+    -- My interpretation of the documentation:
+    -- The result set is the table returned by the enclosing from statement for rank()
+        -- i.e. products as p INNER JOIN product_groups using(group_id)
+    -- First, the PARTITION BY clause distributes rows of the result set into partitions
+    -- Second, order by clause (i.e. ORDER BY price DESC --> based on descending price)
+    -- is applied to each row WITHIN a partition.
+        -- for each p.group_id partition, order the rows based on price in descending order
+    -- Third, the RANK() function assigns a rank to every row within a partition (p.group_id)
+    -- based on ORDER BY clause (i.e. ORDER BY price DESC --> based on descending price):
+        -- (*) For each partition, the rank of the first row is 1.
+        --     The RANK() function adds the number of tied rows to the rank to
+        --     calculate the rank of the next row, so the ranks may not be sequential.
+        --     In addition, rows with the same values will get the same rank.
+
+    -- Use practice_db
+    -- Based on this example, if we want to get:
+    -- Top 2 most expensive products for each product group
+    with step_one as(
+        SELECT
+	        product_id,
+	        product_name,
+            group_id,
+	        group_name,
+	        price,
+	        RANK () OVER (
+		        PARTITION BY p.group_id
+		        ORDER BY price DESC
+	        ) price_rank
+        FROM products as p INNER JOIN product_groups using(group_id)
+    )
+    select * from step_one
+    where price_rank <= 2    --> If many new entries are added to products table with the same price, static value 2 wont work,
+                             --> Because RANK() will give the rank of the 2.nd row a dynamic value (i.e. not 2) due to (*)
+                             --> For each partition, there can be multiple products in each rank. And we are interested
+                             -- in the first two minimum ranked products in each partition.
+        -- Solution:
+            with step_one as(
+                SELECT
+                    product_id,
+                    product_name,
+                    group_id,
+                    group_name,
+                    price,
+                    RANK () OVER (
+                        PARTITION BY p.group_id
+                        ORDER BY price DESC
+                    ) price_rank
+                FROM products as p INNER JOIN product_groups using(group_id)
+            ),
+            step_two as(
+                select
+                        distinct group_id, 1 as price_rank
+                from step_one
+            ),
+            step_three as(
+                select group_id, min(price_rank) as price_rank from step_one
+                where price_rank != 1
+                group by group_id
+            ),
+            step_four as(
+                select * from step_two
+                union
+                select * from step_three
+            )
+            select * from step_one
+            where group_id in (select group_id from step_four) and
+                price_rank in (select price_rank from step_four)
+
+-- Back to the udemy course, lecture 122:
+-- Use Northwind database
+-- List top 2 most expensive order_details_total_price for each order:
+-- Solution 1:
+with step_one as (
+    select
+            o.orderid, productid, ((unitprice*quantity)-discount) as total_price,
+            rank() over (
+                partition by o.orderid
+                order by ((unitprice*quantity)-discount) desc
+            ) as rank_by_total_price
+    from orders as o inner join order_details using(orderid)
+),
+step_two as(
+	select orderid, productid, 1 as rank_by_total_price
+	from step_one
+	where rank_by_total_price = 1
+),
+step_three as(
+	select orderid, productid, rank_by_total_price,
+	min(rank_by_total_price) over (
+		partition by orderid
+	) as min_rank_by_total_price
+	from step_one
+	where rank_by_total_price != 1
+),
+step_four as(
+	select orderid, productid, rank_by_total_price
+	from step_three
+	where rank_by_total_price = min_rank_by_total_price
+),
+step_five as(
+	select * from step_two
+	union
+	select * from step_four
+)
+select * from step_one
+where orderid in (select orderid from step_five) and
+	  productid in (select productid from step_five) and
+      rank_by_total_price in (select rank_by_total_price from step_five)
+-- Use Northwind database
+-- List top 2 most expensive order_details_total_price for each order:
+-- Solution 2:
+with step_one as (
+    select
+            o.orderid, productid, ((unitprice*quantity)-discount) as total_price,
+            rank() over (
+                partition by o.orderid
+                order by ((unitprice*quantity)-discount) desc
+            ) as rank_by_total_price
+    from orders as o inner join order_details using(orderid)
+),
+step_two as(
+	select orderid, productid, total_price, rank_by_total_price
+	from step_one
+	where rank_by_total_price = 1
+),
+step_three as(
+	select orderid, productid, total_price, rank_by_total_price,
+	min(rank_by_total_price) over (
+		partition by orderid
+	) as min_rank_by_total_price
+	from step_one
+	where rank_by_total_price != 1
+),
+step_four as(
+	select orderid, productid, total_price, rank_by_total_price
+	from step_three
+	where rank_by_total_price = min_rank_by_total_price
+),
+step_five as(
+	select * from step_two
+	union
+	select * from step_four
+)
+select * from step_five
+order by orderid, rank_by_total_price asc
+      -- This is the teacher's solution:
+      SELECT * FROM
+            (SELECT orders.orderid, productid, unitprice, quantity,
+ 	                rank() OVER (PARTITION BY order_details.orderid ORDER BY (quantity*unitprice) DESC) AS rank_amount
+            FROM orders
+            NATURAL JOIN order_details) as ranked
+      WHERE rank_amount <=2;
+        -- I think, teacher's solution & task description is wrong:
+        -- Question regarding this solution: https://www.udemy.com/course/postgresql-from-zero-to-hero/learn/lecture/14284344#questions/13412742
+
+
+-- Find the 3 least expensive products from each supplier.
+-- Return supplier name, product name, and price
+with step_one as (
+    select s.supplierid, companyname, productid, productname, unitprice,
+    rank() over (
+                partition by s.supplierid
+                order by unitprice asc
+    ) as rank_by_unit_price
+    from suppliers as s inner join products using(supplierid)
+),
+step_two as(
+    select
+        supplierid, companyname, productid, productname, unitprice, rank_by_unit_price
+    from step_one
+    where rank_by_unit_price = 1
+),
+step_three as(
+    select
+        supplierid, min(rank_by_unit_price) as min_rank_by_unit_price
+    from step_one
+    where rank_by_unit_price <> 1
+    group by supplierid
+	order by supplierid
+),
+step_four as(
+	select
+		supplierid, companyname, productid, productname, unitprice, rank_by_unit_price
+	from step_one
+	where rank_by_unit_price != 1 and
+		  supplierid in (select supplierid from step_three) and
+		  rank_by_unit_price in (select min_rank_by_unit_price from step_three where step_three.supplierid = step_one.supplierid)
+),
+step_five as(
+	select * from step_one
+	except
+	select * from step_two
+	except
+	select * from step_four
+),
+step_six as(
+	select supplierid, min(rank_by_unit_price) as min_rank_by_unit_price
+	from step_five
+	group by supplierid
+),
+step_seven as(
+	select
+		supplierid, companyname, productid, productname, unitprice, rank_by_unit_price
+	from step_one
+	where supplierid in (select supplierid from step_six) and
+		  rank_by_unit_price in (select min_rank_by_unit_price from step_six where step_six.supplierid = step_one.supplierid)
+),
+final_step as(
+	select * from step_two
+	union
+	select * from step_four
+	union
+	select * from step_seven
+)
+select companyname, productname, unitprice from final_step
+order by supplierid, rank_by_unit_price
+    -- Teacher's solution (IMO, it is incorrect)
+    SELECT companyname,productname,unitprice FROM
+            (SELECT companyname,productname,unitprice,
+            rank() OVER (PARTITION BY products.supplierid ORDER BY unitprice ASC) AS price_rank
+    FROM suppliers NATURAL JOIN products) as ranked_products
+    WHERE price_rank <=3;
+        -- Made a Question about the issue: https://www.udemy.com/course/postgresql-from-zero-to-hero/learn/lecture/14284344#questions/13422826
+
 
