@@ -3728,55 +3728,49 @@ order by orderid, rank_by_total_price asc
 -- Find the 3 least expensive products from each supplier.
 -- Return supplier name, product name, and price
 with step_one as (
-    select s.supplierid, companyname, productid, productname, unitprice,
-    rank() over (
-                partition by s.supplierid
-                order by unitprice asc
-    ) as rank_by_unit_price
-    from suppliers as s inner join products using(supplierid)
+	select s.supplierid, companyname, productid, productname, unitprice,
+		   rank() over(
+		   		partition by s.supplierid
+			    order by unitprice asc
+		   ) as rank_by_unitprice
+	from suppliers as s inner join products using(supplierid)
 ),
-step_two as(
-    select
-        supplierid, companyname, productid, productname, unitprice, rank_by_unit_price
-    from step_one
-    where rank_by_unit_price = 1
-),
-step_three as(
-    select
-        supplierid, min(rank_by_unit_price) as min_rank_by_unit_price
-    from step_one
-    where rank_by_unit_price <> 1
-    group by supplierid
-	order by supplierid
-),
-step_four as(
-	select
-		supplierid, companyname, productid, productname, unitprice, rank_by_unit_price
+step_two as (
+	select *
 	from step_one
-	where rank_by_unit_price != 1 and
-		  supplierid in (select supplierid from step_three) and
-		  rank_by_unit_price in (select min_rank_by_unit_price from step_three where step_three.supplierid = step_one.supplierid)
+	where rank_by_unitprice = 1
 ),
-step_five as(
+step_three as (
+	select supplierid, min(rank_by_unitprice) as min_rank_by_unitprice
+	from step_one
+	where rank_by_unitprice <> 1
+	group by supplierid
+),
+step_four as (
+	select
+		*
+	from step_one
+	where rank_by_unitprice <> 1 and
+		  rank_by_unitprice in (select min_rank_by_unitprice from step_three where step_one.supplierid = step_three.supplierid)
+),
+step_five as (
 	select * from step_one
 	except
 	select * from step_two
 	except
 	select * from step_four
 ),
-step_six as(
-	select supplierid, min(rank_by_unit_price) as min_rank_by_unit_price
+step_six as (
+	select supplierid, min(rank_by_unitprice) as min_rank_by_unitprice
 	from step_five
 	group by supplierid
 ),
-step_seven as(
-	select
-		supplierid, companyname, productid, productname, unitprice, rank_by_unit_price
+step_seven as (
+	select *
 	from step_one
-	where supplierid in (select supplierid from step_six) and
-		  rank_by_unit_price in (select min_rank_by_unit_price from step_six where step_six.supplierid = step_one.supplierid)
+	where rank_by_unitprice in (select min_rank_by_unitprice from step_six where step_one.supplierid = step_six.supplierid)
 ),
-final_step as(
+final_step as (
 	select * from step_two
 	union
 	select * from step_four
@@ -3784,7 +3778,7 @@ final_step as(
 	select * from step_seven
 )
 select companyname, productname, unitprice from final_step
-order by supplierid, rank_by_unit_price
+order by supplierid, rank_by_unitprice
     -- Teacher's solution (IMO, it is incorrect)
     SELECT companyname,productname,unitprice FROM
             (SELECT companyname,productname,unitprice,
@@ -3794,3 +3788,192 @@ order by supplierid, rank_by_unit_price
         -- Made a Question about the issue: https://www.udemy.com/course/postgresql-from-zero-to-hero/learn/lecture/14284344#questions/13422826
 
 
+-- Section 23 : Composite Types
+-- What are composite types?
+-- A composite type is a named list of field names and their data types:
+-- Syntax:
+create type composite_name as (
+    field1  datatype,
+    field2  datatype,
+    ...
+)
+-- Important: no constraints, just field names & data types
+-- A composite type can be used as column in a table
+-- Also a composite type can be used in functions and procedures (???)
+
+-- Use practice_db
+-- Let's create an address composite type with:
+-- street_address, street_address2, city, state_region, country and postalcode
+create type address as (
+	street_address 	varchar(50),
+	street_address2 varchar(50),
+	city			varchar(50),
+	state_region	varchar(50),
+	country			varchar(50),
+	postalcode		varchar(15)
+);
+    -- under practice_db > Schemas > Types > address is created
+-- create a table for friends and use the composite type address
+create table friends (
+    firstname varchar(100),
+    lastname varchar(100),
+    address address
+)
+
+-- How to remove a composite?
+drop type if exists composite_name  --> if the composite_name is not used in any table yet
+drop type if exists composite_name cascade --> if the composite_name is used in any table already
+    -- it will remove all the composite colums from the relevant tables
+    drop type if exists address cascade;
+    drop table if exists friends
+
+-- task: create a composite called full_name that includes firstname, middlename and lastname
+--       recreate the address composite type
+--       add both to a new friends table
+create type full_name as (
+    firstname  varchar(100),
+    middlename varchar(100),
+    lastname varchar(100)
+);
+create type address as (
+	street_address 	varchar(50),
+	street_address2 varchar(50),
+	city			varchar(50),
+	state_region	varchar(50),
+	country			varchar(50),
+	postalcode		varchar(15)
+);
+create table friends (
+    full_name full_name,
+    address address
+)
+
+-- task: drop both composite types full_name and address, and drop table friends
+drop type if exists full_name cascade;
+drop type if exists address cascade;
+drop table if exists friends;
+
+-- Lecture 124: Using Composite Types in Queries
+-- Use practice_db and create the following composite types and friends table
+CREATE TYPE address AS (
+	street_address 	varchar(50),
+	street_address2 varchar(50),
+	city			varchar(50),
+	state_region	varchar(50),
+	country			varchar(50),
+	postalcode		varchar(15)
+);
+
+CREATE TYPE full_name AS (
+	first_name varchar(50),
+	middle_name varchar(50),
+	last_name varchar(50)
+);
+
+CREATE TYPE dates_to_remember AS (
+  birthdate date,
+  age       integer,
+  anniversary date
+);
+
+CREATE TABLE friends (
+	full_name full_name,
+	address	address,
+  	specialdates dates_to_remember
+);
+
+-- How to insert data into composite types / How to construct composites in a table?
+-- Syntax:
+insert into table_name(composite_name)
+values(row(field1_value, field2_value, field3_value, ..))
+    -- Example:
+    insert into friends (full_name, address, specialdates)
+    values(
+        ROW('Boyd','M','Gregory'),
+        ROW('7777','','Boise','Idaho','USA','99999'),
+        ROW('1969-02-01',49,'2001-07-15')
+    )
+
+select * from friends
+-- Accessing columns in a composite
+-- Syntax:
+select (composite_type_name).column_name from table_name
+-- Pull back the city and birthdate from friends
+select (address).city, (specialdates).birthdate from friends
+
+-- Select all friends whose first name is Boyd
+select full_name from friends where (full_name).first_name = 'Boyd'
+
+-- Select state, middle_name and age of everyone whose last_name is Gregory
+select (address).state_region, (full_name).middle_name, (specialdates).age
+from friends where (full_name).last_name = 'Gregory'
+
+-- Section 24: SQL Functions& Procedures
+-- use Northwind database in this section
+-- Lecture 125: Write your first function
+-- Four kinds of functions:
+-- 1. Functions written in SQL (what we are doing in this section)
+-- 2. Functions written in PL/SQL (written in another section)
+-- 3 & 4 irrelevant
+-- Syntax for (1):
+create or replace function function_name() returns void AS $$
+  ...SQL statement...
+$$ Language SQL
+
+-- Write a function called fix_homepage that updates all suppliers
+-- with null in homepage field to 'N/A'
+create or replace function fix_homepage() returns void as $$
+    update suppliers
+    set homepage = 'N/A'
+    where homepage is null
+$$ Language SQL
+select fix_homepage()
+
+-- Create a function called set_default_photo to update any missing photopath
+-- to a default 'http://accweb/emmployees/default.bmp and run the function
+create or replace function set_default_photo() returns void as $$
+    update employees
+    set photopath = 'http://accweb/emmployees/default.bmp'
+    where photopath is null
+$$ Language SQL
+
+select set_default_photo()
+select * from employees
+
+-- Lecture 126: Write a Function that returns a single value
+-- Syntax:
+create or replace function function_name() returns datatype AS $$
+  ...Select statement that returns the datatype...
+$$ Language SQL
+
+-- Use AdventureWorks database
+-- Find the maximum price of any product
+create or replace function max_price_of_any_product() returns real as $$
+    select max(unitprice) from products
+$$ Language SQL
+select max_price_of_any_product()
+
+-- Write a function biggest_order() that returns the largest order in terms of total money spent
+create or replace function biggest_order() returns int as $$
+    with step_one as (
+        select orderid, ((unitprice * quantity) - discount) as total_spent_per_order_detail
+        from order_details
+    ),
+    step_two as(
+        select orderid, sum(total_spent_per_order_detail) as total_spent_per_order
+        from step_one
+        group by orderid
+    ),
+    step_three as(
+        select orderid, total_spent_per_order, max(total_spent_per_order) over () as max_total_spent
+        from step_two
+    ),
+    step_four as(
+        select orderid
+        from step_three
+        where total_spent_per_order = max_total_spent
+        limit 1
+    )
+    select * from step_four
+$$ Language sql
+select biggest_order()
