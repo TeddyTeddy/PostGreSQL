@@ -3883,7 +3883,13 @@ CREATE TABLE friends (
 );
 
 -- How to insert data into composite types / How to construct composites in a table?
--- Syntax:
+-- Syntax for composite type:
+create type composite_name as (
+    field1  datatype,
+    field2  datatype,
+    ...
+)
+-- Syntax for inserting data as composite:
 insert into table_name(composite_name)
 values(row(field1_value, field2_value, field3_value, ..))
     -- Example:
@@ -3897,7 +3903,7 @@ values(row(field1_value, field2_value, field3_value, ..))
 select * from friends
 -- Accessing columns in a composite
 -- Syntax:
-select (composite_type_name).column_name from table_name
+select (composite_name).field1 from table_name
 -- Pull back the city and birthdate from friends
 select (address).city, (specialdates).birthdate from friends
 
@@ -3946,7 +3952,7 @@ create or replace function function_name() returns datatype AS $$
   ...Select statement that returns the datatype...
 $$ Language SQL
 
--- Use AdventureWorks database
+-- Use Northwind database
 -- Find the maximum price of any product
 create or replace function max_price_of_any_product() returns real as $$
     select max(unitprice) from products
@@ -3954,26 +3960,492 @@ $$ Language SQL
 select max_price_of_any_product()
 
 -- Write a function biggest_order() that returns the largest order in terms of total money spent
+-- Solution 1: Using window functions
 create or replace function biggest_order() returns int as $$
+	with step_one as(
+		select
+			  orderid, sum((unitprice*quantity)-discount) as total_spent_per_order
+		from order_details
+		group by orderid
+	),
+    step_two as(
+		select
+			  orderid, total_spent_per_order,
+			  max(total_spent_per_order) over () as max_total_spent_per_order
+		from step_one
+	),
+    step_three as(
+		select orderid
+		from step_two
+		where total_spent_per_order = max_total_spent_per_order
+		limit 1
+	)
+	select orderid from step_three
+$$ Language SQL
+select biggest_order()
+-- Solution 2:
+create or replace function biggest_order() returns int as $$
+	with step_one as(
+		select orderid, sum((unitprice*quantity)-discount) as total_spent_per_order
+		from order_details
+		group by orderid
+		order by total_spent_per_order desc
+		limit 1
+	)
+	select orderid from step_one
+$$ Language SQL
+select biggest_order()
+
+-- Lecture 127: Functions with Parameters
+-- Syntax:
+create or replace function function_name(param1 data_type, param2 data_type, ...) returns data_type as $$
+    SQL statment that returns data_type
+$$ Language SQL
+    -- 2 ways to reference parameters:
+        -- By position: $1, $2 (older Postgres SQL only supports this)
+        -- By name: param1, param2
+            -- danger: If you name the parameter the same as column name the function gets confused
+                -- customerid = customerid --> customerid = $1
+
+-- Find the largest order amount given a specific customer(id)
+create or replace function largest_order_amount(customerid  nchar(5)) returns real as $$
     with step_one as (
-        select orderid, ((unitprice * quantity) - discount) as total_spent_per_order_detail
-        from order_details
+        select
+              orderid, sum((unitprice*quantity)-discount) as order_amount
+        from orders inner join order_details using(orderid)
+        where customerid = $1
+        group by orderid
+    )
+    select max(order_amount) from step_one
+$$ Language SQL
+
+select * from customers  --> pick a customerid from there (e.g. ANATR)
+
+select largest_order_amount('ANATR')
+
+-- Find the most ordered productname of a particular customer by
+-- the number of items ordered. Call the function most_ordered_product
+-- Solution 1:
+create or replace function most_ordered_product(customerid nchar(5)) returns varchar(40) as $$
+    with step_one as (
+        select
+            productid, sum(quantity) as num_of_items_ordered_per_product
+        from orders inner join order_details using(orderid)
+        where customerid = $1
+        group by productid
     ),
     step_two as(
-        select orderid, sum(total_spent_per_order_detail) as total_spent_per_order
+        select
+            productid, num_of_items_ordered_per_product,
+            max(num_of_items_ordered_per_product) over ( ) as max_num_of_items_ordered
         from step_one
-        group by orderid
     ),
     step_three as(
-        select orderid, total_spent_per_order, max(total_spent_per_order) over () as max_total_spent
+        select
+            productid
         from step_two
-    ),
-    step_four as(
-        select orderid
-        from step_three
-        where total_spent_per_order = max_total_spent
+        where num_of_items_ordered_per_product = max_num_of_items_ordered
         limit 1
     )
-    select * from step_four
-$$ Language sql
-select biggest_order()
+    select productname from products
+    where productid = (select productid from step_three)
+$$ Language SQL
+select most_ordered_product('ANATR')
+-- Solution 2:
+create or replace function most_ordered_product(customerid nchar(5)) returns varchar(40) as $$
+	with step_one as(
+		select productid, sum(quantity) as number_of_items_ordered
+		from orders inner join order_details using(orderid)
+		where customerid = $1
+		group by productid
+		order by number_of_items_ordered desc
+		limit 1
+	)
+	select productname from products
+	where productid in (select productid from step_one)
+$$ Language SQL
+select most_ordered_product('ANATR')
+    -- Teachers solution:
+    CREATE OR REPLACE FUNCTION most_ordered_product(customerid bpchar) RETURNS varchar(40) AS $$
+	    SELECT productname
+	    FROM products
+	    WHERE productid IN  (
+            SELECT productid FROM (
+                SELECT SUM(quantity) as total_ordered, productid
+	            FROM order_details
+	            INNER JOIN orders USING(orderid)
+	            WHERE customerid = $1
+	            GROUP BY productid
+	            ORDER BY total_ordered DESC
+	            LIMIT 1
+            ) as ordered_products
+        );
+    $$ LANGUAGE SQL;
+
+-- Lecture 128: Functions that have composite parameters
+-- Note: a table is treated as a composite type in postgresql, so
+-- you can pass a table_name as a composite parameter
+-- to a function. The table_name is treaded as a composite type that
+-- is a single ROW with all the column names in order
+
+-- Build a function that takes a product and price increase percentage as int
+-- and returns the new price
+create or replace function new_price(products, price_increase_percentage int)
+returns double precision as $$
+    select  $1.unitprice * price_increase_percentage / 100
+$$ Language SQL
+    -- a single row from products table as a composite as an argument
+    -- given a row/composite in products table, new_price() operates on a single field
+    -- returning a value forming a column for new price
+select products.* from products
+    --> returns all the data from products table, same as
+    --> select * from products
+select productname, unitprice, new_price(products.*, 110) as new_price
+from products
+
+-- create a function full_name() that takes employees and return
+-- title, firstname and lastname concatenated together.
+-- Then use this in a select statement
+create or replace function full_name(employees) returns varchar(255) as $$
+    select $1.title || ' ' || $1.firstname || ' ' || $1.lastname
+$$ Language SQL
+select employeeid, full_name(employees.*) from employees
+    -- employees.*  returns all the columns
+    -- full_name() concatanes title, firstname and lastname columns returning a new column
+
+-- Lecture 129: Functions that return a composite
+-- Used to return a single row of a table
+-- order of the fields must be the same as the table
+-- each type must match the corresponding composite column
+
+-- return the most recent hire
+create or replace function newest_hire() returns employees as $$
+    select * from employees
+    order by hiredate desc limit 1
+$$ Language SQL
+
+select (newest_hire()).lastname
+    -- note that newest_hire() returns a composite called employees
+    -- which is a row from employees table
+    -- Postgres automatically creates a composite with the
+    -- same name as a table. The composite corresponds to a row in that
+    -- table
+
+-- create a function called highest_inventory() that
+-- returns the product that has the most amount of money tied up
+-- in inventory (unitprice * unitsinstock)
+create or replace function highest_inventory() returns products as $$
+    with step_one as (
+        select productid, (unitprice*unitsinstock) as inventory_total
+        from products
+    ),
+    step_two as(
+        select productid, inventory_total
+        from step_one
+        order by inventory_total desc
+        limit 1
+    )
+    select * from products
+    where productid = (select productid from step_two)
+$$ Language SQL
+
+select highest_inventory()
+    -- Teachers solution (Better!)
+    CREATE OR REPLACE FUNCTION highest_inventory() RETURNS products AS $$
+	    SELECT * FROM products
+	    ORDER BY (unitprice*unitsinstock) DESC
+	    LIMIT 1;
+    $$ LANGUAGE SQL;
+
+SELECT (highest_inventory()).*;
+SELECT productname(highest_inventory());
+
+-- Lecture 130: Functions with Output Parameters
+-- Using IN, OUT, INOUT (both input and output)
+-- Syntax:
+create or replace function fn_name (in x int, in y int, out sum int, out product int) as $$
+    .. Select statement returning sum & product
+$$ Language SQL
+
+--- Task: Create a function to both add and multiply two integers
+create or replace function add_n_product (in x int, in y int, out sum int, out product int) as $$
+    select (x+y), (x*y)
+$$ Language SQL
+select add_n_product(5,20)--> returns a composite (25, 100)
+    -- other way of doing:
+    create type sum_n_product as (
+        sum int,
+        product int
+    )
+    create or replace function add_n_product(x int, y int) returns sum_n_product as $$
+        select x+y, x*y
+    $$ Language SQL
+select * from add_n_product(5,20)
+
+-- Task: Create a function that takes a single number and returns the
+-- square and the cumbe of that number using OUT parameters.
+-- Call it square_n_cube
+create or replace function square_n_cube(in x int, out square bigint, out cube bigint) as $$
+    select x*x, x*x*x
+$$ Language SQL
+select (square_n_cube(3)).*
+
+-- Lecture 131: Functions with default values
+-- Functions with arguments having default values
+-- Syntax:
+create or replace function function_name(a int, b int default 2, c int default 7)
+-- must have defaults after the first default
+
+-- redo new_price() function with a default of %5 price increase
+-- orig:
+create or replace function new_price(products, price_increase_percentage int)
+returns double precision as $$
+    select  $1.unitprice * price_increase_percentage / 100
+$$ Language SQL
+    -- solution:
+    create or replace function new_price(products, price_increase_percentage int default 105)
+    returns double precision as $$
+        select $1.unitprice * price_increase_percentage /100
+    $$ Language SQL
+    select productid, productname, unitprice, new_price(products.*) from products
+
+-- Redo square_n_cube using OUT parameters. Give the input a default value 10
+-- Run the function without any input
+-- orig:
+create or replace function square_n_cube(in x int, out square bigint, out cube bigint) as $$
+    select x*x, x*x*x
+$$ Language SQL
+select (square_n_cube(3)).*
+    -- solution:
+    create or replace function square_n_cube(in x int default 10, out square bigint, out cube bigint) as $$
+    select x*x, x*x*x
+    $$ Language SQL
+    select (square_n_cube()).*
+
+-- Lecture 132: Using Functions as table sources
+-- Given that the function returns a composite, you can use the return value of the function as table by using 'FROM function_name()' clause
+
+-- Select firstname, lastname and hiredate from newest_hire()
+select firstname, lastname, hiredate from newest_hire()
+
+-- Use highest_inventory() to pull back productname, supplier companyname
+select productname, companyname
+from highest_inventory() inner join suppliers using(supplierid)
+
+-- Lecture 133: Functions that return more than one row (i.e. a table)
+-- Syntax:
+create or replace function function_name() returns setof datatype as $$
+-- or or multiple parameters
+create or replace function function_name(x int, out sum in, out product int)
+returns setof datatype as $$
+    -- note that datatype can be primitive type (e.g. int or bigint)
+    -- or a composite
+
+-- Lets return all products that have total sales greater than some input value.
+-- Function name should be sold_more_than
+create or replace function sold_more_than(threshold real)
+returns setof products as $$
+    with step_one as (
+        select
+            productid, sum((od.unitprice*od.quantity)-od.discount) as total_sales
+        from products inner join order_details as od using(productid)
+        group by productid
+    ),
+    step_two as (
+        select productid from step_one
+        where total_sales > threshold
+    )
+    select * from products
+    where productid in (select productid from step_two)
+$$ Language SQL
+
+SELECT * FROM sold_more_than(25000);
+    -- Teachers solution:
+    CREATE OR REPLACE FUNCTION sold_more_than(threshold real)
+    RETURNS SETOF products AS $$
+        SELECT * FROM products
+        WHERE productid IN (
+            SELECT productid FROM (
+                SELECT  SUM(quantity*unitprice), productid
+                FROM order_details
+                GROUP BY productid
+                HAVING SUM(quantity*unitprice) > threshold
+            ) as qualified_products
+        )
+    $$ LANGUAGE SQL;
+
+    SELECT productname, productid, supplierid
+    FROM sold_more_than(25000);
+
+-- Task: Create a function called next_birthday()
+-- that return all employees next_birthday, firstname, lastname and hiredate
+-- Solution 1 ( a bit verbose towards the end)
+create type day_and_month as (
+    day_of_birth int,
+    month_of_birth int
+)
+
+create or replace function day_and_month_of_birth(birthdate date) returns day_and_month as $$
+        select extract(day from $1), extract(month from $1)
+$$ Language SQL
+
+select day_and_month_of_birth('27-04-1978'::date) --> returns (27, 4)
+
+create or replace function this_years_birthday(birthdate date) returns timestamp with time zone as $$
+    with step_one as (
+        select (day_and_month_of_birth(birthdate)).day_of_birth::varchar || '-' ||
+               (day_and_month_of_birth(birthdate)).month_of_birth::varchar || '-' ||
+                extract(year from now())::varchar || ' 23:59:59.999'
+    )
+    select (select * from step_one)::timestamp with time zone
+$$ Language SQL
+
+select this_years_birthday('27-04-1978')  --> 2020-04-27 00:00:00+03
+
+create or replace function next_years_birthday(birthdate date) returns timestamp with time zone as $$
+    with step_one as (
+        select (day_and_month_of_birth(birthdate)).day_of_birth::varchar || '-' ||
+               (day_and_month_of_birth(birthdate)).month_of_birth::varchar || '-' ||
+                (extract(year from now())+1)::varchar || ' 23:59:59.999'
+    )
+    select (select * from step_one)::timestamp with time zone
+$$ Language SQL
+
+select next_years_birthday('27-04-1978')  --> 2020-04-27 00:00:00+03
+
+create or replace function get_next_birthday(employees) returns setof datetime as $$
+    select
+        case when this_years_birthday($1.birthdate) >= now() then this_years_birthday($1.birthdate)
+             else next_years_birthday($1.birthdate)
+        end as next_birthday
+$$ Language SQL
+
+select get_next_birthday(employees.*) from employees
+
+create type employee as (
+    next_birthday date,
+    firstname varchar,
+    lastname varchar,
+    hiredate date
+)
+create or replace function next_birthday() returns setof employee as $$
+    select get_next_birthday(employees.*)::date, firstname, lastname, hiredate from employees
+$$ Language SQL
+
+select (next_birthday()).*  --> gives the desired result
+
+-- Solution 2: (more compact)
+create type day_and_month as (
+	birthday_day  int,
+	birthday_month int
+)
+
+create or replace function day_and_month_of_birth(birthdate date) returns day_and_month as $$
+	select extract(day from birthdate)::int, extract(month from birthdate)::int
+$$ Language SQL
+
+create or replace function this_years_birthday(birthdate date) returns timestamp with time zone as $$
+	select (((day_and_month_of_birth(birthdate)).birthday_day)::varchar || '-' ||
+		   ((day_and_month_of_birth(birthdate)).birthday_month)::varchar || '-' ||
+		    extract(year from now())::varchar || ' ' || '23:59:59.999')::timestamp with time zone
+$$ Language SQL
+
+create or replace function next_years_birthday(birthdate date) returns timestamp with time zone as $$
+	select (((day_and_month_of_birth(birthdate)).birthday_day)::varchar || '-' ||
+		   ((day_and_month_of_birth(birthdate)).birthday_month)::varchar || '-' ||
+		    ((extract(year from now()))::int+1)::varchar || ' ' || '23:59:59.999')::timestamp with time zone
+$$ Language SQL
+
+create or replace function next_birthday(birthdate date) returns date as $$
+	select
+		case when this_years_birthday(birthdate) > now() then this_years_birthday(birthdate)::date
+		else next_years_birthday(birthdate)::date
+		end as next_birthday
+$$ Language SQL
+
+select next_birthday(birthdate), birthdate, firstname, lastname, hiredate
+from employees
+        -- Teachers solution: (produces the same result)
+        -- Observation: next_birthday = birthdate + (current age + 1) * years
+        create or replace function next_birthday()
+        returns table (nextbirthdate date, birthdate date, firstname varchar(20), lastname varchar(20), hiredate date) as $$
+            select (birthdate + interval '1 YEAR' * (extract(year from age(birthdate))+1))::date,
+                   birthdate, firstname, lastname, hiredate
+            from employees
+        $$ Language SQL
+		select (next_birthday()).*
+
+-- Task: Create a function that returns all suppliers that have products
+-- that need to be ordered (units on hand plus units ordered is less than reorder level)
+-- Use setof syntax. Call function: suppliers_to_reorder_from()
+create or replace function suppliers_to_reorder_from() returns setof suppliers as $$
+    with step_one as (
+        select distinct(supplierid)
+        from products
+        where (unitsinstock + unitsonorder) < reorderlevel
+    )
+    select * from suppliers
+    where supplierid in (select supplierid from step_one)
+$$ Language SQL
+
+select * from suppliers_to_reorder_from()
+  -- Teachers solution:
+    CREATE OR REPLACE FUNCTION suppliers_to_reorder_from()
+            RETURNS SETOF suppliers AS $$
+            SELECT * FROM suppliers
+            WHERE supplierid IN (
+                SELECT supplierid FROM products
+            WHERE unitsinstock + unitsonorder < reorderlevel
+    )
+    $$ LANGUAGE SQL;
+
+    SELECT * FROM suppliers_to_reorder_from()
+
+-- Task: Crate a function that return the excess inventory, productid and productname
+-- from products based on an input parameter of inventory threshold percent.
+-- excess inventory is calculated as:
+ceil((unitsinstock + unitsonorder)-(reoderlevel * inventory_threshold_percent/100))
+-- Use returns table syntax
+create or replace function get_access_inventory(inventory_threshold_percent int)
+returns table (excess_inventory int, productid int, productname varchar(40)) as $$
+	with step_one as(
+		select
+			((unitsinstock + unitsonorder)-(reorderlevel * inventory_threshold_percent/100)) as excess_inventory,
+			productid, productname
+    	from products
+	)
+	select ceil(excess_inventory), productid, productname from step_one
+	where excess_inventory > 0
+$$ Language SQL
+
+select * from get_access_inventory(1000)
+
+
+-- Lecture 134: Procedures, Functions that returns void
+-- Syntax:
+create or replace procedure procedure_name(param1 int, param2 real, ...) as $$
+    .. Select statement
+$$ Language SQL
+call procedure_name(3, 5.0)
+-- is the same as:
+create or replace function(param1 int, param2 real, ...) returns void as $$
+  -- Select statement
+$$ Language SQL
+
+--Task: create a procedure that adds two numbers
+create or replace procedure add_two_numbers(x int, y int) as $$
+    select x + y
+$$ Language SQL
+call add_two_numbers(5, 10)
+
+
+-- Create a procedure change_supplier_prices that takes
+-- supplieid and amount and increases all the unit prices in products table for that supplier
+-- run the procedure with supplierid 20 and raise prices by 0.5$
+create or replace procedure change_supplier_prices(supplier_id int, increase_by real) as $$
+    update products
+    set unitprice = (unitprice + increase_by)
+    where supplierid = supplier_id
+$$ Language SQL
+call change_supplier_prices(20, 0.5)
+
