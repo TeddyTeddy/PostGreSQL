@@ -4083,6 +4083,7 @@ select most_ordered_product('ANATR')
     $$ LANGUAGE SQL;
 
 -- Lecture 128: Functions that have composite parameters
+-- Documentation: https://www.postgresql.org/docs/11/xfunc-sql.html#XFUNC-SQL-COMPOSITE-FUNCTIONS
 -- Note: a table is treated as a composite type in postgresql, so
 -- you can pass a table_name as a composite parameter
 -- to a function. The table_name is treaded as a composite type that
@@ -4114,6 +4115,7 @@ select employeeid, full_name(employees.*) from employees
     -- full_name() concatanes title, firstname and lastname columns returning a new column
 
 -- Lecture 129: Functions that return a composite
+-- Documentation: https://www.postgresql.org/docs/11/xfunc-sql.html#XFUNC-SQL-COMPOSITE-FUNCTIONS
 -- Used to return a single row of a table
 -- order of the fields must be the same as the table
 -- each type must match the corresponding composite column
@@ -4161,6 +4163,7 @@ SELECT (highest_inventory()).*;
 SELECT productname(highest_inventory());
 
 -- Lecture 130: Functions with Output Parameters
+-- Documentation: https://www.postgresql.org/docs/11/xfunc-sql.html#XFUNC-OUTPUT-PARAMETERS
 -- Using IN, OUT, INOUT (both input and output)
 -- Syntax:
 create or replace function fn_name (in x int, in y int, out sum int, out product int) as $$
@@ -4191,6 +4194,7 @@ $$ Language SQL
 select (square_n_cube(3)).*
 
 -- Lecture 131: Functions with default values
+-- Documentation: https://www.postgresql.org/docs/11/xfunc-sql.html#XFUNC-SQL-PARAMETER-DEFAULTS
 -- Functions with arguments having default values
 -- Syntax:
 create or replace function function_name(a int, b int default 2, c int default 7)
@@ -4223,7 +4227,9 @@ select (square_n_cube(3)).*
     select (square_n_cube()).*
 
 -- Lecture 132: Using Functions as table sources
--- Given that the function returns a composite, you can use the return value of the function as table by using 'FROM function_name()' clause
+-- Documentation: https://www.postgresql.org/docs/11/xfunc-sql.html#XFUNC-SQL-TABLE-FUNCTIONS
+-- Given that the function returns a composite, you can use the return value of the
+-- function as table by using 'FROM function_name()' clause
 
 -- Select firstname, lastname and hiredate from newest_hire()
 select firstname, lastname, hiredate from newest_hire()
@@ -4233,6 +4239,7 @@ select productname, companyname
 from highest_inventory() inner join suppliers using(supplierid)
 
 -- Lecture 133: Functions that return more than one row (i.e. a table)
+-- Documentation: https://www.postgresql.org/docs/11/xfunc-sql.html#XFUNC-SQL-FUNCTIONS-RETURNING-SET
 -- Syntax:
 create or replace function function_name() returns setof datatype as $$
 -- or or multiple parameters
@@ -4404,7 +4411,7 @@ select * from suppliers_to_reorder_from()
 -- Task: Crate a function that return the excess inventory, productid and productname
 -- from products based on an input parameter of inventory threshold percent.
 -- excess inventory is calculated as:
-ceil((unitsinstock + unitsonorder)-(reoderlevel * inventory_threshold_percent/100))
+-- ceil((unitsinstock + unitsonorder)-(reoderlevel * inventory_threshold_percent/100))
 -- Use returns table syntax
 create or replace function get_access_inventory(inventory_threshold_percent int)
 returns table (excess_inventory int, productid int, productname varchar(40)) as $$
@@ -4421,7 +4428,9 @@ $$ Language SQL
 select * from get_access_inventory(1000)
 
 
--- Lecture 134: Procedures, Functions that returns void
+-- Lecture 134: Procedures; Functions that return void
+-- Documentation: https://www.postgresql.org/docs/current/sql-createprocedure.html
+-- Documentation: https://www.postgresql.org/docs/11/xproc.html
 -- Syntax:
 create or replace procedure procedure_name(param1 int, param2 real, ...) as $$
     .. Select statement
@@ -4449,3 +4458,404 @@ create or replace procedure change_supplier_prices(supplier_id int, increase_by 
 $$ Language SQL
 call change_supplier_prices(20, 0.5)
 
+-- SECTION 25: Transactions & Concurrency Control
+-- Lecture 135: ACID Transactions
+-- Documentation: https://www.geeksforgeeks.org/acid-properties-in-dbms/
+-- Consider a bank moving money from one account to another
+-- This involves two queries; it substracts an amount from sources's debit sum and it adds the amount into the target's
+-- debit sum. The set of these two queries is called a transaction.
+-- Transaction is a set of queries that are performed together
+-- In order a transaction to be successful all the statements in that transaction should be successfully executed.
+-- There are 4 types of properties called ACID, each transaction should adhere to:
+    -- Atomicity: All the operations in a transaction work or none of them work. Every transaction is a single unit.
+    -- Consistency: All the Transactions change the database state properly
+        -- e.g. All constraints must be satisfied
+    -- Isolation: Transactions wont interfere with each other
+        -- If you are reading a table, an update wont happen in the middle of reading
+        -- changing the results. The read will occur either before the update or after the update
+        -- but not during the update
+    -- Durability: The changes or results wont be lost if there is a system failure
+        -- e.g. If database crashes after commit, the effects will still be there
+-- IMPORTANT!!!
+    -- Every single statement has a transaction around it
+    -- Like in the bank example, if you want to bundle more than
+    -- one statement, you need to use transaction control statements
+    -- which will be covered next
+
+
+-- Lecture 136 : Simple Transaction Control
+-- Documentation: https://www.postgresql.org/docs/11/tutorial-transactions.html
+-- Documentation: https://www.postgresql.org/docs/current/sql-begin.html
+-- Documentation: https://www.postgresql.org/docs/current/sql-start-transaction.html
+-- Documentation: https://www.postgresql.org/docs/current/sql-commit.html
+-- Documentation: https://www.postgresql.org/docs/current/sql-end.html
+-- Use Northwind database
+-- SQL Syntax:
+start transaction;
+    statement_1;
+    statement_2;
+    statement_3;
+    ...
+commit;
+
+-- Postgres Syntax:
+begin transaction
+    statement_1;
+    statement_2;
+    statement_3;
+    ...
+end transaction;
+
+-- Task: Make a transaction: In products table, Let's update the reorder level by subtracting 5 and
+-- find the count of items that need reordering in one transaction
+start transaction;
+    update products
+    set reorderlevel=reorderlevel-5;
+
+    select count(*)
+    from products
+    where unitsinstock + unitsonorder < reorderlevel;
+commit;
+
+-- Task: Create a single transaction to increase the requireddate in orders by
+-- one day for december 2017 and decrease it by one day for november 2017
+start transaction;
+    update orders
+    set requireddate = requireddate + interval '1 day'
+    where extract(month from requireddate) = 12 and extract(year from requireddate) = 2017;
+
+    update orders
+    set requireddate = requireddate - interval '1 day'
+    where extract(month from requireddate) = 11 and extract(year from requireddate) = 2017;
+commit;
+    -- Teachers solution:
+    BEGIN TRANSACTION;
+            UPDATE orders
+            SET requireddate = requireddate + INTERVAL '1 DAY'
+            WHERE orderdate BETWEEN '1997-12-01' AND '1997-12-31';
+
+            UPDATE orders
+            SET requireddate = requireddate - INTERVAL '1 DAY'
+            WHERE orderdate BETWEEN '1997-11-01' AND '1997-11-30';
+    END TRANSACTION;
+
+-- Lecture 137: Rollbacks and Savepoints
+-- Rollback Documentation: https://www.postgresql.org/docs/current/sql-rollback.html
+-- ROLLBACK rolls back the current transaction and causes all the updates made by the transaction to be discarded.
+-- Issuing ROLLBACK outside of a transaction block emits a warning and otherwise has no effect.
+START TRANSACTION;
+    UPDATE orders
+    SET orderdate = orderdate + INTERVAL '1 YEAR';
+ROLLBACK;
+
+-- Savepoint documentation: https://www.postgresql.org/docs/current/sql-savepoint.html
+-- SAVEPOINT establishes a new savepoint within the current transaction
+-- A savepoint is a special mark inside a transaction that allows all commands that are executed
+-- after it was established to be rolled back, restoring the transaction state to
+-- what it was at the time of the savepoint.
+
+-- Task: Start a transaction, insert a new employee, create a savepoint,
+-- update hireddate and rollback to savepoint
+START TRANSACTION;
+    INSERT INTO employees (employeeid,lastname,firstname,title,birthdate,hiredate)
+    VALUES (501,'Sue','Jones','Operations Assistant','1999-05-23','2017-06-13');
+
+    SAVEPOINT inserted_employee;
+
+    UPDATE employees
+    SET birthdate='2025-07-11';
+
+    ROLLBACK TO inserted_employee;
+
+    UPDATE employees
+    SET birthdate='1998-05-23'
+    WHERE employeeid=501;
+COMMIT;
+
+
+SELECT * FROM employees WHERE employeeid=501;
+
+-- Lecture 138: SQL Transaction Isolation
+-- If you have run some statements in a transaction, can others see the partial results
+-- before the transaction finished? (My answer is NO)
+-- Isolation is a property that defines how & when the changes made by one statement
+-- becomes visible to others
+-- Documentation: https://en.wikipedia.org/wiki/Isolation_(database_systems)
+-- Tutorial: https://www.youtube.com/watch?v=4EajrPgJAk0  << This one first @17:45
+-- Tutorial: https://www.youtube.com/watch?v=pomxJOFVcQs
+-- Documentation: https://www.postgresql.org/docs/current/transaction-iso.html
+-- Use practice_db
+show transaction isolation level;  --> by default it returns read committed
+
+set transaction isolation level read uncommitted;
+
+create table accounts (
+    id serial,
+    owner varchar(100) not null,
+    balance decimal(65, 2) not null default 0.0,
+    currency varchar(10),
+    created_at timestamp default now()
+);
+
+insert into accounts (owner, balance, currency)
+values ('one', 100.0, 'USD'),
+       ('two', 100.0, 'USD'),
+       ('three', 100.0, 'USD');
+
+-- Section 26: Array Data Type
+-- Lecture 140: Declaring Arrays
+-- Documentation: https://www.postgresql.org/docs/11/arrays.html#ARRAYS-DECLARATION
+-- SQL Standard Syntax:
+array_name  contained_data_type  array  --> size of the array is not defined, variable size
+array_name  contained_data_type  array[4]  --> Postgres ignores the array size
+-- Postgres Syntax For Arrays:
+array_name  contained_data_type[]
+pay_by_quarted int[]
+schedule timestamp[]
+
+-- Use practice_db for this lecture
+-- Task: Re-create friends table and add children array
+drop table if exists friends;
+create table friends (
+    fullname full_name,
+    address address,
+    specialdates dates_to_remember,
+    children varchar(50) array
+)
+
+-- Task: Create a table called salary_employees with 3 fields;
+-- name a varchar of size 100
+-- pay_by_quarter which is an integer with one dimension and 4 values
+-- schedule which should be text field with 2 dimensions of no particular size
+create table salary_employees (
+    name varchar(100),
+    pay_by_quarter int array[4],
+    schedule text[][]
+)
+
+-- Lecture 141: Inputting Array Values
+-- Documentation: https://www.postgresql.org/docs/11/arrays.html#ARRAYS-INPUT
+-- Syntax:
+'{ value1, value2, ... }'
+    -- if you have text:
+    '{ "value1", "value2", ... }'
+-- Another Easier Syntax:
+array[value1, value2,...]
+    -- with text:
+    array['value1', 'value2', ...]
+
+-- Task:
+-- Lets insert some values into friends
+insert into friends(fullname, address, specialdates, children)
+VALUES (ROW('Boyd','M','Gregory'),
+		ROW('7777','','Boise','Idaho','USA','99999'),
+		ROW('1969-02-01',49,'2001-07-15'),
+	   '{"Austin","Ana Grace"}');
+INSERT INTO friends (fullname, address, specialdates, children)
+VALUES (ROW('Scott','X','Levy'),
+ 		ROW('357 Page Road','','Austin','TX','USA','88888'),
+ 		ROW('1972-03-01',46,'2002-01-30'),
+ 		ARRAY['Ben','Jill']);
+
+-- Task:
+-- Add a row into salary_employees; Bill who made 20000 each quarter
+-- and had 2 different schedule records of "meeting", "training", and
+-- "lunch", "sales call"
+    INSERT INTO salary_employees (name,pay_by_quarter,schedule)
+    VALUES ('Bill',
+                    '{20000, 20000, 20000, 20000}',
+                    '{{"meeting", "training"},{"lunch", "sales call"}}')
+    -- or (better):
+    INSERT INTO salary_employees (name,pay_by_quarter,schedule)
+    VALUES ('Bill',
+            ARRAY[20000, 20000, 20000, 20000],
+            ARRAY[['meeting', 'training'],['lunch', 'sales call']])
+
+-- Lecture 142: Accesing Arrays
+-- Documentation: https://www.postgresql.org/docs/11/arrays.html#ARRAYS-ACCESSING
+-- Use [] for each dimensions; multi dimentions need more than one (e.g. schedule[2][1])
+-- indexing starts from 1, not from 0
+-- Syntax for range of elements
+-- To get more than one element in an array, use slice notation [lower-bound:upper-bound]
+-- Ex: schedule[1:2][1:1]
+    -- can leave of one of the bounds to start from beginning or go to end
+    -- ex: schedule[:3][2:]
+
+-- Task: Grab 2nd child of all the friends
+create table friends (
+    fullname full_name,
+    address address,
+    specialdates dates_to_remember,
+    children varchar(50) array
+)
+select children[2] from friends
+
+-- Task: grab the 2nd and 3rd elements of pay_by_quarter using range from
+-- salary_employees
+create table salary_employees (
+    name varchar(100),
+    pay_by_quarter int array[4],
+    schedule text[][]
+)
+select pay_by_quarter[2:3] from salary_employees
+
+-- How to find dimensions of an array?
+array_dims()
+-- How to find lenght of a dimension of an array?
+array_lenght(field, dimension_index) --> dimension_index starts from 1
+    -- get the length of dimension_index.th dimension
+    -- get the length of 2.nd dimension
+
+-- Find the dimension & length of schedule in salary_employees
+select array_dims(schedule) from salary_employees
+select array_lenght(schedule, 1), array_lenght(schedule, 2) from salary_employees
+
+-- Lecture 143: Modifying arrays
+-- Documentation: https://www.postgresql.org/docs/11/arrays.html#ARRAYS-MODIFYING
+-- Replace the children of Boyd in friends table
+    create table friends (
+        fullname full_name,
+        address address,
+        specialdates dates_to_remember,
+        children varchar(50) array
+    )
+    insert into friends(fullname, address, specialdates, children)
+    VALUES (ROW('Boyd','M','Gregory'),
+            ROW('7777','','Boise','Idaho','USA','99999'),
+            ROW('1969-02-01',49,'2001-07-15'),
+        '{"Austin","Ana Grace"}');
+update friends
+set children = ARRAY['Jule','Verne','Tommy']
+where  (fullname).first_name = 'Boyd' and
+       (fullname).middle_name = 'M' and
+       (fullname).last_name = 'Gregory'
+
+-- Task: Replace Boyd's 2nd child
+update friends
+set children[2] = 'John'
+where  (fullname).first_name = 'Boyd' and
+       (fullname).middle_name = 'M' and
+       (fullname).last_name = 'Gregory';
+
+-- Task: Replace Boyd's 2nd and 3rd child
+update friends
+set children[2:3] = ARRAY['Silly','Willy']
+where  (fullname).first_name = 'Boyd' and
+       (fullname).middle_name = 'M' and
+       (fullname).last_name = 'Gregory';
+
+-- Task: Replace Bill's pay_by_quarter with values 22000, 25000, 27000 and 22000
+    -- salary_employees table:
+    create table salary_employees (
+        name varchar(100),
+        pay_by_quarter int array[4],
+        schedule text[][]
+    )
+    INSERT INTO salary_employees (name,pay_by_quarter,schedule)
+    VALUES ('Bill',
+            ARRAY[20000, 20000, 20000, 20000],
+            ARRAY[['meeting', 'training'],['lunch', 'sales call']])
+update salary_employees
+set pay_by_quarter = array[22000, 25000, 27000, 22000]
+where name='Bill';
+
+-- Task: Update Bill's 4th pay_by_quarter to 26000
+update salary_employees
+set pay_by_quarter[4]=26000
+where name='Bill';
+
+-- Task: Update Bill's 2nd and 3rd quarter to 24000 and 25000
+update salary_employees
+set pay_by_quarter[2:3] = array[24000, 25000]
+where name='Bill';
+
+-- Lecture 144: Searching through arrays
+-- Documentation: https://www.postgresql.org/docs/current/arrays.html#ARRAYS-SEARCHING
+-- The tedious way: You have to look at each value in the array
+    -- e.g. does any of my friends have a child named Willy
+select * from friends
+where children[1] ='Willy' OR children[2] = 'Willy' OR children[3] = 'Willy'
+-- Shorter way:
+value = ANY(array_name)
+select * from friends
+where 'Willy' = any(children);
+
+-- Task: search salary_employees for anyone with 'sales call'
+-- in the schedule
+    -- salary_employees table:
+    create table salary_employees (
+        name varchar(100),
+        pay_by_quarter int array[4],
+        schedule text[][]
+    )
+    INSERT INTO salary_employees (name,pay_by_quarter,schedule)
+    VALUES ('Bill',
+            ARRAY[20000, 20000, 20000, 20000],
+            ARRAY[['meeting', 'training'],['lunch', 'sales call']])
+
+select * from salary_employees
+where 'sales call'= any(schedule[1][:]) or 'sales call'= any(schedule[2][:]);
+    -- or
+    select * from salary_employees
+    where 'sales call'= any(schedule);
+
+-- Lecture 145: Array operators & containment & overlaps
+-- Documentation: https://www.postgresql.org/docs/current/functions-array.html
+-- =, <>, <, >, <=, >=
+-- They go one element at a time an check
+-- Lets go through examples one at a time
+
+-- first, lets create an array
+select array[1, 2, 3, 4] = array[1, 2, 3, 4]  --> returns true
+select array[1, 2, 4, 3] = array[1, 2, 3, 4]  --> returns false
+
+select array[1, 2, 3, 4] > array[1, 2, 3, 4]   --> false
+select array[1, 2, 4, 3] > array[1, 2, 3, 4]   --> true
+select array[1, 2, 3, 4] > array[1, 2, 4, 2]   --> false
+
+@> contains
+<@ is contained by
+select array[1, 2, 3, 5] @> array[3, 5]  -- true
+select array[1, 2, 3, 5] @> array[3, 5, 7] -- false
+select array[1, 2, 3, 5] <@ array[2, 5, 7, 1] -- false
+select array[1, 2, 3, 5] <@ array[2, 5, 7, 1, 3] -- true
+
+&& return true if arrays containing elements in common, false otherwise
+select array[1, 2, 13, 17] && array[2,5,7,1]  -- true
+select array[13,17] && array[3, 5, 10] -- false
+
+-- Task: find anyone with a child named Willy, use overlaps && operator
+    create table friends (
+        fullname full_name,
+        address address,
+        specialdates dates_to_remember,
+        children varchar(50) array
+    )
+    insert into friends(fullname, address, specialdates, children)
+    VALUES (ROW('Boyd','M','Gregory'),
+            ROW('7777','','Boise','Idaho','USA','99999'),
+            ROW('1969-02-01',49,'2001-07-15'),
+        '{"Austin","Ana Grace"}');
+
+select * from friends
+where children && array['Willy'::varchar];
+
+-- Task: Use overlap operator && to find anyone with 'sales call' in schedule
+-- in salary_employees
+    create table salary_employees (
+        name varchar(100),
+        pay_by_quarter int array[4],
+        schedule text[][]
+    )
+    INSERT INTO salary_employees (name,pay_by_quarter,schedule)
+    VALUES ('Bill',
+            ARRAY[20000, 20000, 20000, 20000],
+            ARRAY[['meeting', 'training'],['lunch', 'sales call']])
+
+select * from salary_employees
+where schedule && array['sales call'];
+
+-- Section 27: PL/pgSQL - SQL procedural language
+-- Lecture 146: Build your first PL/pgSQL Function
+-- Documentation: https://www.postgresql.org/docs/11/plpgsql-structure.html
+-- Documentation: https://www.postgresql.org/docs/11/plpgsql-control-structures.html#PLPGSQL-STATEMENTS-RETURNING
