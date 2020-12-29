@@ -2507,15 +2507,16 @@ insert into pets(petname) values('Dobby') returning petid;
 with cte_name as (
     select statement
 )
-select statement that includes cte_name from with part
+select statement that includes cte_name
 -- CTE creates temporary table that is used just for the current query
 
--- We want to find out the number of units ordered and amount of sales
+-- Task: We want to find out the number of units ordered and amount of sales
 -- for all the products from the top three categories by total_sales
 -- grouped by categoryname & productname
 -- ordered by categoryname & productname
 -- The desired end result:
 -- categoryname, productname, units_ordered, total_sales
+-- Solution 1:
 with top_three_categories_by_total_sales as (
 	select
 		categories.categoryid,
@@ -2539,6 +2540,26 @@ order by categoryname, productname
    -- you can refer to the CTE (e.g. top_three_categories_by_total_sales )
    -- filter out the rows you need:
         where categoryname in (select categoryname from top_three_categories_by_total_sales)
+-- Solution 2:
+with top_three_categories_by_total_sales as (
+	select categoryid
+	from products inner join order_details as od using(productid)
+	group by categoryid
+	order by sum((od.unitprice*od.quantity)-od.discount) desc
+	limit 3
+),
+products_in_top_three_categories as (
+	select productid, categoryid,
+		   sum(od.quantity) as units_ordered,
+		   sum((od.unitprice*od.quantity)-od.discount) as sales_amount
+	from products inner join order_details as od using(productid)
+	where categoryid in (select * from top_three_categories_by_total_sales)
+	group by productid, categoryid
+)
+select categoryname, productname, units_ordered, sales_amount  
+from categories inner join products_in_top_three_categories using (categoryid)
+				inner join products using(productid)
+order by categoryname, productname
 
 -- we want a list of customers, who ordered the 2 least ordered products
 -- (we want to see if we will loose any important customer if we quit
@@ -2667,10 +2688,12 @@ with recursive recursion_name(field1, field2, ...) as (
     -- Termination check: the recursion stops when no rows are returned
     -- from the previous iteration
 -- PostgreSQL executes a recursive CTE in the following sequence:
-    -- Execute the non-recursive term to create the base result set (R0).
-    -- Execute recursive term with Ri as an input to return the result set Ri+1 as the output.
-    -- Repeat step 2 until an empty set is returned. (termination check)
-   --  Return the final result set that is a UNION or UNION ALL of the result set R0, R1, … Rn
+    -- Execute the non-recursive term to create the base result set (R1 for iteration 1)
+    -- For i = 2 to n:
+        -- Execute the recursive term with Ri-1 as an input to recursion_name:
+            -- Make termination check, if it passes union all the result set Ri+1
+            -- if termination check fails at step n, stop.
+    --  Return the final result set that is a UNION or UNION ALL of the result set R1, R2, … Rn-1
 
 -- Create a set of 1 to 50 using recursion
 with recursive my_set(t) as (
@@ -2685,29 +2708,28 @@ select * from my_set
 with recursive my_set(t) as (
     select 500
     union all
-    select t-2 from my_set where t > 2
+    select t-2 from my_set where t >= 4
 )
 select * from my_set
 
+-- Task: Find everyone that the CEO is responsible for (employeeid = 200)
 -- Find everyone that the CEO is responsible for (employeeid = 200)
 with recursive bosses as (
-    select employeeid, firstname, lastname from employees
-    where employeeid = 200
-    union all
-    select e.employeeid, e.firstname, e.lastname
-    from employees as e inner join bosses as b on e.reportsto = b.employeeid
+	select employeeid, firstname, lastname from employees where reportsto = 200
+	union all
+	select e.employeeid, e.firstname, e.lastname from bosses as b inner join employees as e on e.reportsto = b.employeeid
 )
-select * from bosses
+select * from bosses;
 
 -- Find the chain of command from Dudlye Kiona (employeeid = 218) up to the CEO (employeeid = 200)
-with recursive reports_to as (
-    select employeeid, reportsto, firstname, lastname
-    from employees where employeeid = 218
-    union all
-    select boss.employeeid, boss.reportsto, boss.firstname, boss.lastname
-    from employees as boss inner join reports_to on reports_to.reportsto = boss.employeeid
+with recursive subordinate as (
+	select employeeid, firstname, lastname, reportsto from employees
+	where employeeid = 218
+	union all
+	select e.employeeid, e.firstname, e.lastname, e.reportsto
+	from employees as e inner join subordinate as s on e.employeeid = s.reportsto
 )
-select * from reports_to;
+select * from subordinate
 
 -- Section 19: Views
 -- Lecture 106: What is a view? How to create one?
@@ -4669,12 +4691,12 @@ VALUES (ROW('Scott','X','Levy'),
     INSERT INTO salary_employees (name,pay_by_quarter,schedule)
     VALUES ('Bill',
             ARRAY[20000, 20000, 20000, 20000],
-            ARRAY[['meeting', 'training'],['lunch', 'sales call']])
+            ARRAY[['meeting', 'training'],['lunch', 'sales call']])  --> How to enter a two dimensional array values?
 
 -- Lecture 142: Accesing Arrays
 -- Documentation: https://www.postgresql.org/docs/11/arrays.html#ARRAYS-ACCESSING
 -- Use [] for each dimensions; multi dimentions need more than one (e.g. schedule[2][1])
--- indexing starts from 1, not from 0
+-- INDEXING IN ARRAYS: indexing starts from 1, not from 0
 -- Syntax for range of elements
 -- To get more than one element in an array, use slice notation [lower-bound:upper-bound]
 -- Ex: schedule[1:2][1:1]
@@ -4690,7 +4712,7 @@ create table friends (
 )
 select children[2] from friends
 
--- Task: grab the 2nd and 3rd elements of pay_by_quarter using range from
+-- Task: grab the 2nd and 3rd elements of pay_by_quarter using range syntax from
 -- salary_employees
 create table salary_employees (
     name varchar(100),
@@ -4854,8 +4876,553 @@ where children && array['Willy'::varchar];
 
 select * from salary_employees
 where schedule && array['sales call'];
+    -- or
+    select * from salary_employees
+    where 'sales call'=any(schedule);
 
 -- Section 27: PL/pgSQL - SQL procedural language
 -- Lecture 146: Build your first PL/pgSQL Function
 -- Documentation: https://www.postgresql.org/docs/11/plpgsql-structure.html
 -- Documentation: https://www.postgresql.org/docs/11/plpgsql-control-structures.html#PLPGSQL-STATEMENTS-RETURNING
+create function function_name (param1 int, param2 real, ...) returns var type as $$
+BEGIN
+    ... PL/PGSQL statements (not SQL statements)
+END;
+$$ LANGUAGE plpgsql;
+
+-- Use return to send value
+-- Do:
+-- return x+y
+-- instead of
+-- select x+y
+    -- Observation: PLPGSQL is a language like Python designed for Postgres server
+
+-- Use Northwind database unless otherwise stated
+-- Task: Let's redo max_price as PL/PGSQL function
+    -- SQL function implementation:
+    create or replace function max_price_of_any_product() returns real as $$
+        select max(unitprice) from products
+    $$ Language SQL
+    select max_price_of_any_product()
+-- PLPGSQL implementation
+create or replace function max_price_of_any_product() returns real as $$
+begin
+    return max(unitprice) from products;
+end;
+$$ language plpgsql;
+
+-- Task: Drop biggest_order() and redo as a PLPGSQL function.
+-- It returns the largest_order_amount
+create or replace function biggest_order() returns int as $$
+begin
+    return orderid from order_details
+    group by orderid
+    order by sum((unitprice*quantity)-discount) desc limit 1;
+end;
+$$ language plpgsql;
+select biggest_order();
+
+-- Lecture 147: Handling PLPGSQL Functions With Output Variables
+-- Documentation: https://www.postgresql.org/docs/11/plpgsql-statements.html#PLPGSQL-STATEMENTS-ASSIGNMENT
+-- Imagine a SQL function:
+create or replace function add_n_product (in x int, in y int, out sum int, out product int) as $$
+    select (x+y), (x*y)
+$$ Language SQL
+-- The PLPGSQL equivalent of this function is:
+drop function if exists add_n_product;
+create or replace function add_n_product(in x int, in y int, out sum int, out product int) as $$
+begin
+    sum := (x+y);
+    product := (x*y);
+    return;
+end;
+$$ language plpgsql;
+    -- So, in plpgsql equivalent the syntax is:
+    output_variable1 := value1;
+    output_variable  := expression1; --> (x*y)
+    return;  --> must exist in the end of the function
+select (add_n_product(5,20)).*;
+
+-- Use Northwind database
+-- Task: replace square_n_cube with PLPGSQL function.
+drop function if exists square_n_cube;
+create or replace function square_n_cube(in x int, out square bigint, out cube bigint) as $$
+begin
+    square := (x*x);
+    cube := (x*x*x);
+    return;
+end;
+$$ language plpgsql;
+select (square_n_cube(3)).*;
+
+-- Lecture 148: Returning More than one row (i.e. a table ) in PLPGSQL functions
+-- Documentation: https://www.postgresql.org/docs/11/plpgsql-control-structures.html#PLPGSQL-STATEMENTS-RETURNING
+-- Syntax:
+create or replace function function_name(param1 int, param2 real, ...) returns setof table_name as $$
+begin
+    return query select ...
+end;
+$$ language plpgsql;
+
+-- Task: Redo sold_more_than to plpgsql. Returns all products that
+-- sold more than an input amount
+    -- in plain SQL function:
+    drop function if exists sold_more_than;
+    create or replace function sold_more_than(total_sales real) returns setof products as $$
+        with step_one as(
+            select productid
+            from order_details
+            group by productid
+            having sum((unitprice*quantity)-discount) > total_sales
+        )
+        select * from products where productid in (select productid from step_one);
+    $$ language SQL;
+    select (sold_more_than(1000.0)).*;
+-- in plpgsql language:
+drop function if exists sold_more_than;
+create or replace function sold_more_than(total_sold real) returns setof products as $$
+begin
+	return query select * from products where productid in (
+		select productid from order_details
+		group by productid
+		having sum((unitprice*quantity)-discount) > total_sold
+	);
+end;
+$$ language plpgsql;
+
+select (sold_more_than(25000.0)).*;
+    -- Observation: if you try to implement this using WITH clauses, it wont work
+    -- Observation: CTE/With Clauses wont work with PLPGSQL functions
+
+
+-- Task: Redo suppliers_to_reorder_from(). It returns suppliers that have
+-- unitsinstock + unitsinorder that are less than reorderlevel
+-- due to transaction in line 4511, we corrupted the products table
+-- Lets drop Northwind database here and re-create it before we implement our solution
+drop function if exists suppliers_to_reorder_from;
+create or replace function suppliers_to_reorder_from() returns setof suppliers as $$
+begin
+    return query select * from suppliers
+    where supplierid in (
+        select distinct supplierid
+        from products
+        where (unitsinstock + unitsonorder) < reorderlevel
+    );
+end;
+$$ language plpgsql;
+select (suppliers_to_reorder_from()).*;
+
+-- Lecture 149: Declaring variables in PLPGSQL functions
+-- Documentation: https://www.postgresql.org/docs/11/plpgsql-declarations.html
+-- If you need variables inside a PLPGSQL function, syntax:
+declare
+    name varchar(50);  --> uninitialized
+    startdate timestamp := now();
+begin
+...
+end;
+
+-- Use Northwind database
+-- Task: Find products between 75% and 125% of the average priced item
+create or replace function products_in_price_range() returns setof products as $$
+declare
+    avg_unit_price real := (select avg(unitprice) from products);
+    min_unit_price real := avg_unit_price * 0.75;
+    max_unit_price real := avg_unit_price * 1.25;
+begin
+    return query select * from products
+    where unitprice between min_unit_price and max_unit_price;
+end;
+$$ language plpgsql;
+
+select (products_in_price_range()).*;
+    -- Teachers solution:
+    CREATE OR REPLACE FUNCTION middle_priced()
+    RETURNS SETOF products AS $$
+
+        DECLARE
+            average_price real;
+            bottom_price real;
+            top_price real;
+        BEGIN
+            SELECT AVG(unitprice) INTO average_price
+            FROM products;
+
+            bottom_price := average_price * .75;
+            top_price := average_price * 1.25;
+
+            RETURN QUERY SELECT * FROM products
+            WHERE unitprice between bottom_price AND top_price;
+        END;
+    $$ LANGUAGE plpgsql;
+
+-- Task: Build a function that determines the average order size and returns all orders
+-- that are between %75 and %130 of that order
+create or replace function orders_in_range() returns setof orders as $$
+declare
+    average_order_amount real := (select avg(order_amount) from (
+        select orderid, sum((unitprice*quantity)-discount) as order_amount
+        from order_details
+        group by orderid) as subquery
+    );
+    min_order_amount real := average_order_amount * 0.75;
+    max_order_amount real := average_order_amount * 1.3;
+begin
+    return query select * from orders
+    where orderid in (
+        select orderid from order_details
+        group by orderid
+        having sum((unitprice*quantity)-discount) between min_order_amount and max_order_amount
+    );
+end;
+$$ language plpgsql;
+
+select * from orders_in_range();
+    -- Teachers Solution (modified):
+    create or replace function orders_in_range() returns setof orders as $$
+    declare
+        avg_order_amount real;
+        min_order_amount real;
+        max_order_amount real;
+    begin
+        select avg(order_amount) into avg_order_amount from (
+            select orderid, sum((unitprice*quantity)-discount) as order_amount from order_details
+            group by orderid
+        ) as orders_with_order_amount;
+        min_order_amount := avg_order_amount * 0.75;
+        max_order_amount := avg_order_amount * 1.3;
+        return query select * from orders where orderid in (
+            select orderid from order_details
+            group by orderid
+            having sum((unitprice*quantity)-discount) between min_order_amount and max_order_amount
+        );
+    end;
+    $$ language plpgsql;
+    select * from orders_in_range();
+
+-- Lecture 150: Looping through results in PLPGSQL functions
+-- Documentation: https://www.postgresql.org/docs/current/plpgsql-control-structures.html#PLPGSQL-RECORDS-ITERATING
+-- Syntax:
+for variable_name in select_statement loop
+    ... PLPGSQL statements ...
+end loop;
+
+-- Use Northwind database
+-- Task: Starting from an employee, build an array of reportsto from employees table using recursive query
+-- Note that CEO has reportsto as null
+-- Hint: create a function called get_report_chain that returns the reportsto chain as a query set,
+-- then use get_report_chain in another function called get_report_chain_array utilizing FOR loop
+-- to form the array of reportsto values
+create or replace function get_report_chain(in eid int) returns setof int as $$
+    with recursive boss as (
+		select reportsto from employees where employeeid = eid
+		union all
+		select e.reportsto
+		from boss as b inner join employees as e on e.employeeid = b.reportsto
+    )
+    select * from boss where reportsto is not null;
+$$ language sql;
+    -- Important: b.reportsto is the employeeid of previous boss which is fetched from employees table e
+select * from get_report_chain(218);
+
+create or replace function get_report_chain_array(in eid int) returns int[] as $$
+declare
+    r record;
+    report_chain_array int[];
+begin
+    for r in select get_report_chain from get_report_chain(eid) loop
+        report_chain_array := array_append(report_chain_array, r."get_report_chain");
+    end loop;
+    return report_chain_array;
+end;
+$$ language plpgsql;
+
+select get_report_chain_array(218);
+
+-- Task: Build a function that returns the average of the square of products' unitprices
+-- Use FOR loop
+create or replace function average_of_square_of_unitprices() returns real as $$
+declare
+    square_total real := 0;
+    total_count int := 0;
+    product record;
+begin
+    for product in select * from products loop
+        square_total := square_total + (product.unitprice) * (product.unitprice);
+        total_count := total_count + 1;
+    end loop;
+    return square_total / total_count;
+end;
+$$ language plpgsql;
+
+select average_of_square_of_unitprices();
+
+-- Lecture 151 : Using If-Then satements
+-- Use Northwind database
+-- Syntax for If:
+if boolean_expression then
+    ... Statements...
+end if;
+-- Syntax for if then else:
+if boolean_expression then
+    ... Statements...
+else
+    ... Statements...
+end if;
+-- Syntax for if then elsif else:
+if boolean_expression then
+    ... Statements...
+elsif boolean_expression then
+    ... Statements...
+else
+    ... Statements...
+end if;
+
+-- Task: Let's categorize our products by price range into bargain, middleclass and luxury
+-- Detailed description: Given a product's unitprice, write a function
+-- product_price_category that returns a text
+-- (i.e. either bargain, middleclass > 25.0 or luxury > 50.0)
+create or replace function product_price_category(in unitprice real) returns text as $$
+begin
+    if unitprice > 50.0 then
+        return 'luxury';
+    elsif unitprice > 25.0 then
+        return 'middleclass';
+    else
+        return 'bargain';
+    end if;
+end;
+$$ language plpgsql;
+
+select product_price_category(unitprice), * from products;
+
+-- Task: Build a function called time_of_year to return
+-- Spring for dates between March and May
+-- Summer for June to August
+-- Fall for Septemper to November
+-- Winter for December through February
+-- Use a single parameter date
+-- Use time_of_year against orderdate in orders table
+create or replace function time_of_year(in d date) returns text as $$
+declare
+    m int := extract(month from d);
+begin
+    if m in (3, 4, 5) then
+        return 'Spring';
+    elsif m in (6, 7, 8) then
+        return 'Summer';
+    elsif m in (9, 10, 11) then
+        return 'Fall';
+    else
+        return 'Winter';
+	end if;
+end;
+$$ language plpgsql;
+
+select time_of_year(orderdate), * from orders;
+
+-- Lecture 152: Returning query results continued
+-- Documentation: https://www.postgresql.org/docs/current/plpgsql-control-structures.html#PLPGSQL-STATEMENTS-RETURNING
+-- Recap: Lecture 148 : Returning Query Results:
+-- Syntax:
+create or replace function function_name(param1 int, param2 real, ...) returns setof table_name as $$
+begin
+    return query select ...
+end;
+$$ language plpgsql;
+
+-- In this lecture, we focus on functions that returns set of some_type/composite
+-- In this case we do not use RETURN scalar_type (e.g. return 'Winter';) which would return from the function immediately.
+-- We have 2 commands for this case:
+    RETURN NEXT expression;  -- (e.g. return next row_of_table;)
+    RETURN QUERY query;      -- (e.g. return query select flightid from flights where flightdate >= $1 and flightdate < ($1 + 1);)
+-- RETURN NEXT and RETURN QUERY do not actually return from the function —
+-- they simply append zero or more rows to the function's result set.
+-- Execution then continues with the next statement in the PL/pgSQL function.
+-- As successive RETURN NEXT or RETURN QUERY commands are executed, the result set is built up.
+-- A final RETURN, which should have no argument, causes postgres to exit the function (or execution reaches the end of the function)
+    -- Observation: For functions that return a setof some_type, postgres lets you build the result set
+    -- part by part by calling RETURN NEXT and RETURN QUERY, which wont exit the function
+
+-- Task: Lets raise an error in sold_more_than as "no products were found that had total sales more than X"
+    -- How to figure out if there are no products found?
+        -- Builtin variable FOUND: it has a value true, if the current result set has any rows in it
+    -- How to raise an error?
+        raise exception 'string to format %', variable_to_substitute
+-- original sold_more_than():
+create or replace function sold_more_than(total_sold real) returns setof products as $$
+begin
+	return query select * from products where productid in (
+		select productid from order_details
+		group by productid
+		having sum((unitprice*quantity)-discount) > total_sold
+	);
+end;
+$$ language plpgsql;
+-- solution:
+create or replace function sold_more_than(total_sales real) returns setof products as $$
+begin
+    return query select * from products where productid in (
+        select productid from order_details
+        group by productid
+        having sum((unitprice*quantity)-discount) > total_sales
+    );
+    if not found then
+        raise exception 'no products were found that had total sales more than %', total_sales;
+    end if;
+end;
+$$ language plpgsql;
+select * from sold_more_than(15000.0);  --> returns some products
+select * from sold_more_than(500000.0); --> returns an error/exception
+
+-- Task: lets create a variable pricing for after_christmas_sale()
+CREATE OR REPLACE FUNCTION after_christmas_sale() RETURNS SETOF products AS $$
+DECLARE
+	product record;
+BEGIN
+	FOR product IN
+		SELECT * FROM products
+	LOOP
+		IF product.categoryid IN (1,4,8) THEN
+			product.unitprice = product.unitprice * .80;
+		ELSIF product.categoryid IN (2,3,7) THEN
+			product.unitprice = product.unitprice * .75;
+		ELSE
+			product.unitprice = product.unitprice * 1.10;
+		END IF;
+		RETURN NEXT product;
+	END LOOP;
+
+	RETURN;
+
+END;
+$$ LANGUAGE plpgsql;
+
+SELECT * FROM after_christmas_sale();
+
+-- Lecture 153: Loop and While Loops
+-- Documentation: https://www.postgresql.org/docs/current/plpgsql-control-structures.html#PLPGSQL-CONTROL-STRUCTURES-LOOPS
+-- Syntax:
+LOOP
+    IF condition_one then
+        exit
+    elsif condition_two then
+        continue;
+    end if;
+    ... more statements ...
+END LOOP;
+
+-- Syntax:
+LOOP
+    exit when condition_one;
+    continue when condition_two;
+    ... more statements ...
+END LOOP;
+
+-- While loop Syntax:
+while condition loop
+    ... statements ...
+end loop
+
+-- Task: Using a while loop, write a function to calculate the factorial of a given number
+-- Example: 5! = 5 * 4 * 3 * 2 * 1
+create or replace function factorial(in n int) returns bigint as $$
+declare
+    i int := n;
+    f bigint := 1;
+begin
+    while i >= 1 loop
+        f := f * i;
+        i := i - 1;
+    end loop;
+	return f;
+end;
+$$ language plpgsql;
+
+select factorial(5);
+
+
+-- Lecture 154 : Looping over array elements
+-- Documentation: https://www.postgresql.org/docs/current/plpgsql-control-structures.html#PLPGSQL-FOREACH-ARRAY
+-- Syntax:
+foreach variable in array expression loop
+    ... statements ...
+end loop;
+
+-- Task: User has two columns:
+-- path which has a url
+-- and additional which is an array field with values like sm:/url2, md: /url3 etc
+-- Write a function called select_url to return url from additional
+-- if the specific url is available otherwise return the default path
+-- Here are a couple of calls to select_url and return values
+SELECT select_url('sm', ARRAY['sm: /url2', 'md: url3'], '/url1'); --> /url2
+SELECT select_url('md', ARRAY['sm: /url2', 'md: url3'], '/url1'); --> url3
+SELECT select_url('md', ARRAY['sm: /url2'], '/url1');             --> url1
+
+create or replace function select_url(url_to_search text, urls text[], default_url text) returns text as $$
+declare
+    u text;
+    found text := default_url;
+    p int;
+begin
+    foreach u in array urls loop
+        p := position (url_to_search in u);
+        if p != 0 then
+            found := substring(u, p+1)
+            exit;
+        end if;
+    end loop;
+    return found;
+end;
+$$ language plpgsql;
+
+SELECT select_url('sm', ARRAY['sm: /url2', 'md: url3'], '/url1'); --> /url2
+SELECT select_url('md', ARRAY['sm: /url2', 'md: url3'], '/url1'); --> url3
+SELECT select_url('md', ARRAY['sm: /url2'], '/url1');             --> url1
+
+-- Task: Build a function named first_multiple that takes an array of numbers
+-- and a single number as the divisor.
+-- Return the first number that divides evenly in the list.
+-- My addition: if no number in the array evenly divides with the divisor, then function throws an exception
+-- Hint: modulo operator %, returns the remainder of division.
+-- You are looking for a modulo with a zero result.
+create or replace function first_multiple(numbers integer[], divisor integer) returns int as $$
+declare
+	n integer;
+    is_found boolean := false;
+    result integer;
+begin
+    foreach n in array numbers loop
+        if n%divisor = 0 then
+            is_found := true;
+            result := n;
+            exit;
+        end if;
+    end loop;
+    if is_found then
+        return result;
+    else
+        raise exception '% does not divide any of % evenly', divisor, numbers;
+    end if;
+end;
+$$ language plpgsql;
+
+select first_multiple(ARRAY[13, 12, 64, 10], 32);
+select first_multiple(ARRAY[13, 12, 64, 10], 11);
+    -- Teacher's solution:
+    -- Teachers addition: if no number in the array evenly divides with the divisior, then return null
+    CREATE OR REPLACE FUNCTION first_multiple(x int[], y int) RETURNS int AS $$
+    DECLARE
+        test_number int;
+    BEGIN
+        FOREACH test_number IN ARRAY x LOOP
+            IF test_number % y = 0 THEN
+                RETURN test_number;
+            END IF;
+        END LOOP;
+        RETURN NULL;
+    END;
+    $$ LANGUAGE plpgsql;
+
+-- Section 28: Building Triggers
+-- Documentation: https://www.postgresql.org/docs/11/plpgsql-trigger.html
