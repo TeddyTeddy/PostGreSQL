@@ -2732,6 +2732,7 @@ with recursive subordinate as (
 select * from subordinate
 
 -- Section 19: Views
+-- Documentation: https://www.postgresqltutorial.com/postgresql-views/
 -- Lecture 106: What is a view? How to create one?
 -- What is a view?
 -- It acts like a stored query that you give a name
@@ -2744,6 +2745,20 @@ select * from subordinate
 -- Syntax:
 create view view_name as
 select statement
+
+-- My additional task: create a view called list_report_chain returning
+-- employeeid, firstname, lastname, reportsto of all employees starting from employeeid up to the CEO
+create view list_report_chain as (
+	with recursive subordinate as (
+		select employeeid, firstname, lastname, reportsto from employees
+		where employeeid = 218
+		union all
+		select e.employeeid, e.firstname, e.lastname, e.reportsto
+		from employees as e inner join subordinate as s on e.employeeid = s.reportsto
+	)
+	select * from subordinate
+)
+select * from list_report_chain
 
 -- create a view called customer_order_details that links customers, orders and order_details
 CREATE VIEW customer_order_details AS
@@ -2758,9 +2773,9 @@ JOIN order_details on order_details.orderid=orders.orderid;
     FROM customer_order_details
     WHERE customerid='TOMSP';
 
--- create a view called suppler_order_details that shows all orders and order_details
+-- create a view called supplier_order_details that shows all orders and order_details
 -- Then select all the order_details for supplierid = 5
-create view suppler_order_details as
+create view supplier_order_details as
 select s.supplierid, s.companyname, s.contactname, s.contacttitle, s.address, s.city, s.region, s.postalcode, s.country, s.phone, s.fax, s.homepage,
        p.productid, p.productname, p.categoryid, p.quantityperunit, p.unitprice as product_unitprice, p.unitsinstock, p.unitsonorder, p.reorderlevel, p.discontinued,
        od.unitprice as order_unitprice, od.quantity, od.discount,
@@ -2770,7 +2785,7 @@ from suppliers as s inner join products as p using(supplierid)
                inner join order_details as od using(productid)
                inner join orders as o using(orderid);
     -- Then select all the order_details for supplierid = 5
-    select * from suppler_order_details where supplierid = 5;
+    select * from supplier_order_details where supplierid = 5;
 
 -- Lecture 107: Modify a View
 -- Syntax:
@@ -2792,6 +2807,7 @@ select modified_query
 -- example to an updatable view
 -- create a view of customers called north_america_customers for all customers from USA, Canada and Mexico
     -- note that this view satisfies the constrains (1)-(3)
+-- Use Norttwind database
 CREATE VIEW north_america_customers AS
 SELECT *
 FROM customers
@@ -2808,6 +2824,7 @@ UPDATE north_america_customers SET fax='555-333-4141' WHERE customerid='CFDCM';
 -- !!! observation: data can be deleted via the updatable view
 DELETE FROM north_america_customers WHERE customerid='CFDCM';
 
+-- Use northwind database
 -- create an updateable view of all the products that are in dairy products
 -- meat/poultry, and seafood categories (categoryid of 4,6 and 8)
 -- call this view as protein_products
@@ -2829,25 +2846,26 @@ values ('new cool product', 1, 6, 1, 1, 1, 1, 0, 1);     -- (1)
     -- grab the newly created product
     select * from protein_products where productid = 78
     -- update the newly created product; note that row with productid=78 has a categoryid of 6; included in the view;
-    -- can do the update, otherwise not
+    -- can do the update, otherwise not (with check option)
     update protein_products set productname='Fake Nose' where productid=78;
     -- delete the newly created product; note that row with productid=78 has a categoryid of 6; included in the view;
-    -- can do the deletion, otherwise not
+    -- can do the deletion, otherwise not (with check option)
     delete from protein_products where productid=78
     -- check that the newly created product is deleted
     select * from protein_products where productid = 78
 -- Observations:
--- create view has a where clause, lets call it where_clause_1
-    -- via the view, ANY row not belonging to where clause_1 can be inserted
-        -- e.g. a product with categoryid is 1 can be inserted along with categoryid being 6
--- update view has a where clause, lets call it where_clause_2
--- delete view has a where clause, lets call it where_clause 3
-    -- when updating a row(s) from the view, if where_clause_2 & where_clause_1 yields a row(s), then updating takes place. Otherwise, no updating takes place
+-- create view has a where clause, lets call it where_clause_view
+-- Note that the view does NOT have WITH CHECK OPTION
+    -- via the view, ANY row not belonging to where_clause_view can be inserted
+        -- e.g. a product with categoryid is 1 can be inserted along with categoryid 6
+-- update view has a where clause, lets call it where_clause_update
+-- delete view has a where clause, lets call it where_clause_delete
+    -- when updating a row(s) from the view, if where_clause_update & where_clause_view yields a row(s), then updating takes place. Otherwise, no updating takes place
         -- in other words, the to be updated rows must be part of the view in order the update to happen; the view acts as a filter
-    -- when deleting a row(s) from the view, if where_clause_3 & where_clause_1 yields a row(s), then deletion takes place. Otherwise, no deletion takes place
+    -- when deleting a row(s) from the view, if where_clause_delete & where_clause_view yields a row(s), then deletion takes place. Otherwise, no deletion takes place
         -- i.e. if the inserted product in (1) had a categoryid 1 (i.e. bad data), the product would not be part of the view (view expects categoryid to be 4,6,8)
         -- any update & delete operation via the view would do nothing for the product
-            -- Observation: bad data can be inserted via the view, unless CHECK OPTION is added to the view. We will address the CHECK OPTION next
+            -- Observation: bad data can be inserted via the view, unless WITH CHECK OPTION is added to the view. We will address WITH CHECK OPTION next
 
 -- Lecture 109: VIEWs WITH CHECK OPTION
 -- Note: Northwind database is still used
@@ -2860,10 +2878,10 @@ VALUES ('CFDCM','Catfish Dot Com','Will Bunker','President','Old Country Road','
 SELECT FROM north_america_customers
 WHERE customerid=’CFDCM’;   -- returns nothing
     -- returns the bad customer
-    SELECT FROM customers
+    SELECT * FROM customers
     WHERE customerid=’CFDCM’;
 
--- How to prevent inserting data that does not belong to an updateable view via the view?
+-- How to prevent inserting data via a view that does not belong to an the view?
 -- Answer: By using WITH CHECK OPTION
 -- Syntax:
     with local check option    --> if the updatable view is not cascaded to another updatable view(s)
@@ -4993,6 +5011,7 @@ $$ language plpgsql;
 select (sold_more_than(25000.0)).*;
     -- Observation: if you try to implement this using WITH clauses, it wont work
     -- Observation: CTE/With Clauses wont work with PLPGSQL functions
+    -- instead of CTE/With clauses use subqueries in PLPGSQL functions
 
 
 -- Task: Redo suppliers_to_reorder_from(). It returns suppliers that have
@@ -5035,7 +5054,7 @@ begin
 end;
 $$ language plpgsql;
 
-select (products_in_price_range()).*;
+select (products_in_price_range()).*;  --> select * from products_in_price_range();
     -- Teachers solution:
     CREATE OR REPLACE FUNCTION middle_priced()
     RETURNS SETOF products AS $$
@@ -5056,7 +5075,7 @@ select (products_in_price_range()).*;
         END;
     $$ LANGUAGE plpgsql;
 
--- Task: Build a function that determines the average order size and returns all orders
+-- Task: Build a function that determines the average order size (in $) and returns all orders
 -- that are between %75 and %130 of that order
 create or replace function orders_in_range() returns setof orders as $$
 declare
@@ -5154,7 +5173,7 @@ begin
     return square_total / total_count;
 end;
 $$ language plpgsql;
-
+    -- Observation: var_name for for loop (i.e. product) is of type record always. It needs to be declared so (i.e. product record;)
 select average_of_square_of_unitprices();
 
 -- Lecture 151 : Using If-Then satements
@@ -5199,22 +5218,22 @@ select product_price_category(unitprice), * from products;
 -- Task: Build a function called time_of_year to return
 -- Spring for dates between March and May
 -- Summer for June to August
--- Fall for Septemper to November
+-- Fall for September to November
 -- Winter for December through February
 -- Use a single parameter date
 -- Use time_of_year against orderdate in orders table
-create or replace function time_of_year(in d date) returns text as $$
+create or replace function time_of_year(in t date) returns text as $$
 declare
-    m int := extract(month from d);
+	m integer := extract(month from t);
 begin
-    if m in (3, 4, 5) then
-        return 'Spring';
-    elsif m in (6, 7, 8) then
-        return 'Summer';
-    elsif m in (9, 10, 11) then
-        return 'Fall';
-    else
-        return 'Winter';
+	if m in (3, 4, 5) then
+		return 'Spring';
+	elsif m in (6, 7, 8) then
+		return 'Summer';
+	elsif m in (9, 10, 11) then
+		return 'Fall';
+	else
+		return 'Winter';
 	end if;
 end;
 $$ language plpgsql;
@@ -5298,7 +5317,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT * FROM after_christmas_sale();
+select * from products;    --> orig product table with untouched unitprices
+SELECT * FROM after_christmas_sale();  --> a new result set, a set of products with modified unitprices
+select * from products;    --> orig product table with untouched unitprices
+    -- Observation: If a function returns a setof table_name, it means it returns a COPY of some processed rows from table_name, not the original table_name.
 
 -- Lecture 153: Loop and While Loops
 -- Documentation: https://www.postgresql.org/docs/current/plpgsql-control-structures.html#PLPGSQL-CONTROL-STRUCTURES-LOOPS
@@ -5322,7 +5344,7 @@ END LOOP;
 -- While loop Syntax:
 while condition loop
     ... statements ...
-end loop
+end loop;
 
 -- Task: Using a while loop, write a function to calculate the factorial of a given number
 -- Example: 5! = 5 * 4 * 3 * 2 * 1
@@ -5342,10 +5364,10 @@ $$ language plpgsql;
 select factorial(5);
 
 
--- Lecture 154 : Looping over array elements
+-- Lecture 154 : Looping over array elements in PLPGSQL functions
 -- Documentation: https://www.postgresql.org/docs/current/plpgsql-control-structures.html#PLPGSQL-FOREACH-ARRAY
 -- Syntax:
-foreach variable in array expression loop
+foreach variable in array array_name loop
     ... statements ...
 end loop;
 
@@ -5355,30 +5377,28 @@ end loop;
 -- Write a function called select_url to return url from additional
 -- if the specific url is available otherwise return the default path
 -- Here are a couple of calls to select_url and return values
-SELECT select_url('sm', ARRAY['sm: /url2', 'md: url3'], '/url1'); --> /url2
-SELECT select_url('md', ARRAY['sm: /url2', 'md: url3'], '/url1'); --> url3
-SELECT select_url('md', ARRAY['sm: /url2'], '/url1');             --> url1
+select select_url('sm', ARRAY['sm: /url2', 'md: url3'], '/url1'); --> /url2
+select select_url('md', ARRAY['sm: /url2', 'md: url3'], '/url1'); --> url3
+select select_url('md', ARRAY['sm: /url2'], '/url1');             --> /url1
 
 create or replace function select_url(url_to_search text, urls text[], default_url text) returns text as $$
 declare
-    u text;
-    found text := default_url;
-    p int;
+	u text;
+	p integer;
 begin
-    foreach u in array urls loop
-        p := position (url_to_search in u);
-        if p != 0 then
-            found := substring(u, p+1)
-            exit;
-        end if;
-    end loop;
-    return found;
+	foreach u in array urls loop
+		p := position(url_to_search in u);
+		if p != 0 then
+			return substring(u, p+length(url_to_search)+2);
+		end if;
+	end loop;
+	return default_url;
 end;
 $$ language plpgsql;
 
-SELECT select_url('sm', ARRAY['sm: /url2', 'md: url3'], '/url1'); --> /url2
-SELECT select_url('md', ARRAY['sm: /url2', 'md: url3'], '/url1'); --> url3
-SELECT select_url('md', ARRAY['sm: /url2'], '/url1');             --> url1
+select select_url('sm', ARRAY['sm: /url2', 'md: url3'], '/url1'); --> /url2
+select select_url('md', ARRAY['sm: /url2', 'md: url3'], '/url1'); --> url3
+select select_url('md', ARRAY['sm: /url2'], '/url1');             --> /url1
 
 -- Task: Build a function named first_multiple that takes an array of numbers
 -- and a single number as the divisor.
@@ -5386,24 +5406,16 @@ SELECT select_url('md', ARRAY['sm: /url2'], '/url1');             --> url1
 -- My addition: if no number in the array evenly divides with the divisor, then function throws an exception
 -- Hint: modulo operator %, returns the remainder of division.
 -- You are looking for a modulo with a zero result.
-create or replace function first_multiple(numbers integer[], divisor integer) returns int as $$
+create or replace function first_multiple(numbers integer[], divisor integer) returns integer as $$
 declare
 	n integer;
-    is_found boolean := false;
-    result integer;
 begin
-    foreach n in array numbers loop
-        if n%divisor = 0 then
-            is_found := true;
-            result := n;
-            exit;
-        end if;
-    end loop;
-    if is_found then
-        return result;
-    else
-        raise exception '% does not divide any of % evenly', divisor, numbers;
-    end if;
+	foreach n in array numbers loop
+		if n%divisor = 0 then
+			return n;
+		end if;
+	end loop;
+	raise exception '% does not divide any of % evenly', divisor, numbers;
 end;
 $$ language plpgsql;
 
@@ -5425,4 +5437,346 @@ select first_multiple(ARRAY[13, 12, 64, 10], 11);
     $$ LANGUAGE plpgsql;
 
 -- Section 28: Building Triggers
--- Documentation: https://www.postgresql.org/docs/11/plpgsql-trigger.html
+-- Documentation 1: https://www.postgresqltutorial.com/postgresql-triggers/    <-- Read this first
+-- Documentation 2: https://www.postgresql.org/docs/11/plpgsql-trigger.html    <-- Read this second
+-- Documentation 2: Use practice_db
+        CREATE TABLE emp (
+            empname text,
+            salary integer,
+            last_date timestamp,
+            last_user text
+        );
+
+        CREATE FUNCTION emp_stamp() RETURNS trigger AS $emp_stamp$	
+            BEGIN
+                -- Check that empname and salary are given
+                IF NEW.empname IS NULL THEN
+                    RAISE EXCEPTION 'empname cannot be null';
+                END IF;
+                IF NEW.salary IS NULL THEN
+                    RAISE EXCEPTION '% cannot have null salary', NEW.empname;
+                END IF;
+
+                -- Who works for us when they must pay for it?
+                IF NEW.salary < 0 THEN
+                    RAISE EXCEPTION '% cannot have a negative salary', NEW.empname;
+                END IF;
+
+                -- Remember who changed the payroll when
+                NEW.last_date := current_timestamp;
+                NEW.last_user := current_user;
+                RETURN NEW;
+            END;
+        $emp_stamp$ LANGUAGE plpgsql;
+
+        CREATE TRIGGER emp_stamp BEFORE INSERT OR UPDATE ON emp
+        FOR EACH ROW EXECUTE FUNCTION emp_stamp();
+
+        insert into emp(empname, salary)
+        values ('Hakan', 3500);
+
+        select * from emp;
+
+        DROP TABLE emp_audit;
+        CREATE TABLE emp_audit(
+            operation         char(1)   NOT NULL,
+            stamp             timestamp NOT NULL,
+            userid            text      NOT NULL,
+            empname           text      NOT NULL,
+            salary integer
+        );
+
+        CREATE VIEW emp_view AS
+            SELECT e.empname,
+                e.salary,
+                max(ea.stamp) AS last_updated
+            FROM emp e
+            LEFT JOIN emp_audit ea ON ea.empname = e.empname
+            GROUP BY e.empname, e.salary;
+
+        CREATE OR REPLACE FUNCTION update_emp_view() RETURNS TRIGGER AS $$
+            BEGIN
+                --
+                -- Perform the required operation on emp, and create a row in emp_audit
+                -- to reflect the change made to emp.
+                --
+                IF (TG_OP = 'DELETE') THEN
+                    DELETE FROM emp WHERE empname = OLD.empname;
+                    IF NOT FOUND THEN RETURN NULL; END IF;
+
+                    OLD.last_date = now();
+                    INSERT INTO emp_audit(operation, stamp, userid, empname, salary) VALUES('D', now(), user, OLD.empname, OLD.salary);
+                    RETURN OLD;
+                ELSIF (TG_OP = 'UPDATE') THEN
+                    UPDATE emp SET salary = NEW.salary WHERE empname = OLD.empname;
+                    IF NOT FOUND THEN RETURN NULL; END IF;
+
+                    NEW.last_updated = now();
+                    INSERT INTO emp_audit(operation, stamp, userid, empname, salary) VALUES('U', now(), user, NEW.empname, NEW.salary);
+                    RETURN NEW;
+                ELSIF (TG_OP = 'INSERT') THEN
+                    INSERT INTO emp VALUES(NEW.empname, NEW.salary);
+
+                    NEW.last_updated = now();
+                    INSERT INTO emp_audit(operation, stamp, userid, empname, salary) VALUES('I', now(), user, NEW.empname, NEW.salary);
+                    RETURN NEW;
+                END IF;
+            END;
+        $$ LANGUAGE plpgsql;
+
+        CREATE TRIGGER emp_audit
+        INSTEAD OF INSERT OR UPDATE OR DELETE ON emp_view
+            FOR EACH ROW EXECUTE FUNCTION update_emp_view();
+
+        UPDATE emp_view SET salary = 10000 WHERE empname = 'David';  --> Observation updating a view updates its table!
+        select * from emp;
+        select * from emp_view;
+
+        CREATE OR REPLACE FUNCTION process_emp_audit() RETURNS TRIGGER AS $emp_audit$
+            BEGIN
+                --
+                -- Create a row in emp_audit to reflect the operation performed on emp,
+                -- making use of the special variable TG_OP to work out the operation.
+                --
+                IF (TG_OP = 'DELETE') THEN
+                    INSERT INTO emp_audit SELECT 'D', now(), user, OLD.empname, OLD.salary;
+                ELSIF (TG_OP = 'UPDATE') THEN
+                    INSERT INTO emp_audit SELECT 'U', now(), user, NEW.empname, NEW.salary;
+                ELSIF (TG_OP = 'INSERT') THEN
+                    INSERT INTO emp_audit SELECT 'I', now(), user, NEW.empname, NEW.salary;
+                END IF;
+                RETURN NULL; -- result is ignored since this is an AFTER trigger
+            END;
+        $emp_audit$ LANGUAGE plpgsql;
+
+        CREATE TRIGGER emp_audit
+        AFTER INSERT OR UPDATE OR DELETE ON emp
+        FOR EACH ROW EXECUTE FUNCTION process_emp_audit();
+
+        insert into emp(empname, salary)
+        values ('David', 2000);
+
+        update emp set salary = 3000 where empname = 'David';
+
+        delete from emp where empname = 'David';
+
+        select * from emp;
+        select * from emp_audit;
+
+-- What is a trigger?
+-- A PostgreSQL trigger is a function invoked automatically whenever an event
+-- such as insert, update, or delete occurs
+
+-- Task: One simple task that triggers are used for is to update timestamps
+-- every time a record gets changed. Lets build one for employees table
+alter table employees
+add column last_updated timestamp;
+
+-- Step 1: Build a PLPGSQL function that returns trigger
+create or replace function employees_timestamp() returns trigger as $$
+begin
+	new.last_updated := now();
+	return new;   --> (???) why do we return new here as trigger
+end;
+$$ language plpgsql;
+
+drop trigger if exists employee_timestamp on employees;
+
+-- Step 2: create trigger mapping using the table (i.e. employees)
+-- calling the function employees_timestamp
+create trigger employees_timestamp before insert or update on employees
+for each row execute function employees_timestamp();
+
+select last_updated, * from employees where employeeid = 1;  --> null/old timestamp for last_updated
+
+update employees
+set address = '33 West Spring Road'
+where employeeid = 1;
+
+select last_updated, * from employees where employeeid = 1;  --> new timestamp for last_updated
+
+-- Task: Add a last_updated & updating_user to products table and create a trigger function
+-- and a trigger that updates the fields every time there is a change
+alter table products
+add column last_updated timestamp;
+
+alter table products
+add column updating_user text;
+
+create or replace function products_timestamp() returns trigger as $$
+begin
+    new.last_updated := now();
+    new.updating_user := current_user;
+    return new;
+end;
+$$ language plpgsql;
+
+create trigger products_timestamp before insert or update on products
+for each row execute function products_timestamp();
+
+-- test that an insert indeed updates last_updated & updating_user fields
+select max(productid) from products;  --> 77
+
+insert into products(productid, productname, supplierid, categoryid, quantityperunit, unitprice,
+unitsinstock, unitsonorder, reorderlevel, discontinued)
+values (78, 'new cool product', 1, 6, 1, 1, 1, 1, 0, 1);     -- (1)
+
+select * from products where productid = 78;
+
+update products set productname='puppy toy' where productid = 78;
+select * from products where productid = 78;
+delete from products where productid = 78;
+
+-- Lecture 156: Statement Triggers
+-- Syntax:
+create trigger trigger_name before insert on table_name
+referencing new table as new_table
+for each statement execute function trigger_function_name();
+
+create trigger trigger_name before update on table_name
+referencing old table as old_table
+referencing new table as new_table
+for each statement execute function trigger_function_name();
+
+create trigger trigger_name before delete on table_name
+referencing old table as old_table
+for each statement execute function trigger_function_name();
+    -- OLD & NEW wont work at the statement level
+    -- the trigger function must refer to the new & old tables
+    -- using new_table & old_table
+    -- In trigger function, use TG_OP variable to check
+    -- which operation (i.e. insert, update or delete) was called
+
+-- Task: Lets create an audit table called order_details_audit for order_details
+-- and insert the changed information to it when insert, delete and update happens
+create table order_details_audit (
+    operation varchar(1),
+    username text,
+    stamp timestamp,
+    orderid smallint NOT NULL,
+    productid smallint NOT NULL,
+    unitprice real NOT NULL,
+    quantity smallint NOT NULL,
+    discount real NOT NULL
+);
+
+create or replace function audit_order_details() returns trigger as $$
+begin
+    if (tg_op = 'DELETE') then
+        insert into order_details_audit
+        select 'D', user, now(), * from old_table;
+    elsif (tg_op = 'UPDATE') then
+        insert into order_details_audit
+        select 'U', user, now(), * from new_table;
+    elsif (tg_op = 'INSERT') then
+        insert into order_details_audit
+        select 'I', user, now(), * from new_table;
+    end if;
+    return null;
+end;
+$$ language plpgsql;
+    -- refer to insert into select lecture 61
+
+create trigger delete_order_details after delete on order_details
+referencing old table as old_table
+for each statement execute function audit_order_details();
+
+create trigger update_order_details after update on order_details
+referencing old table as old_table new table as new_table
+for each statement execute function audit_order_details();
+
+create trigger insert_order_details after insert on order_details
+referencing new table as new_table
+for each statement execute function audit_order_details();
+
+select orderid from orders; --> pick order id: 10250
+select productid from products; --> pick product id: 1
+insert into order_details
+values (10250, 1, 10.0, 3, 0);
+select * from order_details_audit;
+
+select * from order_details_audit;
+
+update order_details
+set discount = 0.05
+where orderid = 10250 and productid = 1;
+
+select * from order_details_audit;
+
+delete from order_details
+where orderid = 10250 and productid = 1;
+
+select * from order_details_audit;
+select * from order_details
+where orderid = 10250 and productid = 1;
+
+-- Task create an audit trail for orders using the same three steps
+-- of creating table, trigger function and the triggers
+create table orders_audit (
+    operation varchar(1),
+    username text,
+    stamp timestamp,
+    orderid smallint NOT NULL,
+    customerid bpchar,
+    employeeid smallint,
+    orderdate date,
+    requireddate date,
+    shippeddate date,
+    shipvia smallint,
+    freight real,
+    shipname character varying(40),
+    shipaddress character varying(60),
+    shipcity character varying(15),
+    shipregion character varying(15),
+    shippostalcode character varying(10),
+    shipcountry character varying(15)
+);
+
+create or replace function audit_orders() returns trigger as $$
+begin
+    if (tg_op = 'DELETE') then
+        insert into orders_audit
+        select 'D', user, now(), * from old_table;
+    elsif (tg_op = 'UPDATE') then
+        insert into orders_audit
+        select 'U', user, now(), * from new_table;
+    elsif(tg_op = 'INSERT') then
+        insert into orders_audit
+        select 'I', user, now(), * from new_table;
+    end if;
+    return null;
+end;
+$$ language plpgsql;
+    -- refer to insert into select lecture 61
+
+create trigger delete_orders after delete on orders
+referencing old table as old_table
+for each statement execute function audit_orders();
+
+create trigger update_orders after update on orders
+referencing new table as new_table old table as old_table
+for each statement execute function audit_orders();
+
+create trigger insert_orders after insert on orders
+referencing new table as new_table
+for each statement execute function audit_orders();
+
+select max(orderid)+1 from orders; --> next orderid: 11078
+select customerid from customers; --> pick customerid: 'ANTON'
+select employeeid from employees; --> pick employeeid: 3
+select shipperid from shippers;   --> pick shippperid : 6
+insert into orders
+values(11078, 'ANTON', 3, now()::date,
+       now()::date + interval '7 days',
+       now()::date + interval '2 days' , 
+       6, 10.0, 'David Brown', '333 Road CA', 'Los Angeles','California', '00180', 'USA');
+select * from orders_audit;
+
+update orders
+set shippostalcode = '12345'
+where orderid = 11078;
+
+delete from orders
+where orderid = 11078;
+
+select * from orders_audit;
