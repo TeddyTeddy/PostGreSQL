@@ -5768,7 +5768,7 @@ select shipperid from shippers;   --> pick shippperid : 6
 insert into orders
 values(11078, 'ANTON', 3, now()::date,
        now()::date + interval '7 days',
-       now()::date + interval '2 days' , 
+       now()::date + interval '2 days' ,
        6, 10.0, 'David Brown', '333 Road CA', 'Los Angeles','California', '00180', 'USA');
 select * from orders_audit;
 
@@ -5780,3 +5780,1078 @@ delete from orders
 where orderid = 11078;
 
 select * from orders_audit;
+
+-- Section 29 : Importing CSV
+-- Lecture 157: Importing CSV
+-- Syntax:
+copy table_name(field1, field2, ...)
+from 'path\to\file' delimiter ',' csv header;
+    -- delimter can be any string, but in our case, the file contains comma as delimiters
+    -- if csv header is present in the file, then include it in the statement
+    -- fields must be in the same order as in the file
+
+-- Task: create airports table & import data to it using airports.csv from https://ourairports.com/data/
+-- Use https://ourairports.com/data/
+    -- airports.csv (8,938,583 bytes, last modified Jan 5, 2021)
+        -- Large file, containing information on all airports on this site.
+    -- airport-frequencies.csv (1,218,201 bytes, last modified Jan 5, 2021)
+        -- Large file, listing communication frequencies for the airports in airports.csv.
+    -- runways.csv (3,051,462 bytes, last modified Jan 5, 2021)
+        -- Large file, listing runways for the airports in airports.csv.
+    -- navaids.csv (1,526,491 bytes, last modified Jan 5, 2021)
+        -- Large file, listing worldwide radio navigation aids.
+    -- countries.csv (20,663 bytes, last modified Jan 5, 2021)
+        -- A list of the world's countries. You need this spreadsheet to interpret the country codes in the airports and navaids files.
+    -- regions.csv (369,879 bytes, last modified Jan 5, 2021)
+        -- A list of all countries' regions (provinces, states, etc.). You need this spreadsheet to interpret the region codes in the airport file.
+
+create database airports_db;
+
+CREATE TABLE airports (
+	id int NOT NULL,
+	ident varchar(255),
+	type text,
+	name text,
+	latitude_deg float,
+	longitude_deg float,
+	elevation_ft int,
+	continent text,
+	iso_country varchar(10),
+	iso_region varchar(10),
+	municipality text,
+	scheduled_service text,
+	gps_code varchar(10),
+	iata_code varchar(20),
+	local_code varchar(20),
+	home_link text,
+	wikipedia_link text,
+	keywords text
+);
+
+-- open psql in command prompt:
+psql --port=5433 --host=localhost --dbname=airports_db --username=postgres
+
+-- in psql command prompt:
+\copy airports (id,ident,type,name,latitude_deg,longitude_deg,elevation_ft,continent,iso_country,iso_region,municipality,scheduled_service,gps_code,iata_code,local_code,home_link,wikipedia_link,keywords) FROM '/home/hakan/PostGreSQL/Lecture_157/airports.csv' DELIMITER ',' CSV HEADER;
+
+
+-- Task: create airport-frequencies table & import data to it using airport-frequencies.csv from https://ourairports.com/data/
+CREATE TABLE airport_frequencies (
+	id int,
+	airport_ref int,
+	airport_ident varchar(10),
+	type varchar(20),
+	description text,
+	frequency_mhz float
+);
+
+\copy airport_frequencies (	id,airport_ref,airport_ident,type,description,frequency_mhz) FROM '/home/hakan/PostGreSQL/Lecture_157/airport-frequencies.csv' DELIMITER ',' CSV HEADER;
+
+-- Lecture 158: Practice CSV importing
+CREATE TABLE navaids (
+	id int,
+	filename text,
+	ident varchar(10),
+	name text,
+	type varchar(10),
+	frequency_khz float,
+	latitude_deg float,
+	longitude_deg float,
+	elevation_ft int,
+	iso_country varchar(10),
+	dme_frequency_khz float,
+	dme_channel varchar(10),
+	dme_latitude_deg float,
+	dme_longitude_deg float,
+	dme_elevation_ft int,
+	slaved_variation_deg float,
+	magnetic_variation_deg float,
+	usageType char(10),
+	power char(10),
+	associated_airport varchar(10)
+)
+
+\copy navaids (id,filename, ident, name, type, frequency_khz, latitude_deg, longitude_deg, elevation_ft, iso_country, dme_frequency_khz, dme_channel, dme_latitude_deg, dme_longitude_deg, dme_elevation_ft, slaved_variation_deg,magnetic_variation_deg, usageType, power, associated_airport) FROM '/home/hakan/PostGreSQL/Lecture_157/navaids.csv' DELIMITER ',' CSV HEADER;
+
+--2
+CREATE TABLE regions (
+	id int,
+	code varchar(10),
+	local_code varchar(10),
+	name text,
+	continent char(2),
+	iso_country varchar(10),
+	wikipedia_link text,
+	keywords text
+);
+
+\copy regions (id,code, local_code, name, continent, iso_country, wikipedia_link, keywords) FROM '/home/hakan/PostGreSQL/Lecture_157/regions.csv' DELIMITER ',' CSV HEADER;
+
+--3 country
+
+CREATE TABLE countries (
+	id int,
+	code varchar(10),
+	name text,
+	continent char(2),
+	wikipedia_link text,
+	keywords text
+);
+
+\copy countries ( id,code, name, continent, wikipedia_link, keywords) FROM '/home/hakan/PostGreSQL/Lecture_157/countries.csv' DELIMITER ',' CSV HEADER;
+
+--4
+CREATE TABLE runways (
+	id int,
+	airport_ref int,
+	airport_ident varchar(10),
+	length_ft int,
+	width_ft int,
+	surface text,
+	lighted boolean,
+	closed boolean,
+	le_ident varchar(10),
+	le_latitude_deg float,
+	le_longitude_deg float,
+	le_elevation_ft int,
+	le_heading_degT float,
+	le_displaced_threshold_ft int,
+	he_ident varchar(10),
+	he_latitude_deg float,
+	he_longitude_deg float,
+	he_elevation_ft int,
+	he_heading_degT float,
+	he_displaced_threshold_ft int
+);
+
+\copy runways ( id,airport_ref, airport_ident, length_ft, width_ft, surface, lighted, closed ,le_ident, le_latitude_deg, le_longitude_deg, le_elevation_ft, le_heading_degT, le_displaced_threshold_ft, he_ident, he_latitude_deg, he_longitude_deg, he_elevation_ft, he_heading_degT, he_displaced_threshold_ft)  FROM '/home/hakan/PostGreSQL/Lecture_157/runways.csv' DELIMITER ',' CSV HEADER;
+
+-- Section 30: JSON and JSONB Data Types
+-- Lecture 159: What is JSON & how to store it in database
+-- Documentation: https://www.postgresql.org/docs/current/datatype-json.html
+-- json vs jsonb: jsonb is faster since it is parsed and it is in binary format. JSONB also supports indexing.
+-- Use practice_db
+CREATE TABLE books (
+	id serial,
+	bookinfo jsonb
+)
+    -- Observation: a field in a table can be in json/jsonb format
+
+-- How to insert a json/jsonb field value as a part of a row into a table?
+INSERT INTO books (bookinfo)
+VALUES
+('{"title": "Introduction To Data Mining",
+  "author": ["Pang-ning Tan", "Michael Steinbach", "Vipin Kumar"],
+  "publisher":"Addison Wesley", "date": 2006}'),
+('{"title": "Deep Learning with Python", "author": "Francois Chollet", "publisher":"Manning", "date": 2018}'),
+('{"title": "Neural Networks - A Visual Intro for Beginners", "author": "Michael Taylor", "publisher":"self", "date": 2017}'),
+('{"title": "Big Data In Practice", "author": "Bernard Marr", "publisher":"Wiley", "date": 2016}');
+
+-- How to access an item from a JSON field in a table?
+-- Use select json_field_name->'item_name' from table_name
+-- Note that json field contains many items (e.g. bookinfo json field contains author item)
+ SELECT bookinfo->'author' FROM books;  --> returns a jsonb result
+
+-- Lecture 160: Create JSON From Tables using jsonb_build_object()
+-- Syntax:
+select jsonb_build_object('field1', value1, 'field2', value2, ...) from table_name or a join
+
+-- Task: Lets create a simple version of airports into json, which does not contains arrays
+SELECT jsonb_build_object(
+	'id', air.id,
+	'ident', air.ident,
+	'name', air.name,
+	'latitude_deg', air.latitude_deg,
+	'elevation_ft', air.elevation_ft,
+	'continent', air.continent,
+	'iso_country', air.iso_country,
+	'iso_region', air.iso_region,
+	'airport_home_link', air.home_link,
+	'airport_wikipedia_link', air.wikipedia_link,
+	'municipality', air.municipality,
+	'scheduled_service', air.scheduled_service,
+	'gps_code', air.gps_code,
+	'iata_code', air.iata_code,
+	'airport_local_code', air.local_code
+)
+FROM airports AS air;
+
+-- How to export array of items (e.g. an array of authors) into JSONB from a table?
+-- Task: Lets create a full version of airports into json, which contains array called airport_keywords
+SELECT jsonb_build_object(
+	'id', air.id,
+	'ident', air.ident,
+	'name', air.name,
+	'latitude_deg', air.latitude_deg,
+	'elevation_ft', air.elevation_ft,
+	'continent', air.continent,
+	'iso_country', air.iso_country,
+	'iso_region', air.iso_region,
+	'airport_home_link', air.home_link,
+	'airport_wikipedia_link', air.wikipedia_link,
+	'municipality', air.municipality,
+	'scheduled_service', air.scheduled_service,
+	'gps_code', air.gps_code,
+	'iata_code', air.iata_code,
+	'airport_local_code', air.local_code,
+	'airport_keywords', to_jsonb(string_to_array(air.keywords, ','))
+)
+FROM airports AS air;
+
+-- Task: Add to the previous statement by joining countries and regions
+-- using iso_region and iso_country from airports table.
+-- Pull back the name, wikipedia_link and array of keywords for both tables
+-- use inner join
+SELECT jsonb_build_object(
+	'id', air.id,
+	'ident', air.ident,
+	'name', air.name,
+	'latitude_deg', air.latitude_deg,
+	'elevation_ft', air.elevation_ft,
+	'continent', air.continent,
+	'iso_country', air.iso_country,
+	'iso_region', air.iso_region,
+	'airport_home_link', air.home_link,
+	'airport_wikipedia_link', air.wikipedia_link,
+	'municipality', air.municipality,
+	'scheduled_service', air.scheduled_service,
+	'gps_code', air.gps_code,
+	'iata_code', air.iata_code,
+	'airport_local_code', air.local_code,
+	'airport_keywords', to_jsonb(string_to_array(air.keywords, ',')),
+	'country_name', countries.name,
+	'country_wikipedia_link', countries.wikipedia_link,
+	'country_keywords', to_jsonb(string_to_array(countries.keywords, ',')),
+	'region_name', regions.name,
+	'region_wikipedia_link', regions.wikipedia_link,
+	'regions_keywords', to_jsonb(string_to_array(regions.keywords, ','))
+)
+FROM airports AS air
+INNER JOIN regions ON air.iso_region=regions.code
+INNER JOIN countries ON air.iso_country = countries.code;
+    -- Observation: if you have a text (e.g. airports.keywords) containing items seperated by a seperator (e.g. comma)
+    -- and if you want to convert the items into a json/jsonb array, use to_jsonb(string_to_array(airports.keywords, ','))
+
+-- How to strip nulls from the exported JSON/JSONB?
+-- use jsonb_strip_nulls() function
+SELECT JSONB_STRIP_NULLS (
+	 jsonb_build_object(
+	'id', air.id,
+	'ident', air.ident,
+	'name', air.name,
+	'latitude_deg', air.latitude_deg,
+	'elevation_ft', air.elevation_ft,
+	'continent', air.continent,
+	'iso_country', air.iso_country,
+	'iso_region', air.iso_region,
+	'airport_home_link', air.home_link,
+	'airport_wikipedia_link', air.wikipedia_link,
+	'municipality', air.municipality,
+	'scheduled_service', air.scheduled_service,
+	'gps_code', air.gps_code,
+	'iata_code', air.iata_code,
+	'airport_local_code', air.local_code,
+	'airport_keywords', to_jsonb(string_to_array(air.keywords, ',')),
+	'country_name', countries.name,
+	'country_wikipedia_link', countries.wikipedia_link,
+	'country_keywords', to_jsonb(string_to_array(countries.keywords, ',')),
+	'region_name', regions.name,
+	'region_wikipedia_link', regions.wikipedia_link,
+	'regions_keywords', to_jsonb(string_to_array(regions.keywords, ','))
+))
+FROM airports AS air
+INNER JOIN regions ON air.iso_region=regions.code
+INNER JOIN countries ON air.iso_country = countries.code;
+
+-- Lecture 161: Aggregating JSON Fields : How write the result of a query into a json?
+-- Way #1: Use jsonb_build_object() method as specified in the previous lecture
+-- Way #2: Use to_json() with subquery that pull back the records to a result set
+select to_json(subquery_name) from (
+... subquery that pulls back the records to a result set
+) as subquery_name
+
+select to_jsonb(subquery_name) from (
+... subquery that pulls back the records to a result set
+) as subquery_name
+
+-- Task: Lets pull back the runways that belong to airport JRA (9 in total)
+-- Way #1: Using jsonb_build_object() method
+CREATE TABLE runways (
+	id int,
+	airport_ref int,
+	airport_ident varchar(10),
+	length_ft int,
+	width_ft int,
+	surface text,
+	lighted boolean,
+	closed boolean,
+	le_ident varchar(10),
+	le_latitude_deg float,
+	le_longitude_deg float,
+	le_elevation_ft int,
+	le_heading_degT float,
+	le_displaced_threshold_ft int,
+	he_ident varchar(10),
+	he_latitude_deg float,
+	he_longitude_deg float,
+	he_elevation_ft int,
+	he_heading_degT float,
+	he_displaced_threshold_ft int
+);
+select * from runways where airport_ident = 'JRA';
+select jsonb_build_object(
+    'runway_id', r.id,
+    'airport_ref', r.airport_ref,
+    'length_ft', r.length_ft,
+    'width_ft', r.width_ft,
+    'surface', r.surface,
+    'lighted', r.lighted,
+    'closed', r.closed,
+    'le_ident', r.le_ident,
+    'le_latitude_deg', r.le_latitude_deg,
+    'le_longitude_deg', r.le_longitude_deg,
+    'le_elevation_ft', r.le_elevation_ft,
+    'le_heading_degT', r.le_heading_degT,
+    'le_displaced_threshold_ft', r.le_displaced_threshold_ft,
+    'he_ident', r.he_ident,
+    'he_latitude_deg', r.he_latitude_deg,
+    'he_longitude_deg', r.he_longitude_deg,
+    'he_elevation_ft', r.he_elevation_ft,
+    'he_heading_degT', r.he_heading_degT,
+    'he_displaced_threshold_ft', r.he_displaced_threshold_ft
+)
+from runways  as r where airport_ident = 'JRA';
+    -- Observation: jsonb_build_object() gives you a result set of jsonb rows
+
+-- Way #2: Using to_json() / to_jsonb() with a subquery:
+select to_json(subquery_name) from (
+... subquery that pulls back the records to a group
+) as subquery_name
+-- the subquery returns a query set, where the individual fields' names are used as the item names for JSON
+select to_json(JRA_runways) from (
+    select * from runways where airport_ident = 'JRA'
+) as JRA_runways
+
+-- How to aggragate JSON rows into a JSON array
+-- Syntax:
+json_agg()
+
+-- Task: Aggregate all airport JRA's runways into a JSON array
+select json_agg(to_json(JRA_runways)) from (
+    select * from runways where airport_ident = 'JRA'
+) as JRA_runways;
+
+-- Task: Do the same aggregation for the navaids table
+-- where associated_airport='CYYZ'
+CREATE TABLE navaids (
+	id int,
+	filename text,
+	ident varchar(10),
+	name text,
+	type varchar(10),
+	frequency_khz float,
+	latitude_deg float,
+	longitude_deg float,
+	elevation_ft int,
+	iso_country varchar(10),
+	dme_frequency_khz float,
+	dme_channel varchar(10),
+	dme_latitude_deg float,
+	dme_longitude_deg float,
+	dme_elevation_ft int,
+	slaved_variation_deg float,
+	magnetic_variation_deg float,
+	usageType char(10),
+	power char(10),
+	associated_airport varchar(10)
+)
+select * from navaids where associated_airport='CYYZ';
+select json_agg(to_json(CYYZ_navaids)) from (
+    select * from navaids where associated_airport='CYYZ'
+) as CYYZ_navaids;
+
+
+-- Lecture 162: Building a JSON table : Building airports_json table; a table that contains a jsonb as a whole row
+CREATE TABLE airports_json AS (
+    SELECT JSONB_STRIP_NULLS (
+        jsonb_build_object(
+            'id', air.id,
+            'ident', air.ident,
+            'name', air.name,
+            'latitude_deg', air.latitude_deg,
+            'elevation_ft', air.elevation_ft,
+            'continent', air.continent,
+            'iso_country', air.iso_country,
+            'iso_region', air.iso_region,
+            'airport_home_link', air.home_link,
+            'airport_wikipedia_link', air.wikipedia_link,
+            'municipality', air.municipality,
+            'scheduled_service', air.scheduled_service,
+            'gps_code', air.gps_code,
+            'iata_code', air.iata_code,
+            'airport_local_code', air.local_code,
+            'airport_keywords', to_jsonb(string_to_array(air.keywords, ',')),
+            'country_name', countries.name,
+            'country_wikipedia_link', countries.wikipedia_link,
+            'country_keywords', to_jsonb(string_to_array(countries.keywords, ',')),
+            'region_name', regions.name,
+            'region_wikipedia_link', regions.wikipedia_link,
+            'regions_keywords', to_jsonb(string_to_array(regions.keywords, ',')),
+            'runways', (SELECT JSONB_AGG(to_jsonb(runway_json)) FROM
+                (SELECT le_ident, he_ident, length_ft, width_ft, surface,
+                    lighted AS is_lighted,closed AS is_closed,
+                    le_latitude_deg, le_longitude_deg,le_elevation_ft,le_displaced_threshold_ft,
+                    he_latitude_deg,he_longitude_deg,he_elevation_ft, he_heading_degt,he_displaced_threshold_ft
+                FROM runways
+                WHERE airport_ident = air.ident) as runway_json
+                ),
+            'navaids', (SELECT JSONB_AGG(to_jsonb(nav)) FROM
+                        (SELECT name, filename, ident, type, frequency_khz,
+                            latitude_deg, longitude_deg, elevation_ft, dme_frequency_khz,
+                            dme_channel, dme_latitude_deg, dme_latitude_deg,dme_elevation_ft,
+                            slaved_variation_deg, magnetic_variation_deg,usagetype, power
+                        FROM navaids
+                        WHERE associated_airport = air.ident) AS nav
+                ),
+            'frequencies', (SELECT JSONB_AGG(to_jsonb(nav)) FROM
+                        (SELECT type, description, frequency_mhz
+                        FROM airport_frequencies
+                        WHERE airport_ident = air.ident) AS nav
+                )
+        )
+    ) as airport
+    FROM airports AS air
+    INNER JOIN regions ON air.iso_region=regions.code
+    INNER JOIN countries ON air.iso_country = countries.code
+);
+    -- Observation: create table table_name as (subquery);  e.g. create table airports_json as (subquery)
+        -- The subquery gets executed and its result set is saved as a table
+    -- Observation: In the subquery, per row in the join, i.e. per airport, we create a json object containing fields from the row.
+    --              We store the jsonb airport into airports_json table as a row
+    -- Observation: If we want to create a JSON array, such as runways for the airport, we run a subquery returning the array
+    --              The subquery uses jsonb_agg() and to_jsonb() to produce the array
+                    -- to_jsonb() uses a subquery to produce a jsonb runway per each row in the subquery
+                    -- jsonb_agg() creates a jsonb array from the jsonb result set (runways)
+
+-- Lecture 163: Selecting Information Out Of JSON fields in a table : -> and ->> operators
+-- Selecting a JSON element Out Of JSON fields in a table : Syntax:
+operator ->
+select based on key
+jsonb_field->'key'
+
+select based on array index (index starts from 0)
+jsonb_field->number
+
+-- Because they are returning JSON, they can be chained:
+airport->'runways'->2    --> 3rd runway in each airport
+
+-- Use airports_db > airports_json table
+-- Task: select the first runway of each record as jsonb and country_name as jsonb
+select airport->'runways'->0 as first_runway, airport->'country_name' as country_name
+from airports_json;
+
+-- Selecting Text Out of JSON fields in a table : Syntax
+jsonb_field->>int for selecting array element
+jsonb_field->>key for selecting by field name
+
+-- Use airports_db > airports_json table
+-- Task: select the first runway of each record as text and country_name as text
+select airport->'runways'->>0 as first_runway, airport->>'country_name' as country_name
+from airports_json;
+
+-- Select based on path : Syntax
+jsonb_field #> path_in_json   -- return JSON object at path
+jsonb_field #>> path_in_json  -- return text of JSON object at path
+
+-- Task:
+select '{"a": {"b": [3,2,1]}}'::jsonb #> '{a, b}'  --> [3, 2, 1]
+select '{"a": {"b": [3,2,1], "c": {"d": 5}}}'::jsonb #> '{a, c, d}'  --> 5 as jsonb
+    --Observation: Imagine a json tree containing other jsons in their elements and so on
+    -- Postgres can surgically get the json/text version of any part of the json tree using:
+        jsonb_field #> return JSON object at path
+        jsonb_field #>> return text of JSON object at path
+
+-- Task: return the 2nd frequency_khz of each airport as jsonb
+-- and the region_name as text from airports_json table
+-- order by frequencies asc
+select  airport->'frequencies'->1 as second_frequency,
+        airport->>'region_name' as region_name
+from airports_json
+order by second_frequency asc;
+
+-- Lecture 164: Searching for JSON data in a JSON field
+-- Way # 1: Containment operator: is the value on the right contained in the json field on the left
+where jsonb_field @> '{"iso_country": "BR"}'
+-- Way #2: Grab the field, will only return rows that have the field
+where jsonb_field->>'iso_country' = 'BR'   -- note that ->> returns text
+
+-- Use airports_db
+-- Task: Using the airports_json table, Find all the airports in Brazil
+select *
+from airports_json
+where airport->>'iso_country' = 'BR';
+    -- Another solution
+    select *
+    from airports_json
+    where airport @> '{"iso_country": "BR"}';
+
+
+-- Use airports_db
+-- Task: Using the airports_json table, Find the count of all the airports in Brazil
+    select count(*)
+    from airports_json
+    where airport @> '{"iso_country": "BR"}';
+
+
+-- Use airports_db
+-- Task: Using the airports_json table, how many airports are in USA Arkansas Region?
+-- iso_region USA-AR
+select count(*) from airports_json where airport @> '{"iso_region": "US-AR"}';
+select count(*) from airports_json where airport->>'iso_region' = 'US-AR';
+
+-- Select Based On Nested Attribute
+-- i.e. Selecting rows based on part of a json tree
+-- Syntax:
+where jsonb_field->'field1'->>'field2' = "value"
+or
+where jsonb_field @> '{"field1": {"field2": "value"}}'
+
+-- Use airports_db > airports_json table
+-- Task: Find the number of airports with the first runway being 2000 feet long
+select count(*) from airports_json where airport->'runways'->0->>'length_ft' = '2000';
+    -- Another solution
+    SELECT COUNT(*) FROM airports_json
+    WHERE airports->'runways'-> 0 @> '{"length_ft": 2000}';
+
+-- Use airports_db > airports_json table
+-- Task: Find the number of airports in which the 2nd navaid has a frequency of 400
+select count(*) from airports_json where airport->'navaids'->1->>'frequency_khz' = '400';
+    -- Another solution
+    select count(*) from airports_json where airport->'navaids'->1 @> '{"frequency_khz" : 400}';
+
+-- Lecture 165: Updating and Deleting Information inside JSON Fields
+-- Updating existing json using || operator
+    -- This will add a new field or replace an existing value of a field
+select airport->'nearby_lakes' as nearby_lakes
+from airports_json
+where airport->>'iso_region'='US-AR' and airport->>'municipality'='Lake Village';
+    -- Note that ATM, we do not have nearby_lakes
+update airports_json
+set airport = airport || '{"nearby_lakes": ["Lake Chicot", "Lake Providence"]}'
+where airport->>'iso_region'='US-AR' and airport->>'municipality'='Lake Village';
+
+-- Remobing existing json, we have 2 operators
+-- - to delete key/value pairs
+-- #- to delete based on path
+
+-- Use airports_db > airports_json table
+-- Task lets delete the fields (i.e. nearby_lakes) we just created in the previous task
+update airports_json
+set airport = airport - 'nearby_lakes'
+where airport->>'iso_region'='US-AR' and airport->>'municipality'='Lake Village';
+    -- Another solution
+    update airports_json
+    set airport = airport || '{"nearby_lakes": ["Lake Chicot", "Lake Providence"]}'
+    where airport->>'iso_region'='US-AR' and airport->>'municipality'='Lake Village';
+
+    update airports_json
+    set airport = airport #- '{"nearby_lakes", 1}' --> deleting "Lake Providence"
+    where airport->>'iso_region'='US-AR' and airport->>'municipality'='Lake Village';
+
+    select airport->'nearby_lakes' as nearby_lakes
+    from airports_json
+    where airport->>'iso_region'='US-AR' and airport->>'municipality'='Lake Village';
+
+-- Use airports_db > airports_json table
+-- Task: Add a new field good_restaurants that is an array of 'La Terraza'
+-- and 'McDonalds' to the airports with id 20426.
+-- Then remove 'McDonalds' from the array
+update airports_json
+set airport = airport || '{"good_restaurants": ["La Terraza", "McDonalds"]}'
+where (airport->>'id')::integer = 20426;
+
+select airport->'good_restaurants'
+from airports_json
+where (airport->>'id')::integer = 20426;
+
+update airports_json
+set airport = airport #- '{"good_restaurants", 1}'
+where (airport->>'id')::integer = 20426;
+
+select airport->'good_restaurants'
+from airports_json
+where (airport->>'id')::integer = 20426;
+
+-- Section 31 : Creating & Droping Databases
+-- Lecture 166 : Create Database
+-- Syntax:
+create database database_name;  --> in PGAdmin
+createdb database_name;     --> in psql command line
+
+-- Lecture 167: Dropping a database
+drop database if exists database_name; --> in PGAdmin
+dropdb database_name;     --> in psql command line
+
+-- Section 32 : Database Backup and Database Recovery
+-- Lecture 168: Import/Export with Copy command
+-- Documentation: https://www.postgresql.org/docs/current/sql-copy.html
+
+psql --port=5433 --host=localhost --dbname=northwind
+-- export a table to a file
+\copy table_name to 'file/location'
+    -- Important: If the file exists already, it appends to it! It does not overwrite
+-- e.g.
+\COPY customers TO '/home/hakan/PostGreSQL/Lecture_168/customers.txt';
+
+\h copy  --> help options for copy command
+    -- FORMAT  --> i.e. csv / ? JSON
+    -- HEADER  --> i.e. csv header
+    -- QUOTE   --> What you want to surround text
+    -- DELIMITER
+    -- FORCE_QUOTE  --> force text delimiter
+
+-- Use northwind database
+-- Task: Save customers table with CSV format, header and different text delimiter
+\COPY customers TO '/home/hakan/PostGreSQL/Lecture_168/customers.csv' WITH (FORMAT CSV, HEADER, QUOTE '"');
+    -- Observation: Can export a table into CSV using psql's \copy command
+
+-- How to export the result set of a query to a JSON file, where each row is a json?
+\copy (select row_to_json(subquery) from (select ...) as subquery) to '/home/hakan/PostGreSQL/Lecture_168/your_query_file_name.json';
+
+-- How to export a table as JSON file, where each row is a json?
+\copy (select row_to_json(subquery) from (select * from customers) as subquery) to '/home/hakan/PostGreSQL/Lecture_168/customers.json';
+
+-- How to export a table as JSON file, where each row is a json, and the file contains an array of json rows?
+\copy (select json_agg(row_to_json(subquery)) from (select * from customers) as subquery) to '/home/hakan/PostGreSQL/Lecture_168/customers_json_array.json';
+
+-- Use northwind database
+-- Task: Export orders from 1996 into orders_in_1996.csv
+\copy (select * from orders where extract(year from orderdate) = 1996) to '/home/hakan/PostGreSQL/Lecture_168/orders_in_1996.csv' with (format csv, header);
+
+-- Use northwind database
+-- Task: Export order_details for productid 11 in a CSV file with a header
+\copy (select * from order_details where productid = 11) to '/home/hakan/PostGreSQL/Lecture_168/orders_details_with_productid_11.csv' with (format csv, header);
+
+-- Observation: using \copy command in psql command line, one can export a table as JSON or as CSV into a file
+
+-- Lecture 169: Basic pg_dump and restore
+-- plain linux bash shell command:
+pg_dump database_name > /file/location      --> in plain command line as postgres user: sudo su - postgres
+
+pg_dump northwind > /home/hakan/PostGreSQL/Lecture_169/northwind.sql
+
+-- How to restore a database from a .sql file?
+createdb database_name;         --> in plain command line as postgres user
+psql database_name < /file/path --> in plain command line as postgres user
+
+
+-- Task: Create northwind2 database and restore the contents from
+-- /home/hakan/PostGreSQL/Lecture_169/northwind.sql
+
+createdb northwind2             --> in plain command line as postgres user
+psql northwind2 < /home/hakan/PostGreSQL/Lecture_169/northwind.sql  --> in plain command line as postgres user
+
+-- Task: Make a backup of the usda database and restore to usda_bak database
+pg_dump usda > /home/hakan/PostGreSQL/Lecture_169/usda.sql    --> in plain command line
+createdb usda_bak                                             --> in plain command line
+psql usda_bak < /home/hakan/PostGreSQL/Lecture_169/usda.sql   --> in plain command line
+dropdb usda_bak                                               --> in plain command line
+
+-- Lecture 170: Custom format dumps
+-- Documentation: https://www.postgresql.org/docs/current/app-pgrestore.html
+-- it allows you to make a dump in custom format for a database
+-- Advantages: the data is compressed and it allows you to do partial restore of a database (i.e. restoring triggers, a table etc)
+-- Syntax ( in plain command line as postgres user: sudo su - postgres)
+pg_dump -Fc database_name > /file/location/dump_file.fc
+
+-- Task: do a custom format dump of northwind into northwind.fc
+pg_dump -Fc northwind > /home/hakan/PostGreSQL/Lecture_170/northwind.fc
+
+-- How to see what is in the custom format dump file?
+-- Syntax ( in plain command line as postgres user: sudo su - postgres)
+pg_restore --list /file/location
+
+-- Task: lets see the contents of the /home/hakan/PostGreSQL/Lecture_170/northwind.fc
+pg_restore --list /home/hakan/PostGreSQL/Lecture_170/northwind.fc
+
+-- How to restore a database from a custom format dump file?
+-- Syntax ( in plain command line as postgres user: sudo su - postgres)
+pg_restore -j 2 -d database_name /home/hakan/PostGreSQL/Lecture_170/northwind.fc
+
+-- Task: Restore /home/hakan/PostGreSQL/Lecture_170/northwind.fc into northwind2 database
+dropdb northwind2
+createdb northwind2
+pg_restore -j 2 -d northwind2 /home/hakan/PostGreSQL/Lecture_170/northwind.fc
+
+-- How to restore a table from a .fc (custom format dump) file?
+pg_restore -j 2 -d database_name -t table_name /home/hakan/PostGreSQL/Lecture_170/northwind.fc
+
+-- Task: drop usstates table from northwind2 database and do a partial restore
+pg_restore -j 2 -d northwind2 -t usstates /home/hakan/PostGreSQL/Lecture_170/northwind.fc
+
+-- Task: Make a custom format backup of usda
+-- and do a partial restore of table weight to original database
+-- Make sure to drop weight in the database
+pg_dump -Fc usda > /home/hakan/PostGreSQL/Lecture_170/usda.fc
+pg_restore -j 2 -d usda -t weight /home/hakan/PostGreSQL/Lecture_170/usda.fc
+
+-- Observation: pg_dump/pg_restore command pair allows us to dump & restore custom format dump files (i.e. .fc files)
+-- Advantages: the data is compressed and it allows you to do partial restore of a database (i.e. restoring triggers, a table etc)
+
+-- Section 33: Security Using Roles, Users and Permissions
+-- Lecture 171: Roles and Users
+-- Users are roles with passwords and able to login
+-- Groups have become an alias for the roles
+-- There are 2 levels when it comes to backing up a database:
+-- a database level and an database instance level
+    -- roles belong to the database instance level
+        -- so when you \copy a database at database level, you do not copy the roles
+        -- if you wanna copy the roles at well, you need to the backup at database
+        -- instance level (How to do that???)
+-- Roles can be nested: every role can contain other role
+    -- This allows you to add permissions to other roles
+        -- i.e. imagine role X with certain permissions
+        -- create a role Y with new permissions and we can make Y contain X
+
+-- Proper Way to Set Up roles
+    -- create roles that CANT login and are named for jobs: hr, accounting
+    -- Create users (i.e. roles with logins) and add them to the roles they need to get the job done
+
+-- 6 Layers of Security in PostGreSQL
+    1. Instance level (covers all databases), handles can you login, create databases, roles etc
+    2. Database level - can you connect to a db and create roles
+    3. Schema level - can you create or use particular schemas
+    4. Table level - what operations can you perform on a table
+    5. Column level - what operations can you perform on a specific column
+    6. Row level - which rows in database can you perform operations on
+
+
+-- Lecture 172: Instance Level Security
+-- Instance Level Security is the topmost level : applies to all databases,handles can you login, create databases, roles of instance
+-- Controls the following PERMISSIONS:
+    -- SUPERUSER - can do anything (i.e. my postgres user ?)
+    -- CREATEDB - make databases
+    -- CREATEROLE - make more roles
+    -- LOGIN - can login into database
+    -- REPLICATION - can be used for replication (???)
+-- The above permissions can be reversed with a NO in front
+-- e.g. NOSUPERUSER
+
+-- Task: Using northwind database, lets create two roles: hr and accounting
+CREATE ROLE accounting NOCREATEDB NOLOGIN NOSUPERUSER;
+CREATE ROLE hr NOCREATEDB NOLOGIN NOSUPERUSER;
+    -- try logining in with hr and accounting roles
+    psql -U hr
+    psql -U accounting
+
+-- Lets make users that have login permissions
+CREATE ROLE with LOGIN
+-- or
+CREATE USER
+
+CREATE ROLE suzy NOCREATEDB LOGIN NOSUPERUSER PASSWORD 'pass123';
+CREATE USER bobby NOCREATEDB LOGIN NOSUPERUSER PASSWORD 'pass123';
+    -- We didnt give them permissions to Northwind database but they can connect to psql
+    sudo useradd suzy
+    sudo passwd suzy (pwd h1a2k3a4)
+    sudo su - suzy
+    psql -U suzy -d northwind
+
+-- IMPORTANT: there is a role called public which has access to all databases
+-- cancel public's access to northwind using PgAdmin UI
+revoke all on database northwind from public;
+
+-- Add users to roles:
+    grant accounting to suzy;
+    grant hr to boby;
+
+-- Task: create a role for sales that cant login or create db
+-- Then add user jill having role sales
+drop role jill;
+create role sales nosuperuser nocreatedb CREATEROLE nologin replication;  --> instance level
+create role jill login PASSWORD 'pass123';
+grant sales to jill;
+    -- What is missing here in order jill to be able to login via psql?
+        -- jill needs to have an account on ubuntu and jill must have logged in via the account in ubuntu
+        -- after that, jill can login to pgsql
+            sudo useradd jill
+            sudo passwd jill (pwd h1a2k3a4)
+            sudo su - jill
+            psql -U jill -d northwind
+                -- psql: error: FATAL:  permission denied for database "northwind"
+                -- DETAIL:  User does not have CONNECT privilege
+
+-- What we have accomplished at Lecture 172:
+    -- Created generic roles without logins that users can be granted to (e.g. sales)
+    -- Removed all permissions for public on Northwind database
+    -- Assigned users to generic roles (i.e. jill)
+
+-- Next Steps: Work on Database permissions so suzy and boby can reach northwind database
+
+-- Lecture 173 : Database Level Security
+-- Controls the following permissions:
+create - make new schemas
+connect - connect to database
+temporary - create temporary tables
+
+-- Task: Lets add permissions for connection for hr and accounting to northwind database
+grant connect on database northwind to accounting;
+grant connect on database northwind to hr;
+    sudo su - suzy
+    psql -d northwind
+    -- At this stage, suzy can connect to northwind database
+    -- But it cannot a create schema
+    create schema suzy_schema;
+
+-- Task: Lets add create permission for making new schemas on northwind database
+grant create on database northwind to accounting;
+    psql> create schema suzy_schema;  --> succeeds
+
+-- Task: Give your sales role the ability to connect to northwind and create schemas
+grant connect on database northwind to sales;
+grant create on database northwind to sales;
+    sudo su - jill
+    psql -d northwind
+    create schema jills_schema;
+
+-- Lecture 174 : Schema Level Security
+-- controls the following permissions:
+create - put objects like tables, functions into the schema
+usage - look in the schema and see what is present
+
+-- Task: As boby tries to create a table, it goes into public schema
+-- First, lets review what has been done for boby so far:
+    CREATE ROLE hr NOCREATEDB NOLOGIN NOSUPERUSER;      -- as admin user, in PgAdmin
+    CREATE USER bobby NOCREATEDB LOGIN NOSUPERUSER PASSWORD 'pass123';  -- as admin user, in PgAdmin
+    grant hr to boby;                                   -- as admin user, in PgAdmin
+    grant connect on database northwind to hr;
+            sudo useradd boby                   -- as hakan in command line
+            sudo passwd boby (pwd h1a2k3a4)     -- as hakan in command line
+            sudo su - boby
+        -- at this stage;
+            -- we have linux user boby & logged in as boby in command line
+            -- we have boby role defined in Postres
+                -- we CAN login to northwind database as boby, because we have granted
+                -- database level connect privilige to to hr role, to which boby is granted
+
+psql northwind=> create table bobys_table (
+                        name varchar(255),
+                        age integer
+                 );
+-- check public schema under northwind database, you will see that there is bobys_table under public schema > tables
+-- We did not give boby to create a table under public schema
+revoke all on schema public from public;
+drop table bobys_table;
+    -- Observation: public role is a default role that has the ability to edit public schema under a database X.
+    -- For example, with public role, we can add a table under public schema.
+    -- Observation: All users are granted with public role by default
+    -- Related Q/A:
+    -- I see from section 33 that we need to take care of removing privileges of the public role to avoid security holes.
+    -- Is the public role assigned automatically to any new added user? YES
+    -- Is it possible to revoke or even delete this role? Deleting is not possible, revoking is possible:
+        revoke all on schema public from public;  --> at schema level !
+    -- How can i check which users have such role attached? You can't run a query and see it anywhere
+    -- Public is used to indicate the default privileges that are granted to all roles automatically.
+    -- It is an implicitly defined group so you can't see it listed anywhere.
+    -- So you are restricting the default privileges by
+        revoke all on schema public from public;  --> public role cant create any table on public schema
+
+northwind=> create table bobys_table (
+name varchar(255),
+age integer
+);
+    -- ERROR:  no schema has been selected to create in
+    -- LINE 1: create table bobys_table (
+    --                      ^
+
+northwind=> create table public.bobys_table (
+name varchar(255),
+age integer
+);
+    -- ERROR:  permission denied for schema public
+    -- LINE 1: create table public.bobys_table (
+    --                      ^
+
+-- IMPORTANT: When you create a new database, do run
+revoke all on schema public from public;
+-- to ensure that no user will be able to edit the public schema automatically
+-- You need to grant schema level create and/or usage rights per role (e.g. hr)
+
+-- Task: Give accounting create and usage right to public schema
+grant all on schema public to accounting;  -- all = create + usage on schema level
+    -- equals to:
+    grant create on schema public to accounting;
+    grant usage on schema public to accounting;
+    -- note that we did the following earlier
+    grant accounting to suzy;  --> suzy can create tables, functions, triggers etc to public schema & see public schema
+
+-- Task: Give hr usage rights to public schema
+grant usage on schema public to hr;
+    -- note that we did the following earlier
+    grant hr to boby;          --> boby can only see the contents of public schema under northwind database
+
+-- Task: give usage permission to sales for public schema
+grant usage on schema public to sales;
+    -- note that we did the following earlier
+    grant sales to jill;  --> jill can only see the contents of public schema under northwind database
+
+-- Observation: For any database under test, we need to have a tester role
+    -- At instance level & at OS side, we need to create the tester role:
+        create role testing nosuperuser nocreatedb NOCREATEROLE nologin noreplication;
+        create role the_monkey login PASSWORD 'h1a2k3a4';
+        grant testing to the_monkey;
+        sudo useradd the_monkey
+        sudo passwd the_monkey (pwd h1a2k3a4)
+        sudo su - the_monkey
+        psql -d northwind       --> Login action of the_monkey
+        -- psql: error: FATAL:  permission denied for database "northwind"
+        -- DETAIL:  User does not have CONNECT privilege.
+    -- At database level, grand testing access to northwind database
+    grant connect on database northwind to tester;
+        psql -d northwind  --> connected to psql console for northwind database
+        -- the_monkey as a testing can only connect to northwind database
+        -- it cannot create schemas nor it can create temporary tables
+    -- note that we revoked all permissions on the public schema from the role public
+    -- note also that the_monkey automatically got granted the public role's schema level priviliges
+    -- we need to grant usage permission on public schema for testing, so that the_monkey
+    -- can have the usage permission on the public schema as well
+    grant usage on schema public to tester;  --> schema level permission
+        -- note that tester role can only view the contents of public schema of northwind
+        -- note that tester CANT add tables, functions, triggers etc to the public schema
+    -- At this moment, considering the_monkey, we got covered instance level, database level and
+    -- schema level. Now, we need to learn about table level, column level and row level security
+    -- Lets pause it for now for the_monkey
+
+-- Lecture 175: Table level security
+-- controls the following:
+select - read rows in the table
+insert - write data to the table
+update - change data in the table
+delete - delete data
+truncate - remove all data at once
+reference - allows user to create foreign key constraints
+trigger - create triggers on the table
+    -- the above permissions are per table
+    -- so do we have to adjust the permissions for every table?
+        -- No. Can use ALL TABLES clause to apply the desired permissions to every table at once
+-- Task: Give accounting SELECT all tables
+grant select on all tables in schema public to accounting;  --> suzy
+
+-- Task: Give hr SELECT; UPDATE and INSERT to employees table
+grant insert on table employees to hr;  --> boby
+grant select on table employees to hr;  --> boby
+grant update on table employees to hr;  --> boby
+
+-- Task: grant sales the ability to see customers table and
+-- see and insert into orders and order_details table
+grant select on table customers to sales;  --> jill
+grant select on table orders to sales;  --> jill
+grant insert on table orders to sales;  --> jill
+grant select on table order_details to sales;  --> jill
+grant insert on table order_details to sales;  --> jill
+
+-- Observation: On table level security, we decide who (e.g. sales) should be able to do what (e.g. select)
+-- on what table (e.g. orders)
+
+-- Lecture 176: Column Level Security
+-- Controls the following:
+select - read the column
+insert - insert data into the column
+update - update data into the column
+references - permission to refer to the column in foreign keys
+
+-- Referring to the previous lecture, we did give accounting to SELECT all tables
+grant select on all tables in schema public to accounting;  --> suzy
+    -- i.e. accounting can read all the tables (and all the columns) under public schema
+-- Task: we want accounting to be able to see employees table, but hide some
+-- sensitive data such as homephone, address and birthdate
+revoke select on column homephone on table employees from accounting;
+-- First we try to restrict
+GRANT SELECT (employeeid, lastname, firstname, title, titleofcourtesy, hiredate, country, extension, photo, photopath)
+ON employees
+TO accounting; --> suzy
+    -- if you login to psql as suzy, you will see that homephone. address and birthdate are shown
+-- revoke the select (i.e. read) permission at table level first
+REVOKE SELECT ON TABLE employees FROM accounting;
+-- Now only grant what accounting needs to see on employees table:
+GRANT SELECT (employeeid, lastname, firstname, title, titleofcourtesy, hiredate, country, extension, photo, photopath)
+ON employees
+TO accounting;
+    select * from empoyees; --> wont work (*) means every column in the table
+    select employeeid, lastname, firstname, title, titleofcourtesy, hiredate, country, extension, photo, photopath from employees;
+        -- it works!
+
+-- Task: Give sales the ability to update customers table
+-- but only contactname, contacttitle and phone fields (i.e. column level security)
+grant update (contactname, contacttitle, phone) on customers to sales;
+
+-- Lecture 177: Row Level Security
+-- Must be turned on at table level, not turned on by default
+alter table table_name enable row level security;
+-- default row level security is to deny a role to see any rows
+-- so when this feature is enabled, you need to add access to rows
+
+-- Task: on orders table, lets give accounting access to orders table
+-- and then set some row level security (?)
+-- remember we did, on Lecture 175:
+grant select on all tables in schema public to accounting;  --> suzy
+alter table orders enable row level security;
+    -- at this moment, in psql, if suzy does:
+    select * from orders;  --> 0 rows! default row level security is to deny a role to see any rows!
+create policy policy_name
+on table_name
+for select | insert | update | delete
+to role_name
+using (expression)
+    -- Lets make a policy that lets accounting see all orders that are later than Jan 1, 1998
+    create policy orders_after_jan_1_1998
+    on orders
+    as permissive
+    for select
+    to accounting
+    using (orderdate > '1998-01-01'::date);
+        -- at this moment, in psql, if suzy does:
+        select * from orders;  --> many rows!
+
+-- Q: What happens if more than one policy
+    -- default is more rows are added where expressions are combined with OR
+    -- This is called permissive policy
+--Task: Lets add another policy for accounting to see orderdate for 1996
+    create policy orders_in_1996
+    on orders
+    as permissive
+    for select
+    to accounting
+    using (extract(year from orderdate)::int = 1996);
+
+-- Q: How to AND the expressions on the several policies for a specific role on a specific table?
+    create policy accounting_orders_customers on orders
+    as restrictive
+    for select to accounting
+    using (customerid like 'A%');
+
+-- Task: Add a policy for sales to be able to only update sales that
+-- have not shipped (i.e. order.shippeddate is null)
+-- Note that in Lecture 175, we did:
+grant select on table orders to sales;  --> jill
+-- but what we did not do then, which we need to do now
+grant usage on schema public to sales;
+    -- at this moment, if jill on psql does
+    select * from orders;  --> 0 rows, because default row level security is to deny a role to see any rows
+
+create policy not_shipped_orders_for_sales on orders
+for select to sales
+using (shippeddate is null);
+
+create policy not_shipped_orders_for_sales_updating on orders
+for update to sales
+using (shippeddate is null);
+
+
+
+
+
+
+
+
+
