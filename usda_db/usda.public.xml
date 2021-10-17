@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<database name="usda" schema="public" type="PostgreSQL - 13.3 (Ubuntu 13.3-1.pgdg18.04+1)">
+   <tables>
+      <table name="data_src" numRows="366" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="datasrc_id" nullable="false" remarks="" size="6" type="bpchar">
+            <child column="datasrc_id" foreignKey="datsrcln_datasrc_id_fkey" implied="false" onDeleteCascade="false" table="datsrcln"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="authors" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="2" name="title" nullable="false" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="3" name="year" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="4" name="journal" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="5" name="vol_city" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="6" name="issue_state" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="7" name="start_page" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="8" name="end_page" nullable="true" remarks="" size="2147483647" type="text"/>
+         <primaryKey column="datasrc_id" sequenceNumberInPK="1"/>
+         <index name="data_src_pkey" unique="true">
+            <column ascending="true" name="datasrc_id"/>
+         </index>
+      </table>
+      <table name="datsrcln" numRows="93845" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="ndb_no" nullable="false" remarks="" size="5" type="bpchar">
+            <parent column="ndb_no" foreignKey="datsrcln_ndb_no_fkey" implied="false" onDeleteCascade="false" table="nut_data"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="nutr_no" nullable="false" remarks="" size="3" type="bpchar">
+            <parent column="nutr_no" foreignKey="datsrcln_ndb_no_fkey" implied="false" onDeleteCascade="false" table="nut_data"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="datasrc_id" nullable="false" remarks="" size="6" type="bpchar">
+            <parent column="datasrc_id" foreignKey="datsrcln_datasrc_id_fkey" implied="false" onDeleteCascade="false" table="data_src"/>
+         </column>
+         <primaryKey column="ndb_no" sequenceNumberInPK="1"/>
+         <primaryKey column="nutr_no" sequenceNumberInPK="2"/>
+         <primaryKey column="datasrc_id" sequenceNumberInPK="3"/>
+         <index name="datsrcln_pkey" unique="true">
+            <column ascending="true" name="ndb_no"/>
+            <column ascending="true" name="nutr_no"/>
+            <column ascending="true" name="datasrc_id"/>
+         </index>
+         <index name="datsrcln_datasrc_id_idx" unique="false">
+            <column ascending="true" name="datasrc_id"/>
+         </index>
+      </table>
+      <table name="deriv_cd" numRows="54" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="deriv_cd" nullable="false" remarks="" size="2147483647" type="text">
+            <child column="deriv_cd" foreignKey="nut_data_deriv_cd_fkey" implied="false" onDeleteCascade="false" table="nut_data"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="derivcd_desc" nullable="false" remarks="" size="2147483647" type="text"/>
+         <primaryKey column="deriv_cd" sequenceNumberInPK="1"/>
+         <index name="deriv_cd_pkey" unique="true">
+            <column ascending="true" name="deriv_cd"/>
+         </index>
+      </table>
+      <table name="fd_group" numRows="24" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="fdgrp_cd" nullable="false" remarks="" size="4" type="bpchar">
+            <child column="fdgrp_cd" foreignKey="food_des_fdgrp_cd_fkey" implied="false" onDeleteCascade="false" table="food_des"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="fddrp_desc" nullable="false" remarks="" size="2147483647" type="text"/>
+         <primaryKey column="fdgrp_cd" sequenceNumberInPK="1"/>
+         <index name="fd_group_pkey" unique="true">
+            <column ascending="true" name="fdgrp_cd"/>
+         </index>
+      </table>
+      <table name="food_des" numRows="7146" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="ndb_no" nullable="false" remarks="" size="5" type="bpchar">
+            <child column="ndb_no" foreignKey="footnote_ndb_no_fkey" implied="false" onDeleteCascade="false" table="footnote"/>
+            <child column="ndb_no" foreignKey="nut_data_ndb_no_fkey" implied="false" onDeleteCascade="false" table="nut_data"/>
+            <child column="ndb_no" foreignKey="weight_ndb_no_fkey" implied="false" onDeleteCascade="false" table="weight"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="fdgrp_cd" nullable="false" remarks="" size="4" type="bpchar">
+            <parent column="fdgrp_cd" foreignKey="food_des_fdgrp_cd_fkey" implied="false" onDeleteCascade="false" table="fd_group"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="long_desc" nullable="false" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="3" name="shrt_desc" nullable="false" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="4" name="comname" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="5" name="manufacname" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="6" name="survey" nullable="true" remarks="" size="1" type="bpchar"/>
+         <column autoUpdated="false" digits="0" id="7" name="ref_desc" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="8" name="refuse" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="9" name="sciname" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="17" id="10" name="n_factor" nullable="true" remarks="" size="17" type="float8"/>
+         <column autoUpdated="false" digits="17" id="11" name="pro_factor" nullable="true" remarks="" size="17" type="float8"/>
+         <column autoUpdated="false" digits="17" id="12" name="fat_factor" nullable="true" remarks="" size="17" type="float8"/>
+         <column autoUpdated="false" digits="17" id="13" name="cho_factor" nullable="true" remarks="" size="17" type="float8"/>
+         <primaryKey column="ndb_no" sequenceNumberInPK="1"/>
+         <index name="food_des_pkey" unique="true">
+            <column ascending="true" name="ndb_no"/>
+         </index>
+         <index name="food_des_fdgrp_cd_idx" unique="false">
+            <column ascending="true" name="fdgrp_cd"/>
+         </index>
+      </table>
+      <table name="footnote" numRows="1" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="ndb_no" nullable="false" remarks="" size="5" type="bpchar">
+            <parent column="ndb_no" foreignKey="footnote_ndb_no_fkey" implied="false" onDeleteCascade="false" table="food_des"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="footnt_no" nullable="false" remarks="" size="4" type="bpchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="footnt_typ" nullable="false" remarks="" size="1" type="bpchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="nutr_no" nullable="true" remarks="" size="3" type="bpchar">
+            <parent column="nutr_no" foreignKey="footnote_nutr_no_fkey" implied="false" onDeleteCascade="false" table="nutr_def"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="4" name="footnt_txt" nullable="false" remarks="" size="2147483647" type="text"/>
+         <index name="footnote_ndb_no_idx" unique="false">
+            <column ascending="true" name="ndb_no"/>
+            <column ascending="true" name="nutr_no"/>
+         </index>
+      </table>
+      <table name="nut_data" numRows="253825" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="ndb_no" nullable="false" remarks="" size="5" type="bpchar">
+            <child column="ndb_no" foreignKey="datsrcln_ndb_no_fkey" implied="false" onDeleteCascade="false" table="datsrcln"/>
+            <parent column="ndb_no" foreignKey="nut_data_ndb_no_fkey" implied="false" onDeleteCascade="false" table="food_des"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="nutr_no" nullable="false" remarks="" size="3" type="bpchar">
+            <child column="nutr_no" foreignKey="datsrcln_ndb_no_fkey" implied="false" onDeleteCascade="false" table="datsrcln"/>
+            <parent column="nutr_no" foreignKey="nut_data_nutr_no_fkey" implied="false" onDeleteCascade="false" table="nutr_def"/>
+         </column>
+         <column autoUpdated="false" digits="17" id="2" name="nutr_val" nullable="false" remarks="" size="17" type="float8"/>
+         <column autoUpdated="false" digits="17" id="3" name="num_data_pts" nullable="false" remarks="" size="17" type="float8"/>
+         <column autoUpdated="false" digits="17" id="4" name="std_error" nullable="true" remarks="" size="17" type="float8"/>
+         <column autoUpdated="false" digits="0" id="5" name="src_cd" nullable="false" remarks="" size="10" type="int4">
+            <parent column="src_cd" foreignKey="nut_data_src_cd_fkey" implied="false" onDeleteCascade="false" table="src_cd"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="6" name="deriv_cd" nullable="true" remarks="" size="2147483647" type="text">
+            <parent column="deriv_cd" foreignKey="nut_data_deriv_cd_fkey" implied="false" onDeleteCascade="false" table="deriv_cd"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="7" name="ref_ndb_no" nullable="true" remarks="" size="5" type="bpchar"/>
+         <column autoUpdated="false" digits="0" id="8" name="add_nutr_mark" nullable="true" remarks="" size="1" type="bpchar"/>
+         <column autoUpdated="false" digits="0" id="9" name="num_studies" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="17" id="10" name="min" nullable="true" remarks="" size="17" type="float8"/>
+         <column autoUpdated="false" digits="17" id="11" name="max" nullable="true" remarks="" size="17" type="float8"/>
+         <column autoUpdated="false" digits="0" id="12" name="df" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="17" id="13" name="low_eb" nullable="true" remarks="" size="17" type="float8"/>
+         <column autoUpdated="false" digits="17" id="14" name="up_eb" nullable="true" remarks="" size="17" type="float8"/>
+         <column autoUpdated="false" digits="0" id="15" name="stat_cmt" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="16" name="cc" nullable="true" remarks="" size="1" type="bpchar"/>
+         <primaryKey column="ndb_no" sequenceNumberInPK="1"/>
+         <primaryKey column="nutr_no" sequenceNumberInPK="2"/>
+         <index name="nut_data_pkey" unique="true">
+            <column ascending="true" name="ndb_no"/>
+            <column ascending="true" name="nutr_no"/>
+         </index>
+         <index name="nut_data_deriv_cd_idx" unique="false">
+            <column ascending="true" name="deriv_cd"/>
+         </index>
+         <index name="nut_data_nutr_no_idx" unique="false">
+            <column ascending="true" name="nutr_no"/>
+         </index>
+         <index name="nut_data_src_cd_idx" unique="false">
+            <column ascending="true" name="src_cd"/>
+         </index>
+      </table>
+      <table name="nutr_def" numRows="136" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="nutr_no" nullable="false" remarks="" size="3" type="bpchar">
+            <child column="nutr_no" foreignKey="footnote_nutr_no_fkey" implied="false" onDeleteCascade="false" table="footnote"/>
+            <child column="nutr_no" foreignKey="nut_data_nutr_no_fkey" implied="false" onDeleteCascade="false" table="nut_data"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="units" nullable="false" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="2" name="tagname" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="3" name="nutrdesc" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="4" name="num_dec" nullable="true" remarks="" size="5" type="int2"/>
+         <column autoUpdated="false" digits="0" id="5" name="sr_order" nullable="true" remarks="" size="10" type="int4"/>
+         <primaryKey column="nutr_no" sequenceNumberInPK="1"/>
+         <index name="nutr_def_pkey" unique="true">
+            <column ascending="true" name="nutr_no"/>
+         </index>
+      </table>
+      <table name="src_cd" numRows="10" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="src_cd" nullable="false" remarks="" size="10" type="int4">
+            <child column="src_cd" foreignKey="nut_data_src_cd_fkey" implied="false" onDeleteCascade="false" table="nut_data"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="srccd_desc" nullable="false" remarks="" size="2147483647" type="text"/>
+         <primaryKey column="src_cd" sequenceNumberInPK="1"/>
+         <index name="src_cd_pkey" unique="true">
+            <column ascending="true" name="src_cd"/>
+         </index>
+      </table>
+      <table name="weight" numRows="13009" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="ndb_no" nullable="false" remarks="" size="5" type="bpchar">
+            <parent column="ndb_no" foreignKey="weight_ndb_no_fkey" implied="false" onDeleteCascade="false" table="food_des"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="seq" nullable="false" remarks="" size="2" type="bpchar"/>
+         <column autoUpdated="false" digits="17" id="2" name="amount" nullable="false" remarks="" size="17" type="float8"/>
+         <column autoUpdated="false" digits="0" id="3" name="msre_desc" nullable="false" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="17" id="4" name="gm_wgt" nullable="false" remarks="" size="17" type="float8"/>
+         <column autoUpdated="false" digits="0" id="5" name="num_data_pts" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="17" id="6" name="std_dev" nullable="true" remarks="" size="17" type="float8"/>
+         <primaryKey column="ndb_no" sequenceNumberInPK="1"/>
+         <primaryKey column="seq" sequenceNumberInPK="2"/>
+         <index name="weight_pkey" unique="true">
+            <column ascending="true" name="ndb_no"/>
+            <column ascending="true" name="seq"/>
+         </index>
+      </table>
+   </tables>
+</database>

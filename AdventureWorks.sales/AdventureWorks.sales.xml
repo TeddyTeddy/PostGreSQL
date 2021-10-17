@@ -1,0 +1,501 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<database name="AdventureWorks" schema="sales" type="PostgreSQL - 13.4 (Ubuntu 13.4-1.pgdg18.04+1)">
+   <tables>
+      <table name="countryregioncurrency" numRows="109" remarks="Cross-reference table mapping ISO currency codes to a country or region." schema="sales" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="countryregioncode" nullable="false" remarks="ISO code for countries and regions. Foreign key to CountryRegion.CountryRegionCode." size="3" type="varchar">
+            <parent column="countryregioncode" foreignKey="FK_CountryRegionCurrency_CountryRegion_CountryRegionCode" implied="false" onDeleteCascade="false" table="countryregion"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="currencycode" nullable="false" remarks="ISO standard currency code. Foreign key to Currency.CurrencyCode." size="3" type="bpchar">
+            <parent column="currencycode" foreignKey="FK_CountryRegionCurrency_Currency_CurrencyCode" implied="false" onDeleteCascade="false" table="currency"/>
+         </column>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="2" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="countryregioncode" sequenceNumberInPK="1"/>
+         <primaryKey column="currencycode" sequenceNumberInPK="2"/>
+         <index name="PK_CountryRegionCurrency_CountryRegionCode_CurrencyCode" unique="true">
+            <column ascending="true" name="countryregioncode"/>
+            <column ascending="true" name="currencycode"/>
+         </index>
+      </table>
+      <table name="creditcard" numRows="19118" remarks="Customer credit card information." schema="sales" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('sales.creditcard_creditcardid_seq'::regclass)" digits="0" id="0" name="creditcardid" nullable="false" remarks="Primary key for CreditCard records." size="10" type="serial">
+            <child column="creditcardid" foreignKey="FK_PersonCreditCard_CreditCard_CreditCardID" implied="false" onDeleteCascade="false" table="personcreditcard"/>
+            <child column="creditcardid" foreignKey="FK_SalesOrderHeader_CreditCard_CreditCardID" implied="false" onDeleteCascade="false" table="salesorderheader"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="cardtype" nullable="false" remarks="Credit card name." size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="cardnumber" nullable="false" remarks="Credit card number." size="25" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="expmonth" nullable="false" remarks="Credit card expiration month." size="5" type="int2"/>
+         <column autoUpdated="false" digits="0" id="4" name="expyear" nullable="false" remarks="Credit card expiration year." size="5" type="int2"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="5" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="creditcardid" sequenceNumberInPK="1"/>
+         <index name="PK_CreditCard_CreditCardID" unique="true">
+            <column ascending="true" name="creditcardid"/>
+         </index>
+      </table>
+      <table name="currency" numRows="105" remarks="Lookup table containing standard ISO currencies." schema="sales" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="currencycode" nullable="false" remarks="The ISO code for the Currency." size="3" type="bpchar">
+            <child column="currencycode" foreignKey="FK_CountryRegionCurrency_Currency_CurrencyCode" implied="false" onDeleteCascade="false" table="countryregioncurrency"/>
+            <child column="fromcurrencycode" foreignKey="FK_CurrencyRate_Currency_FromCurrencyCode" implied="false" onDeleteCascade="false" table="currencyrate"/>
+            <child column="tocurrencycode" foreignKey="FK_CurrencyRate_Currency_ToCurrencyCode" implied="false" onDeleteCascade="false" table="currencyrate"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="Currency name." size="54" type="Name"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="2" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="currencycode" sequenceNumberInPK="1"/>
+         <index name="PK_Currency_CurrencyCode" unique="true">
+            <column ascending="true" name="currencycode"/>
+         </index>
+      </table>
+      <table name="currencyrate" numRows="13532" remarks="Currency exchange rates." schema="sales" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('sales.currencyrate_currencyrateid_seq'::regclass)" digits="0" id="0" name="currencyrateid" nullable="false" remarks="Primary key for CurrencyRate records." size="10" type="serial">
+            <child column="currencyrateid" foreignKey="FK_SalesOrderHeader_CurrencyRate_CurrencyRateID" implied="false" onDeleteCascade="false" table="salesorderheader"/>
+         </column>
+         <column autoUpdated="false" digits="6" id="1" name="currencyratedate" nullable="false" remarks="Date and time the exchange rate was obtained." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="0" id="2" name="fromcurrencycode" nullable="false" remarks="Exchange rate was converted from this currency code." size="3" type="bpchar">
+            <parent column="currencycode" foreignKey="FK_CurrencyRate_Currency_FromCurrencyCode" implied="false" onDeleteCascade="false" table="currency"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="3" name="tocurrencycode" nullable="false" remarks="Exchange rate was converted to this currency code." size="3" type="bpchar">
+            <parent column="currencycode" foreignKey="FK_CurrencyRate_Currency_ToCurrencyCode" implied="false" onDeleteCascade="false" table="currency"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="4" name="averagerate" nullable="false" remarks="Average exchange rate for the day." size="0" type="numeric"/>
+         <column autoUpdated="false" digits="0" id="5" name="endofdayrate" nullable="false" remarks="Final exchange rate for the day." size="0" type="numeric"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="6" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="currencyrateid" sequenceNumberInPK="1"/>
+         <index name="PK_CurrencyRate_CurrencyRateID" unique="true">
+            <column ascending="true" name="currencyrateid"/>
+         </index>
+      </table>
+      <table name="customer" numRows="19820" remarks="Current customer information. Also see the Person and Store tables." schema="sales" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('sales.customer_customerid_seq'::regclass)" digits="0" id="0" name="customerid" nullable="false" remarks="Primary key." size="10" type="serial">
+            <child column="customerid" foreignKey="FK_SalesOrderHeader_Customer_CustomerID" implied="false" onDeleteCascade="false" table="salesorderheader"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="personid" nullable="true" remarks="Foreign key to Person.BusinessEntityID" size="10" type="int4">
+            <parent column="businessentityid" foreignKey="FK_Customer_Person_PersonID" implied="false" onDeleteCascade="false" table="person"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="storeid" nullable="true" remarks="Foreign key to Store.BusinessEntityID" size="10" type="int4">
+            <parent column="businessentityid" foreignKey="FK_Customer_Store_StoreID" implied="false" onDeleteCascade="false" table="store"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="3" name="territoryid" nullable="true" remarks="ID of the territory in which the customer is located. Foreign key to SalesTerritory.SalesTerritoryID." size="10" type="int4">
+            <parent column="territoryid" foreignKey="FK_Customer_SalesTerritory_TerritoryID" implied="false" onDeleteCascade="false" table="salesterritory"/>
+         </column>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="4" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="5" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="customerid" sequenceNumberInPK="1"/>
+         <index name="PK_Customer_CustomerID" unique="true">
+            <column ascending="true" name="customerid"/>
+         </index>
+      </table>
+      <table name="personcreditcard" numRows="19118" remarks="Cross-reference table mapping people to their credit card information in the CreditCard table." schema="sales" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="false" remarks="Business entity identification number. Foreign key to Person.BusinessEntityID." size="10" type="int4">
+            <parent column="businessentityid" foreignKey="FK_PersonCreditCard_Person_BusinessEntityID" implied="false" onDeleteCascade="false" table="person"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="creditcardid" nullable="false" remarks="Credit card identification number. Foreign key to CreditCard.CreditCardID." size="10" type="int4">
+            <parent column="creditcardid" foreignKey="FK_PersonCreditCard_CreditCard_CreditCardID" implied="false" onDeleteCascade="false" table="creditcard"/>
+         </column>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="2" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="businessentityid" sequenceNumberInPK="1"/>
+         <primaryKey column="creditcardid" sequenceNumberInPK="2"/>
+         <index name="PK_PersonCreditCard_BusinessEntityID_CreditCardID" unique="true">
+            <column ascending="true" name="businessentityid"/>
+            <column ascending="true" name="creditcardid"/>
+         </index>
+      </table>
+      <table name="salesorderdetail" numRows="121317" remarks="Individual products associated with a specific sales order. See SalesOrderHeader." schema="sales" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="salesorderid" nullable="false" remarks="Primary key. Foreign key to SalesOrderHeader.SalesOrderID." size="10" type="int4">
+            <parent column="salesorderid" foreignKey="FK_SalesOrderDetail_SalesOrderHeader_SalesOrderID" implied="false" onDeleteCascade="true" table="salesorderheader"/>
+         </column>
+         <column autoUpdated="true" defaultValue="nextval('sales.salesorderdetail_salesorderdetailid_seq'::regclass)" digits="0" id="1" name="salesorderdetailid" nullable="false" remarks="Primary key. One incremental unique number per product sold." size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="2" name="carriertrackingnumber" nullable="true" remarks="Shipment tracking number supplied by the shipper." size="25" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="orderqty" nullable="false" remarks="Quantity ordered per product." size="5" type="int2"/>
+         <column autoUpdated="false" digits="0" id="4" name="productid" nullable="false" remarks="Product sold to customer. Foreign key to Product.ProductID." size="10" type="int4">
+            <parent column="productid" foreignKey="FK_SalesOrderDetail_SpecialOfferProduct_SpecialOfferIDProductID" implied="false" onDeleteCascade="false" table="specialofferproduct"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="5" name="specialofferid" nullable="false" remarks="Promotional code. Foreign key to SpecialOffer.SpecialOfferID." size="10" type="int4">
+            <parent column="specialofferid" foreignKey="FK_SalesOrderDetail_SpecialOfferProduct_SpecialOfferIDProductID" implied="false" onDeleteCascade="false" table="specialofferproduct"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="6" name="unitprice" nullable="false" remarks="Selling price of a single product." size="0" type="numeric"/>
+         <column autoUpdated="false" defaultValue="0.0" digits="0" id="7" name="unitpricediscount" nullable="false" remarks="Discount amount." size="0" type="numeric"/>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="8" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="9" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="salesorderid" sequenceNumberInPK="1"/>
+         <primaryKey column="salesorderdetailid" sequenceNumberInPK="2"/>
+         <index name="PK_SalesOrderDetail_SalesOrderID_SalesOrderDetailID" unique="true">
+            <column ascending="true" name="salesorderid"/>
+            <column ascending="true" name="salesorderdetailid"/>
+         </index>
+      </table>
+      <table name="salesorderheader" numRows="31465" remarks="General sales order information." schema="sales" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('sales.salesorderheader_salesorderid_seq'::regclass)" digits="0" id="0" name="salesorderid" nullable="false" remarks="Primary key." size="10" type="serial">
+            <child column="salesorderid" foreignKey="FK_SalesOrderDetail_SalesOrderHeader_SalesOrderID" implied="false" onDeleteCascade="true" table="salesorderdetail"/>
+            <child column="salesorderid" foreignKey="FK_SalesOrderHeaderSalesReason_SalesOrderHeader_SalesOrderID" implied="false" onDeleteCascade="true" table="salesorderheadersalesreason"/>
+         </column>
+         <column autoUpdated="false" defaultValue="0" digits="0" id="1" name="revisionnumber" nullable="false" remarks="Incremental number to track changes to the sales order over time." size="5" type="int2"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="2" name="orderdate" nullable="false" remarks="Dates the sales order was created." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="6" id="3" name="duedate" nullable="false" remarks="Date the order is due to the customer." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="6" id="4" name="shipdate" nullable="true" remarks="Date the order was shipped to the customer." size="29" type="timestamp"/>
+         <column autoUpdated="false" defaultValue="1" digits="0" id="5" name="status" nullable="false" remarks="Order current status. 1 = In process; 2 = Approved; 3 = Backordered; 4 = Rejected; 5 = Shipped; 6 = Cancelled" size="5" type="int2"/>
+         <column autoUpdated="false" defaultValue="true" digits="0" id="6" name="onlineorderflag" nullable="false" remarks="0 = Order placed by sales person. 1 = Order placed online by customer." size="1" type="Flag"/>
+         <column autoUpdated="false" digits="0" id="7" name="purchaseordernumber" nullable="true" remarks="Customer purchase order number reference." size="29" type="OrderNumber"/>
+         <column autoUpdated="false" digits="0" id="8" name="accountnumber" nullable="true" remarks="Financial accounting number reference." size="19" type="AccountNumber"/>
+         <column autoUpdated="false" digits="0" id="9" name="customerid" nullable="false" remarks="Customer identification number. Foreign key to Customer.BusinessEntityID." size="10" type="int4">
+            <parent column="customerid" foreignKey="FK_SalesOrderHeader_Customer_CustomerID" implied="false" onDeleteCascade="false" table="customer"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="10" name="salespersonid" nullable="true" remarks="Sales person who created the sales order. Foreign key to SalesPerson.BusinessEntityID." size="10" type="int4">
+            <parent column="businessentityid" foreignKey="FK_SalesOrderHeader_SalesPerson_SalesPersonID" implied="false" onDeleteCascade="false" table="salesperson"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="11" name="territoryid" nullable="true" remarks="Territory in which the sale was made. Foreign key to SalesTerritory.SalesTerritoryID." size="10" type="int4">
+            <parent column="territoryid" foreignKey="FK_SalesOrderHeader_SalesTerritory_TerritoryID" implied="false" onDeleteCascade="false" table="salesterritory"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="12" name="billtoaddressid" nullable="false" remarks="Customer billing address. Foreign key to Address.AddressID." size="10" type="int4">
+            <parent column="addressid" foreignKey="FK_SalesOrderHeader_Address_BillToAddressID" implied="false" onDeleteCascade="false" table="address"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="13" name="shiptoaddressid" nullable="false" remarks="Customer shipping address. Foreign key to Address.AddressID." size="10" type="int4">
+            <parent column="addressid" foreignKey="FK_SalesOrderHeader_Address_ShipToAddressID" implied="false" onDeleteCascade="false" table="address"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="14" name="shipmethodid" nullable="false" remarks="Shipping method. Foreign key to ShipMethod.ShipMethodID." size="10" type="int4">
+            <parent column="shipmethodid" foreignKey="FK_SalesOrderHeader_ShipMethod_ShipMethodID" implied="false" onDeleteCascade="false" table="shipmethod"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="15" name="creditcardid" nullable="true" remarks="Credit card identification number. Foreign key to CreditCard.CreditCardID." size="10" type="int4">
+            <parent column="creditcardid" foreignKey="FK_SalesOrderHeader_CreditCard_CreditCardID" implied="false" onDeleteCascade="false" table="creditcard"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="16" name="creditcardapprovalcode" nullable="true" remarks="Approval code provided by the credit card company." size="15" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="17" name="currencyrateid" nullable="true" remarks="Currency exchange rate used. Foreign key to CurrencyRate.CurrencyRateID." size="10" type="int4">
+            <parent column="currencyrateid" foreignKey="FK_SalesOrderHeader_CurrencyRate_CurrencyRateID" implied="false" onDeleteCascade="false" table="currencyrate"/>
+         </column>
+         <column autoUpdated="false" defaultValue="0.00" digits="0" id="18" name="subtotal" nullable="false" remarks="Sales subtotal. Computed as SUM(SalesOrderDetail.LineTotal)for the appropriate SalesOrderID." size="0" type="numeric"/>
+         <column autoUpdated="false" defaultValue="0.00" digits="0" id="19" name="taxamt" nullable="false" remarks="Tax amount." size="0" type="numeric"/>
+         <column autoUpdated="false" defaultValue="0.00" digits="0" id="20" name="freight" nullable="false" remarks="Shipping cost." size="0" type="numeric"/>
+         <column autoUpdated="false" digits="0" id="21" name="totaldue" nullable="true" remarks="Total due from customer. Computed as Subtotal + TaxAmt + Freight." size="0" type="numeric"/>
+         <column autoUpdated="false" digits="0" id="22" name="comment" nullable="true" remarks="Sales representative comments." size="128" type="varchar"/>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="23" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="24" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="salesorderid" sequenceNumberInPK="1"/>
+         <index name="PK_SalesOrderHeader_SalesOrderID" unique="true">
+            <column ascending="true" name="salesorderid"/>
+         </index>
+      </table>
+      <table name="salesorderheadersalesreason" numRows="27647" remarks="Cross-reference table mapping sales orders to sales reason codes." schema="sales" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="salesorderid" nullable="false" remarks="Primary key. Foreign key to SalesOrderHeader.SalesOrderID." size="10" type="int4">
+            <parent column="salesorderid" foreignKey="FK_SalesOrderHeaderSalesReason_SalesOrderHeader_SalesOrderID" implied="false" onDeleteCascade="true" table="salesorderheader"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="salesreasonid" nullable="false" remarks="Primary key. Foreign key to SalesReason.SalesReasonID." size="10" type="int4">
+            <parent column="salesreasonid" foreignKey="FK_SalesOrderHeaderSalesReason_SalesReason_SalesReasonID" implied="false" onDeleteCascade="false" table="salesreason"/>
+         </column>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="2" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="salesorderid" sequenceNumberInPK="1"/>
+         <primaryKey column="salesreasonid" sequenceNumberInPK="2"/>
+         <index name="PK_SalesOrderHeaderSalesReason_SalesOrderID_SalesReasonID" unique="true">
+            <column ascending="true" name="salesorderid"/>
+            <column ascending="true" name="salesreasonid"/>
+         </index>
+      </table>
+      <table name="salesperson" numRows="17" remarks="Sales representative current information." schema="sales" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="false" remarks="Primary key for SalesPerson records. Foreign key to Employee.BusinessEntityID" size="10" type="int4">
+            <child column="salespersonid" foreignKey="FK_SalesOrderHeader_SalesPerson_SalesPersonID" implied="false" onDeleteCascade="false" table="salesorderheader"/>
+            <child column="businessentityid" foreignKey="FK_SalesPersonQuotaHistory_SalesPerson_BusinessEntityID" implied="false" onDeleteCascade="false" table="salespersonquotahistory"/>
+            <child column="businessentityid" foreignKey="FK_SalesTerritoryHistory_SalesPerson_BusinessEntityID" implied="false" onDeleteCascade="false" table="salesterritoryhistory"/>
+            <child column="salespersonid" foreignKey="FK_Store_SalesPerson_SalesPersonID" implied="false" onDeleteCascade="false" table="store"/>
+            <parent column="businessentityid" foreignKey="FK_SalesPerson_Employee_BusinessEntityID" implied="false" onDeleteCascade="false" table="employee"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="territoryid" nullable="true" remarks="Territory currently assigned to. Foreign key to SalesTerritory.SalesTerritoryID." size="10" type="int4">
+            <parent column="territoryid" foreignKey="FK_SalesPerson_SalesTerritory_TerritoryID" implied="false" onDeleteCascade="false" table="salesterritory"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="salesquota" nullable="true" remarks="Projected yearly sales." size="0" type="numeric"/>
+         <column autoUpdated="false" defaultValue="0.00" digits="0" id="3" name="bonus" nullable="false" remarks="Bonus due if quota is met." size="0" type="numeric"/>
+         <column autoUpdated="false" defaultValue="0.00" digits="0" id="4" name="commissionpct" nullable="false" remarks="Commision percent received per sale." size="0" type="numeric"/>
+         <column autoUpdated="false" defaultValue="0.00" digits="0" id="5" name="salesytd" nullable="false" remarks="Sales total year to date." size="0" type="numeric"/>
+         <column autoUpdated="false" defaultValue="0.00" digits="0" id="6" name="saleslastyear" nullable="false" remarks="Sales total of previous year." size="0" type="numeric"/>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="7" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="8" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="businessentityid" sequenceNumberInPK="1"/>
+         <index name="PK_SalesPerson_BusinessEntityID" unique="true">
+            <column ascending="true" name="businessentityid"/>
+         </index>
+      </table>
+      <table name="salespersonquotahistory" numRows="163" remarks="Sales performance tracking." schema="sales" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="false" remarks="Sales person identification number. Foreign key to SalesPerson.BusinessEntityID." size="10" type="int4">
+            <parent column="businessentityid" foreignKey="FK_SalesPersonQuotaHistory_SalesPerson_BusinessEntityID" implied="false" onDeleteCascade="false" table="salesperson"/>
+         </column>
+         <column autoUpdated="false" digits="6" id="1" name="quotadate" nullable="false" remarks="Sales quota date." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="0" id="2" name="salesquota" nullable="false" remarks="Sales quota amount." size="0" type="numeric"/>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="3" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="4" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="businessentityid" sequenceNumberInPK="1"/>
+         <primaryKey column="quotadate" sequenceNumberInPK="2"/>
+         <index name="PK_SalesPersonQuotaHistory_BusinessEntityID_QuotaDate" unique="true">
+            <column ascending="true" name="businessentityid"/>
+            <column ascending="true" name="quotadate"/>
+         </index>
+      </table>
+      <table name="salesreason" numRows="10" remarks="Lookup table of customer purchase reasons." schema="sales" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('sales.salesreason_salesreasonid_seq'::regclass)" digits="0" id="0" name="salesreasonid" nullable="false" remarks="Primary key for SalesReason records." size="10" type="serial">
+            <child column="salesreasonid" foreignKey="FK_SalesOrderHeaderSalesReason_SalesReason_SalesReasonID" implied="false" onDeleteCascade="false" table="salesorderheadersalesreason"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="Sales reason description." size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="2" name="reasontype" nullable="false" remarks="Category the sales reason belongs to." size="54" type="Name"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="3" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="salesreasonid" sequenceNumberInPK="1"/>
+         <index name="PK_SalesReason_SalesReasonID" unique="true">
+            <column ascending="true" name="salesreasonid"/>
+         </index>
+      </table>
+      <table name="salestaxrate" numRows="29" remarks="Tax rate lookup table." schema="sales" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('sales.salestaxrate_salestaxrateid_seq'::regclass)" digits="0" id="0" name="salestaxrateid" nullable="false" remarks="Primary key for SalesTaxRate records." size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="stateprovinceid" nullable="false" remarks="State, province, or country/region the sales tax applies to." size="10" type="int4">
+            <parent column="stateprovinceid" foreignKey="FK_SalesTaxRate_StateProvince_StateProvinceID" implied="false" onDeleteCascade="false" table="stateprovince"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="taxtype" nullable="false" remarks="1 = Tax applied to retail transactions, 2 = Tax applied to wholesale transactions, 3 = Tax applied to all sales (retail and wholesale) transactions." size="5" type="int2"/>
+         <column autoUpdated="false" defaultValue="0.00" digits="0" id="3" name="taxrate" nullable="false" remarks="Tax rate amount." size="0" type="numeric"/>
+         <column autoUpdated="false" digits="0" id="4" name="name" nullable="false" remarks="Tax rate description." size="54" type="Name"/>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="5" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="6" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="salestaxrateid" sequenceNumberInPK="1"/>
+         <index name="PK_SalesTaxRate_SalesTaxRateID" unique="true">
+            <column ascending="true" name="salestaxrateid"/>
+         </index>
+      </table>
+      <table name="salesterritory" numRows="10" remarks="Sales territory lookup table." schema="sales" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('sales.salesterritory_territoryid_seq'::regclass)" digits="0" id="0" name="territoryid" nullable="false" remarks="Primary key for SalesTerritory records." size="10" type="serial">
+            <child column="territoryid" foreignKey="FK_Customer_SalesTerritory_TerritoryID" implied="false" onDeleteCascade="false" table="customer"/>
+            <child column="territoryid" foreignKey="FK_SalesOrderHeader_SalesTerritory_TerritoryID" implied="false" onDeleteCascade="false" table="salesorderheader"/>
+            <child column="territoryid" foreignKey="FK_SalesPerson_SalesTerritory_TerritoryID" implied="false" onDeleteCascade="false" table="salesperson"/>
+            <child column="territoryid" foreignKey="FK_SalesTerritoryHistory_SalesTerritory_TerritoryID" implied="false" onDeleteCascade="false" table="salesterritoryhistory"/>
+            <child column="territoryid" foreignKey="FK_StateProvince_SalesTerritory_TerritoryID" implied="false" onDeleteCascade="false" table="stateprovince"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="Sales territory description" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="2" name="countryregioncode" nullable="false" remarks="ISO standard country or region code. Foreign key to CountryRegion.CountryRegionCode." size="3" type="varchar">
+            <parent column="countryregioncode" foreignKey="FK_SalesTerritory_CountryRegion_CountryRegionCode" implied="false" onDeleteCascade="false" table="countryregion"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="3" name="group" nullable="false" remarks="Geographic area to which the sales territory belong." size="50" type="varchar"/>
+         <column autoUpdated="false" defaultValue="0.00" digits="0" id="4" name="salesytd" nullable="false" remarks="Sales in the territory year to date." size="0" type="numeric"/>
+         <column autoUpdated="false" defaultValue="0.00" digits="0" id="5" name="saleslastyear" nullable="false" remarks="Sales in the territory the previous year." size="0" type="numeric"/>
+         <column autoUpdated="false" defaultValue="0.00" digits="0" id="6" name="costytd" nullable="false" remarks="Business costs in the territory year to date." size="0" type="numeric"/>
+         <column autoUpdated="false" defaultValue="0.00" digits="0" id="7" name="costlastyear" nullable="false" remarks="Business costs in the territory the previous year." size="0" type="numeric"/>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="8" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="9" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="territoryid" sequenceNumberInPK="1"/>
+         <index name="PK_SalesTerritory_TerritoryID" unique="true">
+            <column ascending="true" name="territoryid"/>
+         </index>
+      </table>
+      <table name="salesterritoryhistory" numRows="17" remarks="Sales representative transfers to other sales territories." schema="sales" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="false" remarks="Primary key. The sales rep.  Foreign key to SalesPerson.BusinessEntityID." size="10" type="int4">
+            <parent column="businessentityid" foreignKey="FK_SalesTerritoryHistory_SalesPerson_BusinessEntityID" implied="false" onDeleteCascade="false" table="salesperson"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="territoryid" nullable="false" remarks="Primary key. Territory identification number. Foreign key to SalesTerritory.SalesTerritoryID." size="10" type="int4">
+            <parent column="territoryid" foreignKey="FK_SalesTerritoryHistory_SalesTerritory_TerritoryID" implied="false" onDeleteCascade="false" table="salesterritory"/>
+         </column>
+         <column autoUpdated="false" digits="6" id="2" name="startdate" nullable="false" remarks="Primary key. Date the sales representive started work in the territory." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="6" id="3" name="enddate" nullable="true" remarks="Date the sales representative left work in the territory." size="29" type="timestamp"/>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="4" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="5" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="businessentityid" sequenceNumberInPK="1"/>
+         <primaryKey column="startdate" sequenceNumberInPK="2"/>
+         <primaryKey column="territoryid" sequenceNumberInPK="3"/>
+         <index name="PK_SalesTerritoryHistory_BusinessEntityID_StartDate_TerritoryID" unique="true">
+            <column ascending="true" name="businessentityid"/>
+            <column ascending="true" name="startdate"/>
+            <column ascending="true" name="territoryid"/>
+         </index>
+      </table>
+      <table name="shoppingcartitem" numRows="3" remarks="Contains online customer orders until the order is submitted or cancelled." schema="sales" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('sales.shoppingcartitem_shoppingcartitemid_seq'::regclass)" digits="0" id="0" name="shoppingcartitemid" nullable="false" remarks="Primary key for ShoppingCartItem records." size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="shoppingcartid" nullable="false" remarks="Shopping cart identification number." size="50" type="varchar"/>
+         <column autoUpdated="false" defaultValue="1" digits="0" id="2" name="quantity" nullable="false" remarks="Product quantity ordered." size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="3" name="productid" nullable="false" remarks="Product ordered. Foreign key to Product.ProductID." size="10" type="int4">
+            <parent column="productid" foreignKey="FK_ShoppingCartItem_Product_ProductID" implied="false" onDeleteCascade="false" table="product"/>
+         </column>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="4" name="datecreated" nullable="false" remarks="Date the time the record was created." size="29" type="timestamp"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="5" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="shoppingcartitemid" sequenceNumberInPK="1"/>
+         <index name="PK_ShoppingCartItem_ShoppingCartItemID" unique="true">
+            <column ascending="true" name="shoppingcartitemid"/>
+         </index>
+      </table>
+      <table name="specialoffer" numRows="16" remarks="Sale discounts lookup table." schema="sales" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('sales.specialoffer_specialofferid_seq'::regclass)" digits="0" id="0" name="specialofferid" nullable="false" remarks="Primary key for SpecialOffer records." size="10" type="serial">
+            <child column="specialofferid" foreignKey="FK_SpecialOfferProduct_SpecialOffer_SpecialOfferID" implied="false" onDeleteCascade="false" table="specialofferproduct"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="description" nullable="false" remarks="Discount description." size="255" type="varchar"/>
+         <column autoUpdated="false" defaultValue="0.00" digits="0" id="2" name="discountpct" nullable="false" remarks="Discount precentage." size="0" type="numeric"/>
+         <column autoUpdated="false" digits="0" id="3" name="type" nullable="false" remarks="Discount type category." size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="category" nullable="false" remarks="Group the discount applies to such as Reseller or Customer." size="50" type="varchar"/>
+         <column autoUpdated="false" digits="6" id="5" name="startdate" nullable="false" remarks="Discount start date." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="6" id="6" name="enddate" nullable="false" remarks="Discount end date." size="29" type="timestamp"/>
+         <column autoUpdated="false" defaultValue="0" digits="0" id="7" name="minqty" nullable="false" remarks="Minimum discount percent allowed." size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="8" name="maxqty" nullable="true" remarks="Maximum discount percent allowed." size="10" type="int4"/>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="9" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="10" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="specialofferid" sequenceNumberInPK="1"/>
+         <index name="PK_SpecialOffer_SpecialOfferID" unique="true">
+            <column ascending="true" name="specialofferid"/>
+         </index>
+      </table>
+      <table name="specialofferproduct" numRows="538" remarks="Cross-reference table mapping products to special offer discounts." schema="sales" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="specialofferid" nullable="false" remarks="Primary key for SpecialOfferProduct records." size="10" type="int4">
+            <child column="specialofferid" foreignKey="FK_SalesOrderDetail_SpecialOfferProduct_SpecialOfferIDProductID" implied="false" onDeleteCascade="false" table="salesorderdetail"/>
+            <parent column="specialofferid" foreignKey="FK_SpecialOfferProduct_SpecialOffer_SpecialOfferID" implied="false" onDeleteCascade="false" table="specialoffer"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="productid" nullable="false" remarks="Product identification number. Foreign key to Product.ProductID." size="10" type="int4">
+            <child column="productid" foreignKey="FK_SalesOrderDetail_SpecialOfferProduct_SpecialOfferIDProductID" implied="false" onDeleteCascade="false" table="salesorderdetail"/>
+            <parent column="productid" foreignKey="FK_SpecialOfferProduct_Product_ProductID" implied="false" onDeleteCascade="false" table="product"/>
+         </column>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="2" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="3" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="specialofferid" sequenceNumberInPK="1"/>
+         <primaryKey column="productid" sequenceNumberInPK="2"/>
+         <index name="PK_SpecialOfferProduct_SpecialOfferID_ProductID" unique="true">
+            <column ascending="true" name="specialofferid"/>
+            <column ascending="true" name="productid"/>
+         </index>
+      </table>
+      <table name="store" numRows="701" remarks="Customers (resellers) of Adventure Works products." schema="sales" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="false" remarks="Primary key. Foreign key to Customer.BusinessEntityID." size="10" type="int4">
+            <child column="storeid" foreignKey="FK_Customer_Store_StoreID" implied="false" onDeleteCascade="false" table="customer"/>
+            <child column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="vindividualcustomer"/>
+            <child column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="vpersondemographics"/>
+            <child column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="vsalesperson"/>
+            <child column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="vstorewithaddresses"/>
+            <child column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="vstorewithcontacts"/>
+            <child column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="vstorewithdemographics"/>
+            <parent column="businessentityid" foreignKey="FK_Store_BusinessEntity_BusinessEntityID" implied="false" onDeleteCascade="false" table="businessentity"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="Name of the store." size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="2" name="salespersonid" nullable="true" remarks="ID of the sales person assigned to the customer. Foreign key to SalesPerson.BusinessEntityID." size="10" type="int4">
+            <parent column="businessentityid" foreignKey="FK_Store_SalesPerson_SalesPersonID" implied="false" onDeleteCascade="false" table="salesperson"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="3" name="demographics" nullable="true" remarks="Demographic informationg about the store such as the number of employees, annual sales and store type." size="2147483647" type="xml"/>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="4" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="5" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="businessentityid" sequenceNumberInPK="1"/>
+         <index name="PK_Store_BusinessEntityID" unique="true">
+            <column ascending="true" name="businessentityid"/>
+         </index>
+      </table>
+      <table name="vindividualcustomer" numRows="0" remarks="" schema="sales" type="VIEW">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="true" remarks="" size="10" type="int4">
+            <parent column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="store"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="title" nullable="true" remarks="" size="8" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="firstname" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="3" name="middlename" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="4" name="lastname" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="5" name="suffix" nullable="true" remarks="" size="10" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="phonenumber" nullable="true" remarks="" size="29" type="Phone"/>
+         <column autoUpdated="false" digits="0" id="7" name="phonenumbertype" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="8" name="emailaddress" nullable="true" remarks="" size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="9" name="emailpromotion" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="10" name="addresstype" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="11" name="addressline1" nullable="true" remarks="" size="60" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="12" name="addressline2" nullable="true" remarks="" size="60" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="13" name="city" nullable="true" remarks="" size="30" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="14" name="stateprovincename" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="15" name="postalcode" nullable="true" remarks="" size="15" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="16" name="countryregionname" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="17" name="demographics" nullable="true" remarks="" size="2147483647" type="xml"/>
+      </table>
+      <table name="vpersondemographics" numRows="0" remarks="" schema="sales" type="VIEW">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="true" remarks="" size="10" type="int4">
+            <parent column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="store"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="totalpurchaseytd" nullable="true" remarks="" size="2147483647" type="money"/>
+         <column autoUpdated="false" digits="0" id="2" name="datefirstpurchase" nullable="true" remarks="" size="13" type="date"/>
+         <column autoUpdated="false" digits="0" id="3" name="birthdate" nullable="true" remarks="" size="13" type="date"/>
+         <column autoUpdated="false" digits="0" id="4" name="maritalstatus" nullable="true" remarks="" size="1" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="5" name="yearlyincome" nullable="true" remarks="" size="30" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="gender" nullable="true" remarks="" size="1" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="7" name="totalchildren" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="8" name="numberchildrenathome" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="9" name="education" nullable="true" remarks="" size="30" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="10" name="occupation" nullable="true" remarks="" size="30" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="11" name="homeownerflag" nullable="true" remarks="" size="1" type="bool"/>
+         <column autoUpdated="false" digits="0" id="12" name="numbercarsowned" nullable="true" remarks="" size="10" type="int4"/>
+      </table>
+      <table name="vsalesperson" numRows="0" remarks="" schema="sales" type="VIEW">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="true" remarks="" size="10" type="int4">
+            <parent column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="store"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="title" nullable="true" remarks="" size="8" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="firstname" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="3" name="middlename" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="4" name="lastname" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="5" name="suffix" nullable="true" remarks="" size="10" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="jobtitle" nullable="true" remarks="" size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="7" name="phonenumber" nullable="true" remarks="" size="29" type="Phone"/>
+         <column autoUpdated="false" digits="0" id="8" name="phonenumbertype" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="9" name="emailaddress" nullable="true" remarks="" size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="10" name="emailpromotion" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="11" name="addressline1" nullable="true" remarks="" size="60" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="12" name="addressline2" nullable="true" remarks="" size="60" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="13" name="city" nullable="true" remarks="" size="30" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="14" name="stateprovincename" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="15" name="postalcode" nullable="true" remarks="" size="15" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="16" name="countryregionname" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="17" name="territoryname" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="18" name="territorygroup" nullable="true" remarks="" size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="19" name="salesquota" nullable="true" remarks="" size="0" type="numeric"/>
+         <column autoUpdated="false" digits="0" id="20" name="salesytd" nullable="true" remarks="" size="0" type="numeric"/>
+         <column autoUpdated="false" digits="0" id="21" name="saleslastyear" nullable="true" remarks="" size="0" type="numeric"/>
+      </table>
+      <table name="vsalespersonsalesbyfiscalyears" numRows="0" remarks="" schema="sales" type="VIEW">
+         <column autoUpdated="false" digits="0" id="0" name="SalesPersonID" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="1" name="FullName" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="2" name="JobTitle" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="3" name="SalesTerritory" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="4" id="4" name="2012" nullable="true" remarks="" size="12" type="numeric"/>
+         <column autoUpdated="false" digits="4" id="5" name="2013" nullable="true" remarks="" size="12" type="numeric"/>
+         <column autoUpdated="false" digits="4" id="6" name="2014" nullable="true" remarks="" size="12" type="numeric"/>
+      </table>
+      <table name="vsalespersonsalesbyfiscalyearsdata" numRows="0" remarks="" schema="sales" type="VIEW">
+         <column autoUpdated="false" digits="0" id="0" name="salespersonid" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="1" name="fullname" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="2" name="jobtitle" nullable="true" remarks="" size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="salesterritory" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="4" name="salestotal" nullable="true" remarks="" size="0" type="numeric"/>
+         <column autoUpdated="false" digits="17" id="5" name="fiscalyear" nullable="true" remarks="" size="17" type="float8"/>
+      </table>
+      <table name="vstorewithaddresses" numRows="0" remarks="" schema="sales" type="VIEW">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="true" remarks="" size="10" type="int4">
+            <parent column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="store"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="2" name="addresstype" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="3" name="addressline1" nullable="true" remarks="" size="60" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="addressline2" nullable="true" remarks="" size="60" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="5" name="city" nullable="true" remarks="" size="30" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="stateprovincename" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="7" name="postalcode" nullable="true" remarks="" size="15" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="8" name="countryregionname" nullable="true" remarks="" size="54" type="Name"/>
+      </table>
+      <table name="vstorewithcontacts" numRows="0" remarks="" schema="sales" type="VIEW">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="true" remarks="" size="10" type="int4">
+            <parent column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="store"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="2" name="contacttype" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="3" name="title" nullable="true" remarks="" size="8" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="firstname" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="5" name="middlename" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="6" name="lastname" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="7" name="suffix" nullable="true" remarks="" size="10" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="8" name="phonenumber" nullable="true" remarks="" size="29" type="Phone"/>
+         <column autoUpdated="false" digits="0" id="9" name="phonenumbertype" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="10" name="emailaddress" nullable="true" remarks="" size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="11" name="emailpromotion" nullable="true" remarks="" size="10" type="int4"/>
+      </table>
+      <table name="vstorewithdemographics" numRows="0" remarks="" schema="sales" type="VIEW">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="true" remarks="" size="10" type="int4">
+            <parent column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="store"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="2" name="AnnualSales" nullable="true" remarks="" size="2147483647" type="money"/>
+         <column autoUpdated="false" digits="0" id="3" name="AnnualRevenue" nullable="true" remarks="" size="2147483647" type="money"/>
+         <column autoUpdated="false" digits="0" id="4" name="BankName" nullable="true" remarks="" size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="5" name="BusinessType" nullable="true" remarks="" size="5" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="YearOpened" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="7" name="Specialty" nullable="true" remarks="" size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="8" name="SquareFeet" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="9" name="Brands" nullable="true" remarks="" size="30" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="10" name="Internet" nullable="true" remarks="" size="30" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="11" name="NumberEmployees" nullable="true" remarks="" size="10" type="int4"/>
+      </table>
+   </tables>
+</database>

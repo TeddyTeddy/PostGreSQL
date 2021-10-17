@@ -1,0 +1,45 @@
+// dot 2.40.1 on Linux 5.4.0-80-generic
+// SchemaSpy rev 590
+digraph "vjobcandidate" {
+  graph [
+    rankdir="RL"
+    bgcolor="#f7f7f7"
+    nodesep="0.18"
+    ranksep="0.46"
+    fontname="Helvetica"
+    fontsize="11"
+  ];
+  node [
+    fontname="Helvetica"
+    fontsize="11"
+    shape="plaintext"
+  ];
+  edge [
+    arrowsize="0.8"
+  ];
+  "vjobcandidate" [
+    label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" BGCOLOR="#ffffff">
+      <TR><TD COLSPAN="3" BGCOLOR="#9bab96" ALIGN="CENTER">vjobcandidate</TD></TR>
+      <TR><TD PORT="jobcandidateid" COLSPAN="3" ALIGN="LEFT">jobcandidateid</TD></TR>
+      <TR><TD PORT="businessentityid" COLSPAN="3" ALIGN="LEFT">businessentityid</TD></TR>
+      <TR><TD PORT="Name.Prefix" COLSPAN="3" ALIGN="LEFT">Name.Prefix</TD></TR>
+      <TR><TD PORT="Name.First" COLSPAN="3" ALIGN="LEFT">Name.First</TD></TR>
+      <TR><TD PORT="Name.Middle" COLSPAN="3" ALIGN="LEFT">Name.Middle</TD></TR>
+      <TR><TD PORT="Name.Last" COLSPAN="3" ALIGN="LEFT">Name.Last</TD></TR>
+      <TR><TD PORT="Name.Suffix" COLSPAN="3" ALIGN="LEFT">Name.Suffix</TD></TR>
+      <TR><TD PORT="Skills" COLSPAN="3" ALIGN="LEFT">Skills</TD></TR>
+      <TR><TD PORT="Addr.Type" COLSPAN="3" ALIGN="LEFT">Addr.Type</TD></TR>
+      <TR><TD PORT="Addr.Loc.CountryRegion" COLSPAN="3" ALIGN="LEFT">Addr.Loc.CountryRegion</TD></TR>
+      <TR><TD PORT="Addr.Loc.State" COLSPAN="3" ALIGN="LEFT">Addr.Loc.State</TD></TR>
+      <TR><TD PORT="Addr.Loc.City" COLSPAN="3" ALIGN="LEFT">Addr.Loc.City</TD></TR>
+      <TR><TD PORT="Addr.PostalCode" COLSPAN="3" ALIGN="LEFT">Addr.PostalCode</TD></TR>
+      <TR><TD PORT="EMail" COLSPAN="3" ALIGN="LEFT">EMail</TD></TR>
+      <TR><TD PORT="WebSite" COLSPAN="3" ALIGN="LEFT">WebSite</TD></TR>
+      <TR><TD PORT="modifieddate" COLSPAN="3" ALIGN="LEFT">modifieddate</TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#f7f7f7">  </TD><TD ALIGN="RIGHT" BGCOLOR="#f7f7f7">view</TD><TD ALIGN="RIGHT" BGCOLOR="#f7f7f7">  </TD></TR>
+    </TABLE>>
+    URL="tables/vjobcandidate.html"
+    tooltip="vjobcandidate"
+  ];
+}

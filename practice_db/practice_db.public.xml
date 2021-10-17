@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<database name="practice_db" schema="public" type="PostgreSQL - 13.4 (Ubuntu 13.4-1.pgdg18.04+1)">
+   <tables>
+      <table name="accounts" numRows="6" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('accounts_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="owner" nullable="false" remarks="" size="100" type="varchar"/>
+         <column autoUpdated="false" defaultValue="0.0" digits="2" id="2" name="balance" nullable="false" remarks="" size="65" type="numeric"/>
+         <column autoUpdated="false" digits="0" id="3" name="currency" nullable="true" remarks="" size="10" type="varchar"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="4" name="created_at" nullable="true" remarks="" size="29" type="timestamp"/>
+      </table>
+      <table name="books" numRows="4" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('books_id_seq'::regclass)" digits="0" id="0" name="id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="bookinfo" nullable="true" remarks="" size="2147483647" type="jsonb"/>
+      </table>
+      <table name="books2" numRows="4" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="id" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="1" name="bookinfo" nullable="true" remarks="" size="2147483647" type="jsonb"/>
+      </table>
+      <table name="emp" numRows="2" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="empname" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="1" name="salary" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="6" id="2" name="last_date" nullable="true" remarks="" size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="0" id="3" name="last_user" nullable="true" remarks="" size="2147483647" type="text"/>
+      </table>
+      <table name="emp_audit" numRows="6" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="operation" nullable="false" remarks="" size="1" type="bpchar"/>
+         <column autoUpdated="false" digits="6" id="1" name="stamp" nullable="false" remarks="" size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="0" id="2" name="userid" nullable="false" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="3" name="empname" nullable="false" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="4" name="salary" nullable="true" remarks="" size="10" type="int4"/>
+      </table>
+      <table name="emp_view" numRows="0" remarks="" schema="public" type="VIEW">
+         <column autoUpdated="false" digits="0" id="0" name="empname" nullable="true" remarks="" size="2147483647" type="text"/>
+         <column autoUpdated="false" digits="0" id="1" name="salary" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="6" id="2" name="last_updated" nullable="true" remarks="" size="29" type="timestamp"/>
+      </table>
+      <table name="friends" numRows="2" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="fullname" nullable="true" remarks="" size="2147483647" type="full_name"/>
+         <column autoUpdated="false" digits="0" id="1" name="address" nullable="true" remarks="" size="2147483647" type="address"/>
+         <column autoUpdated="false" digits="0" id="2" name="specialdates" nullable="true" remarks="" size="2147483647" type="dates_to_remember"/>
+         <column autoUpdated="false" digits="0" id="3" name="children" nullable="true" remarks="" size="50" type="_varchar"/>
+      </table>
+      <table name="practices" numRows="0" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="practiceid" nullable="false" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="1" name="practice_field" nullable="false" remarks="" size="50" type="varchar"/>
+         <primaryKey column="practiceid" sequenceNumberInPK="1"/>
+         <index name="practices_pkey" unique="true">
+            <column ascending="true" name="practiceid"/>
+         </index>
+      </table>
+      <table name="product_groups" numRows="3" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('product_groups_group_id_seq'::regclass)" digits="0" id="0" name="group_id" nullable="false" remarks="" size="10" type="serial">
+            <child column="group_id" foreignKey="products_group_id_fkey" implied="false" onDeleteCascade="false" table="products"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="group_name" nullable="false" remarks="" size="255" type="varchar"/>
+         <primaryKey column="group_id" sequenceNumberInPK="1"/>
+         <index name="product_groups_pkey" unique="true">
+            <column ascending="true" name="group_id"/>
+         </index>
+      </table>
+      <table name="products" numRows="11" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('products_product_id_seq'::regclass)" digits="0" id="0" name="product_id" nullable="false" remarks="" size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="product_name" nullable="false" remarks="" size="255" type="varchar"/>
+         <column autoUpdated="false" digits="2" id="2" name="price" nullable="true" remarks="" size="11" type="numeric"/>
+         <column autoUpdated="false" digits="0" id="3" name="group_id" nullable="false" remarks="" size="10" type="int4">
+            <parent column="group_id" foreignKey="products_group_id_fkey" implied="false" onDeleteCascade="false" table="product_groups"/>
+         </column>
+         <primaryKey column="product_id" sequenceNumberInPK="1"/>
+         <index name="products_pkey" unique="true">
+            <column ascending="true" name="product_id"/>
+         </index>
+      </table>
+      <table name="salary_employees" numRows="1" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="name" nullable="true" remarks="" size="100" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="1" name="pay_by_quarter" nullable="true" remarks="" size="10" type="_int4"/>
+         <column autoUpdated="false" digits="0" id="2" name="schedule" nullable="true" remarks="" size="2147483647" type="_text"/>
+      </table>
+      <table name="sales" numRows="4" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="brand" nullable="false" remarks="" size="2147483647" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="1" name="segment" nullable="false" remarks="" size="2147483647" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="quantity" nullable="false" remarks="" size="10" type="int4"/>
+         <primaryKey column="brand" sequenceNumberInPK="1"/>
+         <primaryKey column="segment" sequenceNumberInPK="2"/>
+         <index name="sales_pkey" unique="true">
+            <column ascending="true" name="brand"/>
+            <column ascending="true" name="segment"/>
+         </index>
+      </table>
+   </tables>
+</database>

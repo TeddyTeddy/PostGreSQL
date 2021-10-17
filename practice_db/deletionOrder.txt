@@ -1,0 +1,11 @@
+sales
+salary_employees
+practices
+friends
+emp_audit
+emp
+books2
+books
+accounts
+products
+product_groups

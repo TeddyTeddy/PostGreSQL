@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<database name="AdventureWorks" schema="purchasing" type="PostgreSQL - 13.4 (Ubuntu 13.4-1.pgdg18.04+1)">
+   <tables>
+      <table name="productvendor" numRows="460" remarks="Cross-reference table mapping vendors with the products they supply." schema="purchasing" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="productid" nullable="false" remarks="Primary key. Foreign key to Product.ProductID." size="10" type="int4">
+            <parent column="productid" foreignKey="FK_ProductVendor_Product_ProductID" implied="false" onDeleteCascade="false" table="product"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="businessentityid" nullable="false" remarks="Primary key. Foreign key to Vendor.BusinessEntityID." size="10" type="int4">
+            <parent column="businessentityid" foreignKey="FK_ProductVendor_Vendor_BusinessEntityID" implied="false" onDeleteCascade="false" table="vendor"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="averageleadtime" nullable="false" remarks="The average span of time (in days) between placing an order with the vendor and receiving the purchased product." size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="3" name="standardprice" nullable="false" remarks="The vendor's usual selling price." size="0" type="numeric"/>
+         <column autoUpdated="false" digits="0" id="4" name="lastreceiptcost" nullable="true" remarks="The selling price when last purchased." size="0" type="numeric"/>
+         <column autoUpdated="false" digits="6" id="5" name="lastreceiptdate" nullable="true" remarks="Date the product was last received by the vendor." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="0" id="6" name="minorderqty" nullable="false" remarks="The maximum quantity that should be ordered." size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="7" name="maxorderqty" nullable="false" remarks="The minimum quantity that should be ordered." size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="8" name="onorderqty" nullable="true" remarks="The quantity currently on order." size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="9" name="unitmeasurecode" nullable="false" remarks="The product's unit of measure." size="3" type="bpchar">
+            <parent column="unitmeasurecode" foreignKey="FK_ProductVendor_UnitMeasure_UnitMeasureCode" implied="false" onDeleteCascade="false" table="unitmeasure"/>
+         </column>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="10" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="productid" sequenceNumberInPK="1"/>
+         <primaryKey column="businessentityid" sequenceNumberInPK="2"/>
+         <index name="PK_ProductVendor_ProductID_BusinessEntityID" unique="true">
+            <column ascending="true" name="productid"/>
+            <column ascending="true" name="businessentityid"/>
+         </index>
+      </table>
+      <table name="purchaseorderdetail" numRows="8845" remarks="Individual products associated with a specific purchase order. See PurchaseOrderHeader." schema="purchasing" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="purchaseorderid" nullable="false" remarks="Primary key. Foreign key to PurchaseOrderHeader.PurchaseOrderID." size="10" type="int4">
+            <parent column="purchaseorderid" foreignKey="FK_PurchaseOrderDetail_PurchaseOrderHeader_PurchaseOrderID" implied="false" onDeleteCascade="false" table="purchaseorderheader"/>
+         </column>
+         <column autoUpdated="true" defaultValue="nextval('purchasing.purchaseorderdetail_purchaseorderdetailid_seq'::regclass)" digits="0" id="1" name="purchaseorderdetailid" nullable="false" remarks="Primary key. One line number per purchased product." size="10" type="serial"/>
+         <column autoUpdated="false" digits="6" id="2" name="duedate" nullable="false" remarks="Date the product is expected to be received." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="0" id="3" name="orderqty" nullable="false" remarks="Quantity ordered." size="5" type="int2"/>
+         <column autoUpdated="false" digits="0" id="4" name="productid" nullable="false" remarks="Product identification number. Foreign key to Product.ProductID." size="10" type="int4">
+            <parent column="productid" foreignKey="FK_PurchaseOrderDetail_Product_ProductID" implied="false" onDeleteCascade="false" table="product"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="5" name="unitprice" nullable="false" remarks="Vendor's selling price of a single product." size="0" type="numeric"/>
+         <column autoUpdated="false" digits="2" id="6" name="receivedqty" nullable="false" remarks="Quantity actually received from the vendor." size="8" type="numeric"/>
+         <column autoUpdated="false" digits="2" id="7" name="rejectedqty" nullable="false" remarks="Quantity rejected during inspection." size="8" type="numeric"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="8" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="purchaseorderid" sequenceNumberInPK="1"/>
+         <primaryKey column="purchaseorderdetailid" sequenceNumberInPK="2"/>
+         <index name="PK_PurchaseOrderDetail_PurchaseOrderID_PurchaseOrderDetailID" unique="true">
+            <column ascending="true" name="purchaseorderid"/>
+            <column ascending="true" name="purchaseorderdetailid"/>
+         </index>
+      </table>
+      <table name="purchaseorderheader" numRows="4012" remarks="General purchase order information. See PurchaseOrderDetail." schema="purchasing" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('purchasing.purchaseorderheader_purchaseorderid_seq'::regclass)" digits="0" id="0" name="purchaseorderid" nullable="false" remarks="Primary key." size="10" type="serial">
+            <child column="purchaseorderid" foreignKey="FK_PurchaseOrderDetail_PurchaseOrderHeader_PurchaseOrderID" implied="false" onDeleteCascade="false" table="purchaseorderdetail"/>
+         </column>
+         <column autoUpdated="false" defaultValue="0" digits="0" id="1" name="revisionnumber" nullable="false" remarks="Incremental number to track changes to the purchase order over time." size="5" type="int2"/>
+         <column autoUpdated="false" defaultValue="1" digits="0" id="2" name="status" nullable="false" remarks="Order current status. 1 = Pending; 2 = Approved; 3 = Rejected; 4 = Complete" size="5" type="int2"/>
+         <column autoUpdated="false" digits="0" id="3" name="employeeid" nullable="false" remarks="Employee who created the purchase order. Foreign key to Employee.BusinessEntityID." size="10" type="int4">
+            <parent column="businessentityid" foreignKey="FK_PurchaseOrderHeader_Employee_EmployeeID" implied="false" onDeleteCascade="false" table="employee"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="4" name="vendorid" nullable="false" remarks="Vendor with whom the purchase order is placed. Foreign key to Vendor.BusinessEntityID." size="10" type="int4">
+            <parent column="businessentityid" foreignKey="FK_PurchaseOrderHeader_Vendor_VendorID" implied="false" onDeleteCascade="false" table="vendor"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="5" name="shipmethodid" nullable="false" remarks="Shipping method. Foreign key to ShipMethod.ShipMethodID." size="10" type="int4">
+            <parent column="shipmethodid" foreignKey="FK_PurchaseOrderHeader_ShipMethod_ShipMethodID" implied="false" onDeleteCascade="false" table="shipmethod"/>
+         </column>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="6" name="orderdate" nullable="false" remarks="Purchase order creation date." size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="6" id="7" name="shipdate" nullable="true" remarks="Estimated shipment date from the vendor." size="29" type="timestamp"/>
+         <column autoUpdated="false" defaultValue="0.00" digits="0" id="8" name="subtotal" nullable="false" remarks="Purchase order subtotal. Computed as SUM(PurchaseOrderDetail.LineTotal)for the appropriate PurchaseOrderID." size="0" type="numeric"/>
+         <column autoUpdated="false" defaultValue="0.00" digits="0" id="9" name="taxamt" nullable="false" remarks="Tax amount." size="0" type="numeric"/>
+         <column autoUpdated="false" defaultValue="0.00" digits="0" id="10" name="freight" nullable="false" remarks="Shipping cost." size="0" type="numeric"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="11" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="purchaseorderid" sequenceNumberInPK="1"/>
+         <index name="PK_PurchaseOrderHeader_PurchaseOrderID" unique="true">
+            <column ascending="true" name="purchaseorderid"/>
+         </index>
+      </table>
+      <table name="shipmethod" numRows="5" remarks="Shipping company lookup table." schema="purchasing" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('purchasing.shipmethod_shipmethodid_seq'::regclass)" digits="0" id="0" name="shipmethodid" nullable="false" remarks="Primary key for ShipMethod records." size="10" type="serial">
+            <child column="shipmethodid" foreignKey="FK_PurchaseOrderHeader_ShipMethod_ShipMethodID" implied="false" onDeleteCascade="false" table="purchaseorderheader"/>
+            <child column="shipmethodid" foreignKey="FK_SalesOrderHeader_ShipMethod_ShipMethodID" implied="false" onDeleteCascade="false" table="salesorderheader"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="Shipping company name." size="54" type="Name"/>
+         <column autoUpdated="false" defaultValue="0.00" digits="0" id="2" name="shipbase" nullable="false" remarks="Minimum shipping charge." size="0" type="numeric"/>
+         <column autoUpdated="false" defaultValue="0.00" digits="0" id="3" name="shiprate" nullable="false" remarks="Shipping charge per pound." size="0" type="numeric"/>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="4" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="5" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="shipmethodid" sequenceNumberInPK="1"/>
+         <index name="PK_ShipMethod_ShipMethodID" unique="true">
+            <column ascending="true" name="shipmethodid"/>
+         </index>
+      </table>
+      <table name="vendor" numRows="104" remarks="Companies from whom Adventure Works Cycles purchases parts or other goods." schema="purchasing" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="false" remarks="Primary key for Vendor records.  Foreign key to BusinessEntity.BusinessEntityID" size="10" type="int4">
+            <child column="businessentityid" foreignKey="FK_ProductVendor_Vendor_BusinessEntityID" implied="false" onDeleteCascade="false" table="productvendor"/>
+            <child column="vendorid" foreignKey="FK_PurchaseOrderHeader_Vendor_VendorID" implied="false" onDeleteCascade="false" table="purchaseorderheader"/>
+            <child column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="vvendorwithaddresses"/>
+            <child column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="vvendorwithcontacts"/>
+            <parent column="businessentityid" foreignKey="FK_Vendor_BusinessEntity_BusinessEntityID" implied="false" onDeleteCascade="false" table="businessentity"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="accountnumber" nullable="false" remarks="Vendor account (identification) number." size="19" type="AccountNumber"/>
+         <column autoUpdated="false" digits="0" id="2" name="name" nullable="false" remarks="Company name." size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="3" name="creditrating" nullable="false" remarks="1 = Superior, 2 = Excellent, 3 = Above average, 4 = Average, 5 = Below average" size="5" type="int2"/>
+         <column autoUpdated="false" defaultValue="true" digits="0" id="4" name="preferredvendorstatus" nullable="false" remarks="0 = Do not use if another vendor is available. 1 = Preferred over other vendors supplying the same product." size="1" type="Flag"/>
+         <column autoUpdated="false" defaultValue="true" digits="0" id="5" name="activeflag" nullable="false" remarks="0 = Vendor no longer used. 1 = Vendor is actively used." size="1" type="Flag"/>
+         <column autoUpdated="false" digits="0" id="6" name="purchasingwebserviceurl" nullable="true" remarks="Vendor URL." size="1024" type="varchar"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="7" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="businessentityid" sequenceNumberInPK="1"/>
+         <index name="PK_Vendor_BusinessEntityID" unique="true">
+            <column ascending="true" name="businessentityid"/>
+         </index>
+      </table>
+      <table name="vvendorwithaddresses" numRows="0" remarks="" schema="purchasing" type="VIEW">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="true" remarks="" size="10" type="int4">
+            <parent column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="vendor"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="2" name="addresstype" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="3" name="addressline1" nullable="true" remarks="" size="60" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="addressline2" nullable="true" remarks="" size="60" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="5" name="city" nullable="true" remarks="" size="30" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="stateprovincename" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="7" name="postalcode" nullable="true" remarks="" size="15" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="8" name="countryregionname" nullable="true" remarks="" size="54" type="Name"/>
+      </table>
+      <table name="vvendorwithcontacts" numRows="0" remarks="" schema="purchasing" type="VIEW">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="true" remarks="" size="10" type="int4">
+            <parent column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="vendor"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="2" name="contacttype" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="3" name="title" nullable="true" remarks="" size="8" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="firstname" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="5" name="middlename" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="6" name="lastname" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="7" name="suffix" nullable="true" remarks="" size="10" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="8" name="phonenumber" nullable="true" remarks="" size="29" type="Phone"/>
+         <column autoUpdated="false" digits="0" id="9" name="phonenumbertype" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="10" name="emailaddress" nullable="true" remarks="" size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="11" name="emailpromotion" nullable="true" remarks="" size="10" type="int4"/>
+      </table>
+   </tables>
+</database>

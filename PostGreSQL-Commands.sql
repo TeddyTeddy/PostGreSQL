@@ -1,8 +1,17 @@
 -- NOTE: We use Northwind db unless otherwise stated
+-- How to list all the available tables in a database?
+-- https://stackoverflow.com/questions/14730228/postgresql-query-to-list-all-table-names
+    SELECT table_name
+    FROM information_schema.tables
+    WHERE table_type='BASE TABLE'
+    AND table_schema='public';
+
+-- Lecture 5:
+DROP DATABASE "AdventureWorks" WITH (FORCE);
 
 -- Section 3: Simple Selection Of All Records
 -- Lecture 6: Selecting All Data From A Table
-    select * from customers
+    select * from customers;
 
 -- Lecture 7: Selecting specific fields
 -- How to get the schema for a specific table (e.g. suppliers)
@@ -11,10 +20,10 @@
     where table_name = 'suppliers';
 
 -- Get companyname, city and country fields from suppliers table
-    select companyname, city, country from suppliers
+    select companyname, city, country from suppliers;
 
 -- Get categoryname and description fields from categories table
-    select categoryname, description from categories
+    select categoryname, description from categories;
 
 -- Lecture 8: Selecting Distinct Values
 -- List all of the customers' countries (without duplicates)?
@@ -26,18 +35,18 @@
 
 -- Lecture 9: Counting results
 -- How many entries do we have in products table?
-   select count(*) from products
+   select count(*) from products;
 -- How many orders have we had so far?
-   select count(*) from orders
+   select count(*) from orders;
 -- How many cities are our Suppliers in?
-    select count(*) from (select distinct city from suppliers) as T   -- or
-    select count(distinct city) from suppliers
+    select count(*) from (select distinct city from suppliers) as T;   -- or
+    select count(distinct city) from suppliers;
 -- How many distinct products have been ordered (hint. use order details table)
-    select count(distinct productid) from order_details
+    select count(distinct productid) from order_details;
 
 -- Lecture 10: Combining fields in SELECT
 -- List customerid and difference between shippeddate and orderdate for all our orders
-select customerid, shippeddate - orderdate as delta from orders
+select customerid, shippeddate - orderdate as delta from orders;
 
 -- List order_id and the amount spent using order_details (unitprice times quantity minus discount)
 select orderid, ((unitprice * quantity) - discount) as amount_spent from order_details
@@ -46,45 +55,45 @@ select orderid, ((unitprice * quantity) - discount) as amount_spent from order_d
 -- NOTE: At this lecture, we use pagila database
 
 -- Select all fields, and all records from actor table
-    select * from actor
+    select * from actor;
 
 -- Select all fields and records from film table
-    select * from film
+    select * from film;
 
 -- Select all fields and records from the staff table
-    select * from staff
+    select * from staff;
 
 -- Select address and district columns from address table
-    select address, district from address
+    select address, district from address;
 
 -- Select title and description from film table
-    select title, description from film
+    select title, description from film;
 
 -- Select city and country_id from city table
-    select city, country_id from city
+    select city, country_id from city;
 
 -- Select all the distinct last names from customer table
-    select distinct last_name from customer
+    select distinct last_name from customer;
 
 -- Select all the distinct first_names from the actor table
-    select distinct first_name from actor
+    select distinct first_name from actor;
 
 -- Select all the distinct inventory_id values from rental table
-    select distinct inventory_id from rental
+    select distinct inventory_id from rental;
 
 -- Find the number of films ( COUNT ).
-    select count(*) from film
+    select count(*) from film;
 
 -- Find the number of categories.
-    select count(*) from category
+    select count(*) from category;
 
 -- Find the number of distinct first_names in actor table
-    select count(distinct first_name) from actor
+    select count(distinct first_name) from actor;
     -- Find the number of distinct (first_name, last_name) pairs
-    select count(distinct(first_name, last_name)) from actor
+    select count(distinct(first_name, last_name)) from actor;
 
 -- Select rental_id and the difference between return_date and rental_date in rental table
-    select rental_id, return_date - rental_date as diff from rental
+    select rental_id, return_date - rental_date as diff from rental;
 
 -- Section 4: What if you dont want all records? Using WHERE to select records
 -- Lecture 13: Searching for specific text
@@ -101,11 +110,11 @@ select orderid, ((unitprice * quantity) - discount) as amount_spent from order_d
 
 -- Lecture 14: Searching Numeric fields
 -- Find the number of orders by employee with id of 3 (Janet Levering)
-    select count(*) from orders where employeeid = 3
+    select count(*) from orders where employeeid = 3;
 -- Number of order details that had more than 20 items ordered
-   select count(*) from order_details where quantity > 20
+   select count(*) from order_details where quantity > 20;
 -- How many orders had a freight cost equal to or greater than 250$
-   select count(*) from orders where freight >= 250
+   select count(*) from orders where freight >= 250;
 
 -- Lecture 15: Searching DATE fields
 -- Basic Syntax for Date Fields
@@ -119,10 +128,13 @@ select orderid, ((unitprice * quantity) - discount) as amount_spent from order_d
     select now()   --> 2020-10-19 15:33:12.096909+03
 
 -- Find Number of Orders ordered on or after Jan 01, 1998
-    select count(*) from orders where orderdate >= '1998-01-01'
+    select count(*) from orders where orderdate >= '1998-01-01';
+    select count(*) from orders where orderdate >= date('Jan-01-1998');
 
 -- How many orders shipped before July 5, 1997
-    select count(*) from orders where shippeddate < '1997-07-05'
+    select count(*) from orders where shippeddate < '1997-07-05';
+    select count(*) from orders where shippeddate < date('July-5-1997');
+
 
 -- Lecture 16: WHERE using logical AND operator
 -- Basic Syntax:
@@ -130,7 +142,7 @@ select orderid, ((unitprice * quantity) - discount) as amount_spent from order_d
 -- where condition 1 and condition 2 and condition 3 and ...
 
 -- How many orders shipped to Germany with fright cost more than 100$
-    select count(*) from orders where shipcountry='Germany' and freight>100
+    select count(*) from orders where shipcountry='Germany' and freight>100;
 
 -- We want the distict customers where orders were shipped shipped via United Package (id = 2)
 -- and the ship country is Brazil
@@ -143,20 +155,25 @@ select orderid, ((unitprice * quantity) - discount) as amount_spent from order_d
 -- where condition 1 or condition 2 or condition 3 or ...
 
 -- How many customers do we have in USA and Canada
-    select count(*) from customers where country='USA' or country='Canada'
+    select count(*) from customers where country='USA' or country='Canada';
+    select * from customers where country = 'USA' or country = 'Canada';
 
 -- How many suppliers do we have in Germany and Spain
-    select count(*) from suppliers where country='Germany' or country='Spain'
+    select count(*) from suppliers where country='Germany' or country='Spain';
+    select count(*) from suppliers where country in ('Germany', 'Spain');
+
 -- How many orders shipped to USA, Brazil and Argentina
-    select count(*) from orders where shipcountry in ('USA', 'Brazil', 'Argentina')
+    select count(*) from orders where shipcountry in ('USA', 'Brazil', 'Argentina');
 
 -- Lecture 18: WHERE using logical NOT operator
 -- Basic Syntax:
 -- select <colun1>, <column2>, ... from <table_name>
 -- where NOT <condition>
 
+-- IMPORTANT: In postgres, unlike MySQL, string searching operations are case-sensitive by default
 -- How many customers are not in France
-   select count(*) from customers where not country='France'
+   select count(*) from customers where not country='France';
+   select count(*) from customers where country != 'France';
 
 -- How many suppliers are not in USA
     select count(*) from suppliers where not country='USA'
@@ -168,10 +185,12 @@ select orderid, ((unitprice * quantity) - discount) as amount_spent from order_d
 -- where not ((<condition1> and not <condition2>) or <condition3>)
 
 -- How many orders are shipped to Germany and freight charges < 50 or > 175
-    select count(*) from orders where shipcountry='Germany' and (freight < 50 or freight > 175)
+    select count(*) from orders where shipcountry='Germany' and (freight < 50 or freight > 175);
+    select count(*) from orders where shipcountry = 'Germany' and not (freight >= 50 and freight <= 175);
 
 -- How many orders shipped to Canada or Spain and shippeddate after May 1, 1997
-    select count(*) from orders where (shipcountry='Canada' or shipcountry='Spain') and shippeddate > '1997-05-01'
+    select count(*) from orders where (shipcountry='Canada' or shipcountry='Spain') and shippeddate > '1997-05-01';
+    select count(*) from orders where shipcountry in ('Canada', 'Spain') and shippeddate > date('May-1-1997');
 
 -- Lecture 20 : Using BETWEEN
 -- where freight between 50 and 100
@@ -179,10 +198,12 @@ select orderid, ((unitprice * quantity) - discount) as amount_spent from order_d
 -- where fright >= 50 and freight <= 100
 
 -- How many order details have a unit price between $10 and $20
-    select count(*) from order_details where unitprice between 10 and 20
+    select count(*) from order_details where unitprice between 10 and 20;
 
 -- How many orders shipped between June 1, 1996 and Sept 30, 1996
-    select count(*) from orders where shippeddate between '1996-06-01' and '1996-09-30'
+    select count(*) from orders where shippeddate between '1996-06-01' and '1996-09-30';
+    select count(*) from orders where shippeddate between date('Jun-1-1996') and date('Sept-30-1996');
+
 
 -- Lecture 21 : Using IN
 -- Basic Syntax
@@ -198,59 +219,70 @@ select count(*) from products where categoryid in (1, 4, 6, 7)
 
 -- Lecture 22
 -- Select all records from data_src which came from the journal named 'Food Chemistry'.
-    select * from data_src where journal='Food Chemistry'
+    select * from data_src where journal='Food Chemistry';
 
 -- Select record from nutr_def where nutrdesc is Retinol.
-    select * from nutr_def where nutrdesc = 'Retinol'
+    select * from nutr_def where nutrdesc = 'Retinol';
 
 -- Find all the food descriptions (food_des) records for manufacturer Kellogg, Co.
 -- (must include punctuation for exact match).
-    select * from food_des where manufacname='Kellogg, Co.'
+    select * from food_des where manufacname='Kellogg, Co.';
 
 -- Find the number of records in data sources (data_src) that were published after year 2000 (it is numeric field).
-    select count(*) from data_src where year > 2000
+    select count(*) from data_src where year > 2000;
 
 -- Find the number of records in food description that have a fat_factor < 4.
-    select count(*) from food_des where fat_factor < 4
+    select count(*) from food_des where fat_factor < 4;
 
 -- Select all records from weight table that have gm_weight of 190.
-    select * from weight where gm_wgt = 190
+    select * from weight where gm_wgt = 190.0;
 
 -- Find the number of records in food description table that have pro_factor greater than 1.5 and fat_factor less than 5.
-    select * from food_des where pro_factor > 1.5 and fat_factor < 5
+    select * from food_des where pro_factor > 1.5 and fat_factor < 5;
 
 -- Find the record in data source table that is from year 1990 and the journal Cereal Foods World.
-    select * from data_src where year = 1990 and journal = 'Cereal Foods World'
+    select * from data_src where year = 1990 and journal = 'Cereal Foods World';
 
 -- Select count of weights where gm_wgt is greater than 150 and less than 200.
-    select count(*) from weight where gm_wgt > 150 and gm_wgt < 200
+    select count(*) from weight where gm_wgt > 150 and gm_wgt < 200;
 
 -- Select the records in nutr_def table (nutrition definitions) that have units of kj or kcal.
-    select * from nutr_def where units in ('kj', 'kcal')
+    select * from nutr_def where units in ('kj', 'kcal');
 
 -- Select all records from data source table (data_src) that where from the year 2000 or the journal Food Chemistry.
-    select * from data_src where year = 2000 and journal = 'Food Chemistry'
+    select * from data_src where year = 2000 and journal = 'Food Chemistry';
 
 -- How many records in food_des are not about food group Breakfast Cereals.
 -- The field fdgrp_cd is an id field and you will have to find it in fd_group for fddrp_desc = 'Breakfast Cereals'.
-    select * from food_des where fdgrp_cd != (select fdgrp_cd from fd_group where fddrp_desc = 'Breakfast Cereals')
+    select count(*) from food_des where fdgrp_cd != (select distinct fdgrp_cd from fd_group where fddrp_desc = 'Breakfast Cereals');
+    select count(*) from food_des left join fd_group using(fdgrp_cd) where not fddrp_desc = 'Breakfast Cereals';
 
 -- Find all the records in data sources that where between 1990 and 2000 and either 'J. Food Protection' or 'Food Chemistry'.
     select * from data_src where (year between 1990 and 2000) and (journal in ('J. Food Protection', 'Food Chemistry'))
 
 -- Use BETWEEN syntax to find number of weight records that weight between 50 and 75 grams (gm_wgt).
-    select * from weight where gm_wgt between 50 and 75
+    select * from weight where gm_wgt between 50 and 75;
 
 -- Select all records from the data source table that were published
 -- in years 1960,1970,1980,1990, and 2000.  Use the IN syntax.
-    select * from data_src where year in (1960,1970,1980,1990, 2000)
+    select * from data_src where year in (1960,1970,1980,1990, 2000);
 
 -- Lecture 23 : Schema Basics
+-- Q) What is PostgreSQL schema?
+-- A) In PostgreSQL, a schema is a namespace that contains named database objects such as tables.
+-- views, indexes, data types, functions, stored procedures and operators. To access an object in a schema, 
+-- you need to qualify the object by using the following syntax: schema_name.object_name.
+-- Reference: https://www.postgresqltutorial.com/postgresql-schema/
+
 -- Select everything from product table in production schema
     select * from production.product
 
 -- Select verything from the vendor table in purchasing schema
     select * from purchasing.vendor
+
+-- Q) How to query vendor table's table schema?
+    select column_name, data_type, character_maximum_length, column_default, is_nullable
+    from INFORMATION_SCHEMA.COLUMNS where table_name = 'vendor';
 
 -- Section 6: Using psql to connect to PostGres
 -- Lecture 24: Connecting with psql
@@ -280,7 +312,7 @@ select count(*) from products where categoryid in (1, 4, 6, 7)
 -- order by price highest to lowest
 -- and the product names from a to z
     select productname, unitprice from products
-    order by unitprice desc, productname asc
+    order by unitprice desc, productname asc;
 
 -- Lecture 29: MIN & MAX
 -- Syntax:
@@ -288,13 +320,22 @@ select count(*) from products where categoryid in (1, 4, 6, 7)
 -- select max(column) from <table_name> where <condition>
 
 -- When was the first order ordered from Italy
-    select min(orderdate) from orders where shipcountry='Italy'
+    select min(orderdate) from orders where shipcountry='Italy';
 
 -- When was the last order shipped to Canada?
-    select max(orderdate) from orders where shipcountry='Canada'
+    select max(shippeddate) from orders where shipcountry = 'Canada';
+
+-- Find the longest period between ship date and order date:
+    select max(shippeddate-orderdate) from orders where shipcountry = 'France' and shippeddate is not null and orderdate is not null;
 
 -- Find the slowest order sent to France based on order date vs. ship date
-    select max(shippeddate - orderdate) from orders where shipcountry='France'
+    select * from orders where shipcountry = 'France' and shippeddate is not null and orderdate is not null
+    order by (shippeddate-orderdate) desc limit 1;
+    -- OR
+    select * from orders
+    where (shippeddate-orderdate) = (
+        select max(shippeddate-orderdate) from orders where shipcountry = 'France' and shippeddate is not null and orderdate is not null
+    ) and shipcountry = 'France';
 
 -- Lecture 30: AVG and SUM
 -- Syntax:
@@ -302,15 +343,23 @@ select count(*) from products where categoryid in (1, 4, 6, 7)
 -- select sum(column) from <table_name> where <condition>
 
 -- What was average freight of orders shipped to Brazil
-    select avg(freight) from orders where shipcountry='Brazil'
+    select avg(freight) from orders where shipcountry='Brazil';
 
 -- How many individual items of Tofu (productid=14) were ordered
-    select sum(quantity) from order_details where productid = (select productid from products where productname='Tofu')
+    select sum(quantity) from order_details where productid = (select productid from products where productname='Tofu');
+    select sum(quantity) from products inner join order_details using(productid) where productname='Tofu';
+
 
 -- What was the average number of Steeleye Stout (productid=35) per order
-  select * from order_details where productid = (select productid from products where productname='Steeleye Stout')
+  select avg(quantity) as avg_quantity from order_details
+    where productid = (
+	    select productid from products where productname='Steeleye Stout'
+    );
+    -- OR
+    select  avg(quantity) as avg_quantity from products inner join order_details using(productid)
+    where productname='Steeleye Stout';
 
--- Lecture 35: LIKE to match patterns
+-- Lecture 31: LIKE to match patterns
 -- Syntax:
 -- select <column1>, <column2>, ... from <table_name>
 -- where <column> LIKE <pattern>
@@ -331,27 +380,27 @@ select count(*) from products where categoryid in (1, 4, 6, 7)
 -- Syntax
 -- Select <column1> as alias_name from <table_name>
     -- list the total amount spent per order details
-    select unitprice*quantity as total_spent from order_details
+    select ((unitprice*quantity)-discount) as total_amount_spent from order_details;
 
     -- list the total amount spent per order details & order it by total amount spent in asc fashion
-    select unitprice*quantity as total_spent from order_details
-    order by total_spent asc
+    select ((unitprice*quantity)-discount) as total_amount_spent from order_details
+    order by total_amount_spent asc;
 
 -- calculate our inventory value of products
 -- (need unitprice and unitsinstock fields)
 -- and return as total_inventory
 -- order by this column desc
     select productid, productname, unitprice*unitsinstock as inventory_value from products
-    order by inventory_value desc
+    order by inventory_value desc;
 
 -- Lecture 33: LIMIT the number of records returned
 -- Syntax: select <column1>, <column2> ... from <table_name> limit number
 
 -- Find 3 most expensive order details
-    select orderid, ((unitprice*quantity)-discount) as amount_spent from order_details order by amount_spent desc limit 3
+   select *, ((unitprice*quantity)-discount) as total_spent from order_details order by total_spent desc limit 3;
 
 -- List the 2 products with the least inventory in stock by total dollar amount of inventory
-    select productname, (unitsinstock*unitprice) as total_inventory from products order by total_inventory asc limit 2
+    select *, (unitprice*unitsinstock) as total_dollar_amount from products order by total_dollar_amount asc limit 2;
 
 -- Lecture 34: NULL value
 -- NULL is a special value that signifies unknown
@@ -361,29 +410,36 @@ select count(*) from products where categoryid in (1, 4, 6, 7)
 -- select <column1>, <column2> from table_name where <columnX> is not null
 
 -- How many customers dont have a region value?
-   select count(*) from customers where region is null
+   select count(*) from customers where region is null;
 
 -- How many suppliers have a region value?
-    select count(*) from suppliers where region is not null
+    select count(*) from suppliers where region is not null;
 
 -- How many orders did not have a ship region?
-    select count(*) from orders where shipregion is null
+    select count(*) from orders where shipregion is null;
 
 -- Lecture 35: Exercises
+-- AdventureWorks database for Lecture 35
 -- Return the name, weight, and productnumber of  all the products  ordered by weight from lightest to heaviest.
 -- (Remember to use schema to reach table.  It is in production schema.)
-   select name, weight, productnumber from production.product order by weight asc
+    select
+        product.name,
+        product.weight,
+        product.productnumber
+    from production.product
+    order by product.weight asc;
 
--- Return the records from productvendor for productid = 407 in order of averageleadtime from shortest to longest.
--- (You'll have to figure out which schema this is in.)
-    select * from purchasing.productvendor where productid=407 order by averageleadtime asc
+-- Return the records from purchasing.productvendor for productid = 407 in order of averageleadtime from shortest to longest.
+    select * from purchasing.productvendor
+    where productid = 407
+    order by averageleadtime asc;
 
--- Find all the salesorderdetail records for productid 799 and order them by largest orderqty to smallest.
-    select * from sales.salesorderdetail where productid=799 order by orderqty desc
+-- Find all the sales.salesorderdetail records for productid 799 and order them by largest orderqty to smallest.
+    select * from sales.salesorderdetail where productid=799 order by orderqty desc;
 
 -- What is the largest  discount percentage offered in the specialoffer table.
-    select discountpct from sales.specialoffer order by discountpct desc limit 1
-    select max(discountpct) from sales.specialoffer
+    select discountpct from sales.specialoffer order by discountpct desc limit 1;
+    select max(discountpct) from sales.specialoffer;
 
 -- Find the smallest number of sickleavehours for an employee.
     select sickleavehours from humanresources.employee order by sickleavehours asc limit 1
@@ -397,34 +453,34 @@ select count(*) from products where categoryid in (1, 4, 6, 7)
     select max(rejectedqty) as max_rejected_qty from purchasing.purchaseorderdetail
 
 -- Find the average rate from employeepayhistory table.
-    select avg(rate) as average_rate from humanresources.employeepayhistory
+    select avg(rate) as average_rate from humanresources.employeepayhistory;
 
 -- Find the average standardcost in the productcosthistory table for productid 738.
-    select avg(standardcost) as avg_std_cost from production.productcosthistory where productid = 738
+    select avg(standardcost) as avg_std_cost from production.productcosthistory where productid = 738;
 
 -- Find the sum of scrappedqty from the workorder table for productid 529.
-    select sum(scrappedqty) as sum_scrapped_qty from production.workorder where productid = 529
+    select sum(scrappedqty) as sum_scrapped_qty from production.workorder where productid = 529;
 
 -- Find all vendor names with a name that starts with letter G.
-    select vendor.name from purchasing.vendor where vendor.name like 'G%'
+    select distinct vendor.name from purchasing.vendor where vendor.name like 'G%'
 
 -- Find all vendor names that have the word Bike in them.
-    select name from purchasing.vendor where name like '%Bike%'
+    select distinct vendor.name from purchasing.vendor where vendor.name like '%Bike%';
 
 -- Search the person table for every firstname that has t as a second letter.
-    select firstname from person.person where firstname like '_t%'
+    select * from person.person where person.firstname like '_t%';
 
 -- Return the first 20 records from emailaddress table
-    select * from person.emailaddress limit 20
+    select * from person.emailaddress limit 20;
 
 -- Return the first 2 records from productcategory table
-    select * from production.productcategory limit 2
+    select * from production.productcategory limit 2;
 
 -- How many product records have a missing weight value
-    select count(*) from production.product where weight is null
+    select count(*) from production.product where product.weight is null;
 
 -- How many person records have an additionalcontactinfo field that has a value
-    select count(*)  from person.person where additionalcontactinfo is not null
+    select count(*)  from person.person where additionalcontactinfo is not null;
 
 -- Section 8: Joining multiple tables together
 -- Keep in mind, we use Northwind as the database, and refer to 01-Northwind-A4-Size-for-Print.png
@@ -446,11 +502,11 @@ on customers.customerid = orders.customerid
 
 -- Connect employees to orders and pull back firstname, lastname and order date for all orders
 select firstname, lastname, orderdate from employees inner join orders
-on employees.employeeid = orders.employeeid
+on employees.employeeid = orders.employeeid;
 
 -- connect products and suppliers and pull back companyname, unitprice and unitsinstock
 select companyname, unitprice, unitsinstock from products inner join suppliers
-on products.supplierid = suppliers.supplierid
+on products.supplierid = suppliers.supplierid;
 
 -- Lecture 38: Grabbing information from multiple tables
 -- Syntax:
@@ -465,7 +521,7 @@ on products.supplierid = suppliers.supplierid
 -- productid (OrderDetails), unitprice (OrderDetails) and quantity (OrderDetails)
 select companyname, orderdate, productid, unitprice, quantity
 from orders inner join customers on customers.customerid = orders.customerid
-            inner join order_details on orders.orderid = order_details.orderid
+            inner join order_details on orders.orderid = order_details.orderid;
 
 -- Connect products to previous query and add product name to fiels returned
 select customers.companyname, orders.orderdate, order_details.productid, order_details.unitprice, order_details.quantity,
@@ -480,7 +536,7 @@ select customers.companyname, orders.orderdate, order_details.productid, order_d
 from orders inner join customers on customers.customerid = orders.customerid
             inner join order_details on orders.orderid = order_details.orderid
             inner join products on products.productid = order_details.productid
-            inner join categories on products.categoryid = categories.categoryid
+            inner join categories on products.categoryid = categories.categoryid;
 
 -- Take the previous query and add a WHERE clause selecting the category name of Seafood
 -- and the amount spent >= 500
@@ -490,7 +546,7 @@ from orders inner join customers on customers.customerid = orders.customerid
             inner join order_details on orders.orderid = order_details.orderid
             inner join products on products.productid = order_details.productid
             inner join categories on products.categoryid = categories.categoryid
-where categories.categoryname = 'Seafood' and order_details.unitprice * order_details.quantity >= 500
+where categories.categoryname = 'Seafood' and order_details.unitprice * order_details.quantity >= 500;
 
 select companyname, orderdate, productid, productname, order_details.unitprice, quantity
 from orders inner join customers using(customerid)
@@ -507,21 +563,21 @@ where categoryname = 'Seafood' and (order_details.unitprice * order_details.quan
 
 -- Connect Customers table to Orders Table
 -- Bring back company name and order id
-select companyname, orderid from customers left join orders on customers.customerid = orders.customerid
+select companyname, orderid from customers left join orders on customers.customerid = orders.customerid;
 
 -- Take the previous query and look for customers without orders
 select companyname from customers left join orders on customers.customerid = orders.customerid
-where orderid is null
+where orderid is null;
 
 -- Do a left join between products and order_details
-select productname, orderid  from products left join order_details on products.productid = order_details.productid
+select productname, orderid  from products left join order_details on products.productid = order_details.productid;
 
 -- Use the previous query and look for products without orders
 select productname, orderid  from products left join order_details on products.productid = order_details.productid
-where orderid is null
+where orderid is null;
 
 select * from products left join order_details using(productid)
-where order_details.orderid is null
+where order_details.orderid is null;
 
 -- Lecture 40: Right Joins
 -- Pull back maching records from the first table and all records in the second table
@@ -531,29 +587,29 @@ where order_details.orderid is null
 
 -- Connect Orders to customers
 -- Bring back companyname, orderid and use right join
-select companyname, orderid from orders right join customers on orders.customerid = customers.customerid
-select companyname, orderid from orders right join customers using(customerid)
+select companyname, orderid from orders right join customers on orders.customerid = customers.customerid;
+select companyname, orderid from orders right join customers using(customerid);
 
 -- Lets look for orders without customers using right join
 select orderid, customers.customerid from customers right join orders on customers.customerid = orders.customerid
-where customers.customerid is null
+where customers.customerid is null;
 
 select orderid, orders.customerid from customers right join orders using(customerid)
 where customers.customerid is null
 
 -- Lets look for customers without orders using right join
 select companyname from orders right join customers on orders.customerid = customers.customerid
-where orderid is null
+where orderid is null;
 
 select companyname from orders right join customers using(customerid)
-where orders.orderid is null
+where orders.orderid is null;
 
 -- Do a right join between customercustomerdemo and customers
 select customers.customerid, companyname, customertypeid
-from customercustomerdemo right join customers on customercustomerdemo.customerid = customers.customerid
+from customercustomerdemo right join customers on customercustomerdemo.customerid = customers.customerid;
 
 select customers.customerid, companyname, customercustomerdemo.customertypeid
-from customercustomerdemo right join customers using(customerid)
+from customercustomerdemo right join customers using(customerid);
 
 -- Lecture 41: Full joins
 -- pulls all records in first table and all records in second table
@@ -561,16 +617,18 @@ from customercustomerdemo right join customers using(customerid)
 -- Syntax:
    select <column1>, <column2>, ...
    from table1 full join table2 on table1.column_name = table2.column_name
+-- Documentation: https://www.postgresqltutorial.com/postgresql-full-outer-join/
 
 -- Connect Orders to Customers via full join
 -- Bring back companyname and orderid
 select companyname, orderid from orders full join customers on orders.customerid = customers.customerid
 select companyname, orderid from customers full join orders on orders.customerid = customers.customerid
-select companyname, orderid from orders full join customers using(customerid)
+select companyname, orderid from orders full join customers using(customerid);
     -- orders without customers + customers without orders + inner join of customers & orders
 
 -- Do a full join between products and categories
-select productname, categoryname from products full join categories on products.categoryid = categories.categoryid
+select productname, categoryname from products full join categories on products.categoryid = categories.categoryid;
+select productname, categoryname from products full join categories using(categoryid);
 
 -- Lecture 42: Self joins
 -- Connect a table back to itself
@@ -586,22 +644,34 @@ select productname, categoryname from products full join categories on products.
     from table1 as t1 join table1 as t2 on t1.column=t2.column
     where condition
 
--- Find customer pairs who are in the same city and order by city
+-- Find customer pairs who are in the same city and order by city ascending
     select c1.companyname as customer_1, c2.companyname as customer_2, c1.city as city
     from customers as c1 join customers as c2 on c1.city = c2.city
     where c1.customerid != c2.customerid
-    order by c1.city
+    order by c1.city asc;
 
     select c1.companyname as customer_1, c2.companyname as customer_2, c1.city
-    from customers as c1 join customers as c2 on c1.city = c2.city
+    from customers as c1 join customers as c2 using(city)
     where c1.customerid <> c2.customerid
-    order by c1.city
+    order by c1.city asc;
+
+    select
+        c1.companyname as customer_1, c2.companyname as customer_2, c1.city
+    from customers as c1 inner join customers as c2 using(city)
+    where c1.customerid <> c2.customerid
+    order by c1.city asc;
 
 -- Find supplier pairs from same country and order by country
     select s1.companyname as supplier1, s2.companyname as supplier2, s1.country as country
     from suppliers as s1 join suppliers as s2 on s1.country = s2.country
     where s1.supplierid <> s2.supplierid
-    order by s1.country
+    order by s1.country;
+
+    select
+        s1.companyname as supplier1, s2.companyname as supplier2, s1.country
+    from suppliers as s1 inner join suppliers as s2 using(country)
+    where s1.supplierid <> s2.supplierid
+    order by s1.country asc;
 
 -- Lecture 43: using USING keyword in ON statements in joins
 -- Usage:
@@ -652,38 +722,47 @@ select person.firstname, person.middlename, person.lastname, personphone.phonenu
 from person.person inner join person.personphone using(businessentityid)
 			       inner join person.businessentity using(businessentityid)
 			       inner join person.phonenumbertype using(phonenumbertypeid)
-order by person.businessentityid desc
+order by person.businessentityid desc;
 
 -- Join (Inner) productmodel, productmodelproductiondescriptionculture, productdescription and culture from the production schema.
--- Return the productmodel name, culture name, and productdescription description ordered by the product model name.
+-- Return the productmodel name, culture name, and productdescription description ordered by the product model name in ascending order.
 select pm.name, pc.name, description
 from production.productmodel as pm inner join production.productmodelproductdescriptionculture using(productmodelid)
 						  		   inner join production.productdescription using(productdescriptionid)
 						  		   inner join production.culture as pc using(cultureid)
-order by pm.name asc
+order by pm.name asc;
 
 -- Add a join to previous example to production.product and return the product name field in addition to other information.
-select p.name, pm.name, culture.name, productdescription.description
-from production.productmodel as pm inner join production.productmodelproductdescriptionculture using(productmodelid)
-						  		   inner join production.productdescription using(productdescriptionid)
-						  		   inner join production.culture using(cultureid)
-								   inner join production.productmodel using(productmodelid)
-								   inner join production.product as p using(productmodelid)
-order by pm.name asc
+select
+	product.name,
+	productmodel.name,
+	culture.name,
+	productdescription.description
+from production.productmodel
+inner join production.product using(productmodelid)
+inner join production.productmodelproductdescriptionculture using(productmodelid)
+inner join production.productdescription using(productdescriptionid)
+inner join production.culture using(cultureid)
+order by productmodel.name asc;
 
 
 -- Join product and productreview in the schema table.  Include every record from product and any reviews they have.
 -- Return the product name, review rating and comments.  Order by rating in ascending order.
-select p.name, r.rating, r.comments
-from production.product as p left join production.productreview as r using(productid)
-order by r.rating asc
+select 	product.name,
+		productreview.rating,
+		productreview.comments
+from production.product left join production.productreview using(productid)
+order by productreview.rating asc;
 
 
 -- Use a right join to combine workorder and product from production schema to bring back all products and any work orders they have.
 -- Include the product name and workorder orderqty and scrappedqty fields.  Order by productid ascending
-select p.name, wo.orderqty, wo.scrappedqty
-from production.workorder as wo right join production.product as p using(productid)
-order by p.productid asc
+select
+		product.name,
+		workorder.orderqty,
+		workorder.scrappedqty
+from production.workorder right join production.product using(productid)
+order by product.productid asc;
 
 -- Section 9: Grouping and Aggregation
 -- Lecture 46: GROUP BY
@@ -691,47 +770,100 @@ order by p.productid asc
 -- How many customers do we have in each county? ordered by # of customers in each country in descending order
 select country, count(*) as num_of_customers
 from customers group by country
-order by num_of_customers desc
+order by num_of_customers desc;
 
 -- You can use GROUP BY with joins
 -- What is the # of products for each category? ordered by # of products in desc order
-select
-	categoryname,
-	count(*) as num_of_products
-from categories left join products using(categoryid)
-group by categories.categoryid
-order by num_of_products desc
+-- Teachers solution:
+SELECT COUNT(*),categoryname
+FROM categories
+JOIN products ON categories.categoryid=products.categoryid
+GROUP BY categoryname
+ORDER BY COUNT(*) DESC;
+    -- in the previous solution, we grouped by category name, but ideally we should group by categoryid
+    -- we might also take into account categories without products
+    -- we might also take into account products without categories
+    select 	categories.categoryid,
+            categories.categoryname,
+            case
+                when sum(productid) is null then 0
+                else count(*)
+            end as num_of_products
+    from categories full join products using(categoryid)
+    group by categories.categoryid
+    order by num_of_products desc;
 
 -- What is the total # of products sold for each category?
 -- ordered by total # of products sold in desc order
 select
+        categories.categoryid,
 		categories.categoryname,
-		sum(od.quantity) as total_num_sold
+		sum(od.quantity) as total_num_of_products_sold
 from products inner join order_details as od using(productid)
 			  inner join categories using(categoryid)
 group by categories.categoryid
-order by total_num_sold desc
+order by total_num_of_products_sold desc;
 
--- What is the average number of items ordered for products ordered by the average amount
+    -- if we had product categories that does not yet have products
+    -- or if we had certain products that do not yet have order details then this solution would be better:
+    select
+        categories.categoryid,
+        categories.categoryname,
+        case
+            when sum(products.productid) is null then 0
+            when sum(order_details.orderid) is null then 0
+            else sum(order_details.quantity)
+        end as total_num_of_products_sold
+    from categories
+    left join products using(categoryid)
+    left join order_details using(productid)
+    group by categories.categoryid
+    order by total_num_of_products_sold desc;
+
+-- What is the average number of items ordered for products ordered by the average number of items
 -- in descending order
+-- close to teacher's solution:
 select productname, avg(quantity) as avg_num_of_items_ordered
 from products inner join order_details using(productid)
 group by products.productid
 order by avg_num_of_items_ordered desc
+    -- we used inner join to select products with order details and vice versa.
+    -- what if we have products with no order details? To take them into account:
+    select
+	products.productname,
+	case
+		when sum(order_details.orderid) is null then 0
+		else avg(quantity)
+	end as avg_num_products_ordered
+    from products left join order_details using(productid)
+    group by products.productid
+    order by avg_num_products_ordered desc;
 
--- What is the average number of items ordered for for all the products ordered by the average amount in descending order
+-- What is the average number of items ordered for all the products ordered by the average amount in descending order
 -- if a product does not have any orders, then the average amount should be 0
-select productname, COALESCE(avg(quantity),0) as avg_quantity
+select productname, COALESCE(avg(quantity),0) as avg_num_products_ordered
 from products left join order_details using(productid)
 group by products.productid
-order by avg_quantity desc
+order by avg_num_products_ordered desc;
+    -- Reference: https://www.postgresqltutorial.com/postgresql-coalesce/
+    -- coalesce : unite
+        select
+        products.productname,
+        case
+            when avg(quantity) is null then 0
+            else avg(quantity)
+        end as avg_num_products_ordered
+        from products left join order_details using(productid)
+        group by products.productid
+        order by avg_num_products_ordered desc;
 
 -- How many suppliers do we have in each country? order it by # of suppliers desc
 select country, count(*) as number_of_suppliers
 from suppliers group by country
-order by number_of_suppliers desc
+order by number_of_suppliers desc;
 
 -- Total value of each product sold for year 1997 ordered by total value in descending form
+-- Teachers solution: Note that we can use WHERE before GROUP BY
 select
 	productname,
 	sum((od.unitprice*od.quantity)-od.discount) as total_sold
@@ -739,7 +871,17 @@ from products inner join order_details as od using(productid)
 			  inner join orders using(orderid)
 where extract(year from orderdate) = 1997
 group by products.productid
-order by total_sold desc
+order by total_sold desc;
+    -- OR:
+    select
+        products.productname,
+        sum((order_details.unitprice*order_details.quantity)-order_details.discount) as total_value
+    from products
+    inner join order_details using(productid)
+    inner join orders using(orderid)
+    group by productid, extract(year from orderdate)
+    having extract(year from orderdate) = 1997
+    order by total_value desc;
 
 -- Lecture 47: Use HAVING to filter groups
 -- Syntax:
@@ -755,35 +897,43 @@ order by total_sold desc
 
 -- Find all products that sold less than 2000$ order by amount sold asc
 select
-	productname,
-	coalesce(sum((od.unitprice * od.quantity) - od.discount), 0) as amount_sold
+	products.productid,
+	products.productname,
+	coalesce(sum((od.unitprice*od.quantity)-od.discount), 0) as amount_sold
 from products left join order_details as od using(productid)
-group by products.productid
-having coalesce(sum((od.unitprice * od.quantity) - od.discount), 0) < 2000
-order by amount_sold asc
-    -- coalesce (postgresql) == ifnull (mysql)
+group by productid
+having coalesce(sum((od.unitprice*od.quantity)-od.discount), 0) < 2000
+order by amount_sold asc;
+    -- coalesce (postgresql) ?= ifnull (mysql)
 
 -- List customers that have bought more than 5000$ of products in descending order
 select
-		customers.companyname as buyer,
-		sum((od.unitprice*od.quantity)-od.discount) as total_purchase
-from customers inner join orders using(customerid)
-			   inner join order_details as od using(orderid)
+	customers.customerid,
+	customers.companyname,
+	sum((od.unitprice*od.quantity)-od.discount) as total_amount_bought
+from customers
+inner join orders using(customerid)
+inner join order_details as od using(orderid)
 group by customers.customerid
 having sum((od.unitprice*od.quantity)-od.discount) > 5000
-order by total_purchase desc
+order by total_amount_bought desc;
 
 -- List customers that have bought more than 5000$ of products in descending order
 -- with order date in first six months of the year 1997
-select
-		customers.companyname as buyer,
-		sum((od.unitprice*od.quantity)-od.discount) as total_purchase
-from customers inner join orders using(customerid)
-			   inner join order_details as od using(orderid)
-where cast(orderdate as date) between cast('1997-01-01' as date) and cast('1997-06-30' as date)
-group by customers.customerid
-having sum((od.unitprice*od.quantity)-od.discount) > 5000
-order by total_purchase desc
+    select column_name, data_type, character_maximum_length, column_default, is_nullable
+    from INFORMATION_SCHEMA.COLUMNS where table_name = 'orders';
+
+    select
+        customers.customerid,
+        customers.companyname,
+        sum((od.unitprice * od.quantity) - od.discount) as total_purchase
+    from customers
+    inner join orders using(customerid)
+    inner join order_details as od using(orderid)
+    where orderdate between date('Jan-1-1997') and date('June-30-1997')
+    group by customers.customerid
+    having sum((od.unitprice * od.quantity) - od.discount) > 5000
+    order by total_purchase desc;
 
 -- Lecture 48 : Grouping Sets
 -- What is the term "Grouping Set" ?
@@ -828,34 +978,98 @@ order by total_purchase desc
     group by grouping sets ((field1), (field2), (field3, field4))
 
 -- Total sales grouped by category and then the product & category together
--- ordered by categoryname & productname
+-- ordered by categoryname & productname in ascending order
 select
-		categories.categoryname as category,
-		products.productname as product,
-		sum((od.unitprice*od.quantity)-od.discount) as total_sales
-from products inner join order_details as od using(productid)
-			  inner join categories using(categoryid)
-group by grouping sets((category),(category, product))
-order by category, product
+	categories.categoryname,
+	products.productname,
+	sum((od.quantity*od.unitprice)-od.discount) as total_sales
+from categories
+inner join products using(categoryid)
+inner join order_details as od using(productid)
+group by grouping sets(
+	(categories.categoryname),
+	(products.productname, categories.categoryname)
+)
+order by categories.categoryname, products.productname;
+    -- OR;
+    select
+            categories.categoryname as category,
+            products.productname as product,
+            sum((od.unitprice*od.quantity)-od.discount) as total_sales
+    from products inner join order_details as od using(productid)
+                inner join categories using(categoryid)
+    group by grouping sets((category),(category, product))
+    order by category, product;
+    -- If we have categories without products OR
+    -- If we have products without order details then to count the total sales properly for them, we use left join:
+    select
+        categories.categoryname,
+        products.productname,
+        coalesce(sum((od.quantity*od.unitprice)-od.discount), 0) as total_sales
+    from categories
+    left join products using(categoryid)
+    left join order_details as od using(productid)
+    group by grouping sets(
+        (categories.categoryname),
+        (products.productname, categories.categoryname)
+    )
+    order by categories.categoryname, products.productname asc;
 
 -- customer's companyname renamed as buyer
 -- supplier's companymame renamed as supplier
 -- Find total purchase by:
     -- buyer
     -- buyer, supplier
--- order by buyer and supplier
+-- order by buyer and supplier in ascending order
 select
-		customers.companyname as buyer,
-		suppliers.companyname as supplier,
-		sum((od.unitprice * od.quantity) - od.discount) as total_purchase
-from customers inner join orders using(customerid)
-			   inner join order_details as od using(orderid)
-			   inner join products using(productid)
-			   inner join suppliers using(supplierid)
-group by grouping sets((buyer), (buyer, supplier))
-order by buyer, supplier
-    -- note that (customers.companyname, suppliers.companyname) means for a particular buyer
+	customers.companyname as buyer,
+	suppliers.companyname as supplier,
+	sum((od.quantity*od.unitprice)-od.discount) as total_purchase
+from customers
+inner join orders using(customerid)
+inner join order_details as od using(orderid)
+inner join products using(productid)
+inner join suppliers using(supplierid)
+group by grouping sets(
+	(buyer),
+	(buyer, supplier)
+)
+order by buyer, supplier asc;
+    -- note that in the previous solution (customers.companyname, suppliers.companyname) means for a particular buyer
     -- which supplier he ordered the products from.
+    -- The previous solution is missing the fact that some customers may not have ordered any products.
+    -- To take this into account, below is the given solution:
+    select
+        customers.companyname as buyer,
+        suppliers.companyname as supplier,
+        coalesce(sum((od.quantity*od.unitprice)-od.discount), 0) as total_purchase
+    from customers
+    left join orders using(customerid)
+    left join order_details as od using(orderid)
+    left join products using(productid)
+    left join suppliers using(supplierid)
+    group by grouping sets(
+        (buyer),
+        (buyer, supplier)
+    )
+    order by buyer, supplier asc;
+        -- To prove that there ARE buyers who did not order any products, below is the query:
+        select
+            customers.companyname as buyer,
+            suppliers.companyname as supplier,
+            coalesce(sum((od.quantity*od.unitprice)-od.discount), 0) as total_purchase
+        from customers
+        left join orders using(customerid)
+        left join order_details as od using(orderid)
+        left join products using(productid)
+        left join suppliers using(supplierid)
+        group by grouping sets(
+            (buyer),
+            (buyer, supplier)
+        )
+        having coalesce(sum((od.quantity*od.unitprice)-od.discount), 0) = 0
+        order by buyer, supplier asc;
+
 
 -- customer companyname is called buyer
 -- categories category name is called category
@@ -864,7 +1078,7 @@ order by buyer, supplier
     -- and then,
     -- buyer and category
         -- in other words, which customer ordered which category
--- order by companyname, category name with nulls first
+-- order by companyname, category name with nulls first, all in ascending order
 select
 		customers.companyname as buyer,
 		categories.categoryname as category,
@@ -874,7 +1088,7 @@ from customers inner join orders using(customerid)
 			   inner join products using(productid)
 			   inner join categories using(categoryid)
 group by grouping sets((buyer), (buyer, category))
-order by buyer nulls first, category nulls first
+order by buyer asc nulls first, category asc nulls first;
 
 -- Lecture on 49: ROLLUP(a, b) -- grouping sets ((a, b), (a), ())
 -- https://www.postgresql.org/docs/current/queries-table-expressions.html#QUERIES-GROUPING-SETS
@@ -887,7 +1101,8 @@ order by buyer nulls first, category nulls first
 -- total salary by department, division, and company-wide total
 
 -- Do a rollup with total_sales of customer, categories and products
--- order by  customer, categories and products
+-- order by  customer, categories and products in ascending order
+-- Teachers solution:
 select	companyname as customer,
 		categoryname as category,
 		productname as product,
@@ -897,7 +1112,37 @@ from customers inner join orders using(customerid)
 			   inner join products using(productid)
 			   inner join categories using(categoryid)
 group by rollup(customer, category, product)
-order by customer, category, product
+order by customer, category, product asc;
+    -- My solution:
+    	-- do we have customers with no orders?
+	-- do we have orders with no products/productid?
+	select
+		customers.companyname as customer,
+		categories.categoryname as category,
+		products.productname as product,
+		coalesce(sum((od.unitprice*od.quantity)-od.discount), 0) as total_sales
+	from customers
+	left join orders using(customerid)
+	left join order_details as od using(orderid)
+	left join products using(productid)
+	left join categories using(categoryid)
+	group by rollup(customer, category, product)
+	having coalesce(sum((od.unitprice*od.quantity)-od.discount), 0) = 0
+	order by customer, category, product asc;
+        -- Acc.to the previous query, yes we do have customers with no orders. So, we need to take them into account
+        -- by using left join:
+        select
+            customers.companyname as customer,
+            categories.categoryname as category,
+            products.productname as product,
+            coalesce(sum((od.unitprice*od.quantity)-od.discount), 0) as total_sales
+        from customers
+        left join orders using(customerid)
+        left join order_details as od using(orderid)
+        left join products using(productid)
+        left join categories using(categoryid)
+        group by rollup(customer, category, product)
+        order by customer, category, product asc;
 
 
 -- Using total_sales, do a rollup of suppliers, products and buyers
@@ -913,20 +1158,47 @@ from customers inner join orders using(customerid)
 			   inner join suppliers using(supplierid)
 group by rollup(supplier, product, buyer)
 order by supplier, product, buyer
+    -- Note that there are customers without orders, to prove this:
+        select
+            suppliers.companyname as supplier,
+            products.productname as product,
+            customers.companyname as buyer,
+            coalesce(sum((od.unitprice*od.quantity)-od.discount), 0) as total_sales
+        from customers
+        left join orders using(customerid)
+        left join order_details as od using(orderid)
+        left join products using(productid)
+        left join suppliers using(supplierid)
+        group by rollup(supplier, product, buyer)
+        having coalesce(sum((od.unitprice*od.quantity)-od.discount), 0) = 0
+        order by supplier asc, product asc, buyer asc;
+        -- to take into account the customers without orders, we use left join:
+        select
+            suppliers.companyname as supplier,
+            products.productname as product,
+            customers.companyname as buyer,
+            coalesce(sum((od.unitprice*od.quantity)-od.discount), 0) as total_sales
+        from customers
+        left join orders using(customerid)
+        left join order_details as od using(orderid)
+        left join products using(productid)
+        left join suppliers using(supplierid)
+        group by rollup(supplier, product, buyer)
+        order by supplier asc, product asc, buyer asc;
 
 -- Lecture 50 : Cube(a, b) -- grouping sets ((a, b), (a), (b), ())
 -- Documentation: https://www.postgresql.org/docs/current/queries-table-expressions.html#QUERIES-GROUPING-SETS
 
     CUBE ( a, b, c )  -- is equivalent to
     GROUPING SETS (
-    ( a, b, c ),
-    ( a, b    ),
-    ( a,    c ),
-    ( a       ),
-    (    b, c ),
-    (    b    ),
-    (       c ),
-    (         )
+        ( a, b, c ),
+        ( a, b    ),
+        ( a,    c ),
+        ( a       ),
+        (    b, c ),
+        (    b    ),
+        (       c ),
+        (         )
     )
    -- in short CUBE does all the combination of subsets of a, b, c
 
@@ -957,6 +1229,33 @@ from customers inner join orders using(customerid)
 			   inner join suppliers using(supplierid)
 group by cube(supplier, buyer, product)
 order by supplier nulls first, buyer nulls first, product nulls first
+    -- Note that in the previous solution, we use inner join. However, there are customers with no orders:
+    select
+        customers.companyname as customer,
+        categories.categoryname as category,
+        products.productname as product,
+        coalesce(sum((od.unitprice*od.quantity)-od.discount), 0) as total_sales
+    from customers
+    left join orders using(customerid)
+    left join order_details as od using(orderid)
+    left join products using(productid)
+    left join categories using(categoryid)
+    group by cube(customer, category, product)
+    having coalesce(sum((od.unitprice*od.quantity)-od.discount), 0) = 0
+    order by customer, category, product;
+        -- So, we actually need to use left join to take into customers without orders:
+        select
+            customers.companyname as customer,
+            categories.categoryname as category,
+            products.productname as product,
+            coalesce(sum((od.unitprice*od.quantity)-od.discount), 0) as total_sales
+        from customers
+        left join orders using(customerid)
+        left join order_details as od using(orderid)
+        left join products using(productid)
+        left join categories using(categoryid)
+        group by cube(customer, category, product)
+        order by customer, category, product;
 
 
 -- Section 10: Combining queries
@@ -967,7 +1266,7 @@ order by supplier nulls first, buyer nulls first, product nulls first
     select <column1>, <column2>, ...
     from table1
 
-    union  --> removes duplicates
+    union all/distinct  --> duplicates stay/removes duplicates
 
     select <column1>, <column2>
     from table2
@@ -993,14 +1292,14 @@ select companyname from suppliers
 
 -- Find cities of all our customers and suppliers
 -- with only one record for each companies city (i.e. remove duplicate cities)
-select city from customers
+select distinct city from customers
 union distinct
-select city from suppliers
+select distinct city from suppliers
 
 -- distinct counties of all customers and suppliers in alphabetical order
-select country from customers
+select distinct country from customers
 union distinct
-select country from suppliers
+select distinct country from suppliers
 order by country asc
 
 -- All list of country of suppliers and customers
@@ -1018,7 +1317,7 @@ order by country asc
     select <column1>, <column2>, ...
     from table1
 
-    intersect  --> removes duplicates
+    intersect all/distinct --> keeps duplicates/removes duplicates
 
     select <column1>, <column2>
     from table2
@@ -1045,20 +1344,78 @@ order by country asc
 	select country from suppliers
 	order by country desc
 
--- ??? Find the number of customer & supplier pairs that are in the same country
+-- Q) ??? Find the number of customer & supplier pairs that are in the same country
 -- Refer to the Q/A for Lecture 52, there is a Q with a title:
 -- Finding the number of customer & supplier pairs that are in the same country
 select count(*) from
 (select country from customers
 intersect all
-select country from suppliers) as combined
+select country from suppliers) as combined     -- (**)
+    -- This Q is tricky. The way I understand the Q is as follows:
+    -- Imagine you have 3 suppliers and 2 customers for Brazil. Altogether, we have 6 pairs for Brazil.
+    -- The previous solution would yield 2 Brazil entries via intersect all, which is wrong. Here is the proof:
+            -- Refer to Lecture-52 database:
+            create table customers (
+                country varchar(100)
+            );
 
--- how many distinct countries have both customers and suppliers
+            create table suppliers (
+                country varchar(100)
+            );
+
+            insert into customers(country)
+            values('USA'),
+                ('USA'),
+                ('BRAZIL'),
+                ('BRAZIL'),
+                ('BRAZIL');
+
+            insert into suppliers(country)
+            values ('USA'),
+                ('BRAZIL'),
+                ('BRAZIL');
+
+            -- pay attention to this one:
+            select country from customers
+            intersect all
+            select country from suppliers;
+                country
+                USA
+                BRAZIL
+                BRAZIL
+
+            select country from customers
+            intersect distinct
+            select country from suppliers;
+                country
+                USA
+                BRAZIL
+    -- So referring to the query (**) and our imaginary example, we would receive 2 pairs as BRAZIL, not 6!
+    -- To be able to implement the imaginary example, we need to use:
+    select count(*) as num_of_pairs, customers.country
+    from customers inner join suppliers using(country)
+    group by customers.country
+    order by customers.country asc;
+
+-- how many distinct countries, where we have both customers and suppliers
 select count(*) from (
 	select country from customers
 	intersect distinct
 	select country from suppliers
 ) as x
+    -- another solution:
+    select count(*) from (
+        select distinct country from customers
+        intersect distinct
+        select distinct country from suppliers
+    ) as x;
+
+-- how many distinct countries we have for customers and suppliers altogether
+select count(*) from (
+	select distinct country from customers
+	union distinct
+	select distinct country from suppliers
+) as x;
 
 -- Distinct cities that have customers and suppliers located in
 -- e.g. NY has 2 customers & 3 suppliers
@@ -1067,14 +1424,20 @@ select count(*) from (
 -- Outcome: cities -> Ny, Helsinki
 select city from customers
 intersect distinct
-select city from suppliers
+select city from suppliers;
 
 --(???) the count of number of customers and suppliers pairs that are in the same city
 select count(*) from
 (select city from customers
 intersect all
 select city from suppliers) as customer_supplier_pairs
-
+    -- Imagine we have 2 customers and 3 suppliers in London, but the previous solution
+    -- would return 2 as the number of customer/supplier pairs in London. However, we expect 6 as the number of pairs.
+    -- The correct solution is likely this one:
+    select count(*) as num_of_pairs, customers.city
+    from customers inner join suppliers using(city)
+    group by customers.city
+    order by customers.city asc;
 
 -- Lecture 53: EXCEPT
 -- documenation: https://www.postgresql.org/docs/13/sql-select.html
@@ -1083,37 +1446,92 @@ select city from suppliers) as customer_supplier_pairs
     select <column1>, <column2>, ...
     from table1
 
-    except  --> removes duplicates (e.g. except distinct)
+    except all/distinct --> removes duplicates (e.g. except distinct)
 
     select <column1>, <column2>
     from table2
 -- must have same number of columns
 -- column types must line up
 
+-- Documentation: https://stackoverflow.com/questions/43599511/psql-except-vs-except-all
+
 -- Find all countries that we have customers in but no suppliers
 -- order by country in asc
-select country from customers
-except distinct
-select country from suppliers
-order by country asc
+select distinct country from customers
+except all
+select distinct country from suppliers
+order by country asc;
 
--- Find the number of customers within a country without suppliers
+-- ??? Find the number of customers within a country without suppliers
+-- Teachers solution:
 select count(*) from
 (select country from customers
  except all
  select country from suppliers
 ) as customers_without_suppliers
+    --> returns 68.
+    -- however, except all works such that if there are 2 customers and 1 supplier in Germany, it returns 1
+    -- which isn't a country without suppliers. Proof:
+            -- Refer to Lecture 52 database:
+            select country from customers
+            except all
+            select country from suppliers;
+    -- So, we need to utilize distinct to solve this issue:
+    select count(*) from customers where country in 
+    (select distinct country from customers
+    except all
+    select distinct country from suppliers);
+
+    -- Find the number of customers within a country without suppliers
+    select count(*) from customers where country in
+    (select distinct country from customers
+    except all
+    select distinct country from suppliers);
+        -- which returns 22
+        --Another solution is to use left join:
+        select
+            count(*) as num_of_customers
+        from customers left join suppliers using(country)
+        group by suppliers.country
+        having suppliers.country is null;
+        -- OR;
+        select count(*) as num_of_customers from customers
+        left join suppliers using(country)
+        where suppliers.country is null;
 
 -- Cities which have a supplier with no customer
 select city from suppliers
 except distinct
-select city from customers
-
+select city from customers;  --> (1)
+    -- it gives 24 cities having supplier(s) and no customer.
+    -- Another equal way to implement this:
+    select distinct city from suppliers
+    except
+    select distinct city from customers;    --> (2)
+    -- Way 1 and way 2 are the same. Proof:
+    (select distinct city from suppliers
+    except
+    select distinct city from customers)
+    except all
+    (select city from suppliers
+    except distinct
+    select city from customers);
+        -- Note that The result of EXCEPT does not contain any duplicate rows unless the ALL option is specified.
+        -- With ALL, a row that has m duplicates in the left table and n duplicates in the right table will appear max(m-n,0) times 
+        -- in the result set.
 -- How many customers do we have in cities without suppliers
+-- My incorrect solution
 select count(*) from
 (select city from customers
  except all
  select city from suppliers) as cities_with_customers_without_suppliers
+    -- Possibly the right solution:
+    -- How many customers do we have in cities without suppliers
+    select count(*) from customers where city in
+    (select distinct city from customers
+    except all
+    select distinct city from suppliers
+    );
 
 
 -- Section 11: Subqueries
@@ -1127,6 +1545,9 @@ select count(*) from
     where exists (select column1 from table2 where condition)
     -- it looks to see if the condition is met in the subquery
     -- then it pulls out the columnA, columnB, ... from table 1
+        -- My interpretation: if any row in Table1 is related with a condition to any row in Table2,
+        -- then pick that row in Table1. Note that in the condition your will define the relationship between columns
+        -- of Table1 and Table2.
 
 -- Find customers with orders made in April, 1997
 -- order by company name ascending
@@ -1156,6 +1577,14 @@ where not exists(
 	cast(orderdate as date) between cast('1997-04-01' as date) and cast('1997-04-30' as date)
 )
 order by companyname asc, contactname asc
+    -- OR
+    select companyname, contactname from customers
+    where not exists (
+        select orderid from orders
+        where customers.customerid = orders.customerid and
+        (orderdate between date('1-April-1997') and date('30-April-1997'))
+    )
+    order by companyname asc, contactname asc;
 
 
     -- or it can be done this way (??? does not work)
@@ -1180,7 +1609,7 @@ order by companyname asc, contactname asc
     where x.customerid is null
     order by companyname asc, contactname asc
 
--- What products did not have an order in April, 1997.
+-- What products did not have an order in April, 1997. order by productname ascending order
 -- order by productname in asc (??? does not work)
 -- https://stackoverflow.com/questions/64633363/left-join-vs-where-not-exits
 select
@@ -1197,42 +1626,72 @@ order by productname asc;
     -- even though it should not be picked.
 
     -- Solution 1: Using joins
-    select productname
+    select
+        productname
     from products left join (
         select distinct productid
-        from products inner join order_details using(productid)
-                    inner join orders using(orderid)
-        where orderdate::date between '1997-04-01'::date and '1997-04-30'::date
-    ) as x using(productid)
-    where x.productid is null
-    order by productname asc
+        from products 
+        inner join order_details using(productid)
+        inner join orders using(orderid)
+        where orderdate between date('1-April-1997') and date('30-April-1997')
+    ) as products_ordered_in_april_1997
+    using (productid)
+    where products_ordered_in_april_1997.productid is null
+    order by productname asc;
 
     -- or it can be done using WHERE NOT EXISTS (Correctly working!)
     -- Solution 2:
+        select productname from products
+        where NOT exists (
+            select orders.orderid from orders
+            inner join order_details using(orderid)
+            where products.productid = order_details.productid
+            and (orderdate::date between '1997-04-01'::date and '1997-04-30'::date)
+        )
+        order by productname asc;
+
+    -- Solution 3: using NOT IN
     select
         productname
-    from products as p
-    where not exists(
-        select productid
-        from order_details as od inner join orders using(orderid)
-        where od.productid = p.productid and
-        cast(orderdate as date) between cast('1997-04-01' as date) and cast('1997-04-30' as date)
+    from products
+    where productid not in (
+        select distinct productid from products
+        inner join order_details using(productid)
+        inner join orders using(orderid)
+        where orderdate between date('April-01-1997') and date('April-30-1997')
+    )
+    order by productname asc;
+
+    -- Solution 4: Using <> all == NOT IN
+    select
+        productname
+    from products
+    where productid <> all (
+        select distinct productid from products
+        inner join order_details using(productid)
+        inner join orders using(orderid)
+        where orderdate between date('April-01-1997') and date('April-30-1997')
     )
     order by productname asc;
 
 -- Find all suppliers with a product that costs more than 200$
+-- order by companyname ascending order
 -- Solution 1:
 select distinct companyname
 from suppliers inner join products using(supplierid)
 where unitprice > 200
+order by companyname asc;
 
     -- Solution2:
-    select companyname
-    from suppliers as s where exists(
-	select productid from products as p
-	where s.supplierid = p.supplierid and
-	unitprice > 200
+    select companyname from suppliers
+    where exists (
+        select productid from products
+        where products.supplierid = suppliers.supplierid AND
+        unitprice > 200
     )
+    order by companyname asc;
+
+
 
 -- Find all suppliers that don't have an order in Dec 1996
 -- order by companyname in ascending order
@@ -1266,23 +1725,22 @@ order by companyname asc;
     from suppliers left join (
 	    select *
 	    from products inner join order_details using(productid)
-				  inner join orders using(orderid)
+				      inner join orders using(orderid)
 	    where orderdate::date between '1996-12-01'::date and '1996-12-31'::date
     ) as x using(supplierid)
     where x.productid is null
     order by companyname asc
 
     -- Solution 4: (Works) using NOT EXISTS
-    select companyname
-    from suppliers as s
+    select companyname from suppliers
     where not exists(
-        select distinct supplierid
-        from products as p inner join order_details using(productid)
-                    inner join orders using(orderid) 	
-        where orderdate::date between '1996-12-01'::date and '1996-12-31'::date
-        and s.supplierid = p.supplierid
+        select distinct supplierid from products
+        inner join order_details using(productid)
+        inner join orders using(orderid)
+        where (orderdate between date('Dec-01-1996') and date('Dec-31-1996'))
+        and (suppliers.supplierid = products.supplierid)
     )
-    order by companyname asc
+    order by companyname asc;
 
 
 -- Lecture 55: using ANY and ALL
@@ -1328,6 +1786,18 @@ order by companyname asc
     )
     order by companyname asc
 
+    -- Solution4: Using EXISTS
+    select
+        companyname
+    from customers
+    where exists (
+        select orderid from orders
+        inner join order_details using(orderid)
+        where customers.customerid = orders.customerid AND
+        quantity > 50
+    )
+    order by companyname asc;
+
 -- Find all suppliers that have an order with 1 item
 -- order by companyname in ascending order
 -- Solution 1: using ANY
@@ -1340,12 +1810,30 @@ where supplierid = any(
 )
 order by companyname asc
 
-    -- Solution 2: Using joins only
+    -- Solution2: Using IN operator
+    select companyname from suppliers
+    where supplierid in (
+        select distinct supplierid from products
+        inner join order_details using(productid)
+        where quantity = 1
+    )
+    order by companyname asc;
+
+    -- Solution 3: Using joins only
     select distinct companyname
     from suppliers inner join products using(supplierid)
 			   inner join order_details using(productid)
     where quantity = 1
     order by companyname asc
+
+    -- Solution 4: Using EXISTS
+    select companyname from suppliers
+    where exists (
+        select distinct supplierid from products
+        inner join order_details using(productid)
+        where suppliers.supplierid = products.supplierid and quantity = 1
+    )
+    order by companyname asc;
 
 -- ALL
 -- Documentation: https://www.postgresqltutorial.com/postgresql-all/
@@ -1365,43 +1853,60 @@ order by companyname asc
         column_name != ALL (subquery) the expression evaluates to true if a value is not equal to any value returned by the subquery
     -- In case the subquery returns no row, then the ALL operator always evaluates to true
 
--- Find products which has order quantity that are
--- higher than the average of all the products
+-- Extra (not in the course exercises): Find products which has order quantity that are
+-- higher than the averages of all of the individual products
 -- order by product name in ascending fashion
-select distinct productname
+select
+	productname, sum(quantity) as total_ordered_quantity
 from products inner join order_details using(productid)
-where quantity > all(
-	select avg(quantity)
-	from products as p inner join order_details using(productid)
-	group by p.productid
-)
-order by productname asc
+group by productid
+having sum(quantity) > all(
+	select round(avg(quantity),2) from order_details
+	group by products.productid)
+order by productname asc;
 
--- Find products which has order AMOUNT ($) that are
--- higher than the average of all the products
+
+-- Extra: Find products which has total order AMOUNT ($) that are
+-- higher than all individual product's average order amounts
 -- order by product name in ascending fashion
-    select distinct productname
-    from products inner join order_details as od using(productid)
-    where (od.unitprice * quantity) > all (
-        select round(cast(avg(od.unitprice * quantity) as numeric), 2)
-        from products as p inner join order_details as od using(productid)
-        group by p.productid
-    )
-    order by productname asc
+select
+	productname
+from products inner join order_details using(productid)
+group by products.productid
+having sum((order_details.unitprice*quantity)-discount) > all(
+	select avg((unitprice*quantity)-discount)
+	from order_details group by productid
+)
+order by productname asc;
 
--- Find all distinct customers that ordered more than 1 item
+
+-- Find products which has least 1 order with AMOUNT ($) that is
+-- higher than the average of all individual product's amounts
+-- order by product name in ascending fashion
+        select distinct productname from products
+        inner join order_details as od using(productid)
+        where ((od.unitprice*quantity)-discount) > all(
+            select avg((unitprice*quantity)-discount) from order_details
+            group by productid
+        )
+        order by productname asc;
+
+-- Ambigious Task Description: Find all distinct customers that ordered more than 1 item
 -- than the average order amount per item of all customers
-select distinct companyname
-from customers inner join orders using(customerid)
-			   inner join order_details using(orderid)
-where (unitprice*quantity) > all(
-	select avg(unitprice*quantity)
-	from orders inner join order_details using(orderid)
+select distinct companyname from customers
+inner join orders using(customerid)
+inner join order_details using(orderid)
+where ((unitprice*quantity)-discount) > all (
+	select avg((unitprice*quantity)-discount)
+	from order_details inner join orders using(orderid)
 	group by customerid
 )
+order by companyname asc;
     -- My interpretation:
-    -- Find all the distinct customers, which made a purchase with
-    -- an amount greater than that of the averages of all the customers
+    -- Find all customers, which made a purchase with
+    -- an amount greater than that of the average total purchase amount 
+    -- of all the individual customers
+    -- order by companyname asc
 
 -- Lecture 56 : using IN
 -- Documentation: https://www.postgresqltutorial.com/postgresql-in/
@@ -1416,9 +1921,24 @@ where (unitprice*quantity) > all(
     value IN (SELECT column_name FROM table_name);
 
 -- Find Customers that are in the same countries as suppliers
+-- order by company name asc
 SELECT companyname
 FROM customers
-WHERE country IN (SELECT DISTINCT country FROM suppliers);
+WHERE country IN (SELECT DISTINCT country FROM suppliers)
+order by companyname asc;
+    -- Solution 2: Using = ANY
+    select companyname from customers
+    where country = any (
+	select distinct country from suppliers
+    );
+
+    -- Solution 3: Using where exists
+    select companyname from customers
+    where exists(
+        select supplierid from suppliers
+        where customers.country = suppliers.country
+    )
+    order by companyname asc;
 
 
 -- Section 12: Modifying data in tables INSERT INTO, UPDATE, DELETE
@@ -1452,7 +1972,7 @@ WHERE country IN (SELECT DISTINCT country FROM suppliers);
 
         -- productid = 11
         insert into order_details (orderid, productid, unitprice, quantity, discount)
-                    values (11078, 11, 14, 20, 0)
+                    values (11078, 11, 14, 20, 0);
 
 -- Lecture 58: UPDATE
 -- Documentation: https://www.postgresqltutorial.com/postgresql-update/
@@ -1478,7 +1998,7 @@ WHERE condition;
 -- They need it by 2017-09-20 and the shipping cost is increased by 50$
 update orders
 set requireddate='2017-09-20'::date, freight = freight + 50
-where orderid = 11078
+where orderid = 11078;
 
 -- update the order_details row we created in Lecture 57
     -- orderid= 11078 and quantity=20 and productid=11
@@ -1486,7 +2006,7 @@ where orderid = 11078
 -- and we are giving a discount of 0.05
 update order_details
 set quantity=40, discount=0.05
-where orderid= 11078 and quantity=20 and productid=11
+where orderid=11078 and quantity=20 and productid=11
 
 -- Lecture 59: DELETE
 -- Doc: https://www.postgresqltutorial.com/postgresql-delete/
@@ -1501,10 +2021,10 @@ WHERE condition
 
 -- Delete the order_detail row created in Lecture 57
 delete from order_details
-where orderid= 11078 and quantity=40 and productid=11
+where orderid= 11078 and quantity=40 and productid=11;
 
 -- delete the order entry created in Lecture 57
-delete from orders where orderid=11078
+delete from orders where orderid=11078;
 
 -- Lecture 60: SELECT INTO TABLE : take selected rows & columns and slap it into a new table
 -- Docs: https://www.postgresqltutorial.com/postgresql-select-into/
@@ -1526,14 +2046,14 @@ WHERE
 select *
 into table suppliers_north_america
 from suppliers
-where country in ('USA', 'Canada')
+where country in ('USA', 'Canada');
 
 
 -- Backup orders in the year 1997 to a new table orders_1997
 select *
 into table orders_1997
 from orders
-where orderdate::date between '1997-01-01'::date and '1997-12-31'::date
+where orderdate::date between '1997-01-01'::date and '1997-12-31'::date;
 
 -- Lecture 61: INSERT INTO SELECT
 -- Syntax:
@@ -1551,13 +2071,13 @@ where condition
 -- Add our suppliers in Brazil & Argentina to suppliers_north_america
 insert into suppliers_north_america
 select * from suppliers
-where country in ('Brazil', 'Argentina')
+where country in ('Brazil', 'Argentina');
 
 -- Add orders from December 2016 to the table orders_1997
 insert into orders_1997
 select *
 from orders
-where orderdate::date between '2016-12-01'::date and '2016-12-31'::date
+where orderdate::date between '2016-12-01'::date and '2016-12-31'::date;
 
 -- Lecture 62: Returning data from UPDATE; INSERT INTO AND DELETE
 -- Syntax for INSERT INTO:
@@ -1576,7 +2096,7 @@ update products
 set
 	unitprice = unitprice * 1.2
 where productid = 1
-returning unitprice, productid
+returning unitprice, productid;
 
 -- update order_details for orderid 10248 and productid 11
 -- to double the quantity ordered and return the new quantity
@@ -1604,7 +2124,7 @@ returning *
 -- The solution is to use indexes.
 
 -- Lecture 63: What are indexes?
--- Indexes are data structures attached to specific fields/columns
+-- Indexes are data structures attached to specific columns
 -- to improve the lookup speed
 
 -- Penalty for attaching indexes for every column:
@@ -1626,11 +2146,11 @@ on table1 (column1, ...);
 
 -- create unique index on employeeid field of employees table
 create unique index idx_employees_employeeid
-on employees(employeeid)
+on employees(employeeid);
 
 -- on orders create a single index on two fields customerid and orderid
 create index idx_orders_customerid_orderid
-on orders(customerid, orderid)
+on orders(customerid, orderid);
 
 -- Lecture 65: DROP INDEX
 -- Syntax:
@@ -1728,24 +2248,28 @@ EXPLAIN ANALYZE SELECT *
 FROM  performance_test
 WHERE location LIKE 'df%' AND name LIKE 'cf%';
 
+
 CREATE INDEX idx_performance_test_location_name
 ON performance_test(location,name);
-
--- takes 55 ms
-EXPLAIN SELECT *
-FROM  performance_test
-WHERE location LIKE 'df%' AND name LIKE 'cf%';
-
--- order matters with searches with one column
-    -- this can't use index
-    EXPLAIN ANALYZE SELECT *
+-- This index would not be used in:
+    EXPLAIN SELECT *
     FROM  performance_test
-    WHERE  name LIKE 'cf%';
-
-    -- this can
-    EXPLAIN ANALYZE SELECT *
+    WHERE location LIKE 'df%' AND name LIKE 'cf%';
+    -- Q: how to optimize the performance for where clauses like above?
+    -- Answer: Index columns for LIKE in postgres:
+    -- https://niallburkley.com/blog/index-columns-for-like-in-postgres/
+    CREATE EXTENSION pg_trgm;
+    create index trgm_idx_performance_test_location on performance_test using gin(location gin_trgm_ops);
+    create index trgm_idx_performance_test_name on performance_test using gin(name gin_trgm_ops);
+    -- Re-Run
+    EXPLAIN SELECT *
     FROM  performance_test
-    WHERE location LIKE 'df%';
+    WHERE location LIKE 'df%' AND name LIKE 'cf%';
+        -- You will see that the created indexes are being used in the query plan
+        SELECT *
+        FROM  performance_test
+        WHERE location LIKE 'df%' AND name LIKE 'cf%';
+        -- Runs now in about 113 msec, not 4 secs!
 
 
 -- LECTURE 71: Expression Indexes
@@ -1768,9 +2292,19 @@ ON production.product (name);
 
 -- this becomes an bitmap index scan
 -- "  ->  Bitmap Index Scan on idx_product_name  (cost=0.00..4.32 rows=5 width=0)"
+    -- Second time study: no, idx_product_name is NOT used.
 EXPLAIN select *
 from production.product
 WHERE name LIKE 'Flat%';
+    -- Referring to:
+    CREATE EXTENSION pg_trgm;
+    create index trgm_idx_production_product_name
+    on production.product using gin(name gin_trgm_ops);
+
+    EXPLAIN select *
+    from production.product
+    WHERE product.name LIKE 'Flat%';
+        -- This did not work either; trgm_idx_production_product_name is not in the query plan.
 
 -- this is back to sequential scan
 -- "Seq Scan on product  (cost=0.00..17.56 rows=3 width=139)"
@@ -1941,7 +2475,7 @@ CREATE TABLE table_name (
 -- Example:
 CREATE TABLE subscribers (
 	firstname varchar(200),
-	 lastname varchar(200),
+	lastname varchar(200),
 	email varchar(250),
 	signup timestamp,
 	frequency integer,
@@ -2037,6 +2571,7 @@ drop table bad_orders;
 -- Data type is the most basic kind of constraint; Do i want text, integers, floats etc
 -- other constraits, which we will see soon, enables us to further restrict the data going into a table
 -- Types of Constraints
+-- Lecture 92:
 NOT NULL    -- Field must have a value
 UNIQUE      -- Value must not already be in table
 PRIMARY KEY -- Must have a value and be unique --> used to identify a value
@@ -2070,6 +2605,7 @@ alter column unitprice set not null;
 alter table employees
 alter column lastname set not null;
 
+-- Lecture 93:
 -- Drop the practices table and re-create it with:
 -- one field practice id that is unique and fieldname practice_field with varchar(50) and
 -- has NOT NULL constraint
@@ -2152,7 +2688,7 @@ create table table1(
     foreign key (column_name) references table2(column_name)
 )
 
--- Northwind database
+-- use northwind_2 database
 -- drop the table practices and re-create it:
 -- practiceid with the primary key
 -- fieldname practicefield varchar(50) and has NOT NULL
@@ -2165,7 +2701,7 @@ create table practices (
     foreign key (employeeid) references employees(employeeid)  --> creates practices_employeeid_fkey
 );
 
--- Northwind database
+-- Northwind_2 database
 -- Drop the old pets table and create table called pets with 3 fields:
 -- petid integer that is the primary key with auto increment
 -- name varchar(25) and must not have null values
@@ -2199,7 +2735,7 @@ drop constraint pets_customerid_fkey;
 alter table pets
 add constraint pets_customerid_fkey foreign key (customerid) references customers(customerid);
 
--- Lecture 95 : CHECK constraint
+-- Lecture 96 : CHECK constraint
 -- syntax:
 create table table_name (
     column1 datatype,
@@ -2208,6 +2744,7 @@ create table table_name (
     constraint constraint_name check (condition)
 )
 
+-- Use northwind_2 database
 -- Re-create practices table:
 -- practiceid is the primary key
 -- fieldname practice_field with varchar(50) and cannot be null
@@ -2244,6 +2781,7 @@ check(condition)
 alter table table_name
 drop constraint constraint_name
 
+-- Use northwind_2 database
 -- add constraint to orders table that freight must be more than 0
 alter table orders
 add constraint orders_freight_check
@@ -2254,7 +2792,7 @@ alter table products
 add constraint products_unitprice_check
 check(unitprice > 0);
 
--- Lecture 96: DEFAULT constraint
+-- Lecture 97: DEFAULT constraint
 -- Syntax
 create table table_name (
     column1 datatype,
@@ -2267,26 +2805,28 @@ create table table_name (
 -- employeeid is integer type & cannot be null and a foreign key from employees table
 -- cost integer which must be between 0 and 1000 and default 50
 drop table if exists practices;
-create table practices (
-    practiceid int primary key,
-    practice_field varchar(50) not null,
-    employeeid int not null,
-    cost int constraint practices_cost_check check(cost >= 0 and cost <= 1000) default 50,
-    foreign key (employeeid) references employees(employeeid)
+create table practices(
+	practiceid integer primary key,
+	practice_field varchar(50) not null,
+	employeeid integer not null,
+	cost integer not null default 50,
+	foreign key (employeeid) references employees(employeeid),
+	constraint check_cost check(cost >= 0 and cost <= 1000)
 );
 
 -- Re-create pets table with 4 fields:
 -- petid integer that is the primary key with auto increment
 -- name varchar(25) and must not have null values
 -- customerid char(5) which cannot be null and a foreign key from customers table
--- wieght integer which has to be greater than 0 and less than 200, default 5
+-- weight integer which has to be greater than 0 and less than 200, default 5
 drop table if exists pets;
 create table pets (
-    petid serial primary key,
-    name varchar(25) not null,
-    customerid char(5) not null,
-    weight integer default 5 constraint pets_weight_check check(weight > 0 and weight < 200),
-    foreign key (customerid) references customers(customerid)
+	petid serial primary key,
+	name varchar(25) not null,
+	customerid char(5) not null,
+	weight integer not null default 5,
+	foreign key (customerid) references customers(customerid),
+	constraint check_pets_weight check(weight >= 0 and weight <= 200)
 );
 
 -- ALTER TABLE + DEFAULT constraint
@@ -2367,7 +2907,7 @@ alter table table_name alter column column_name drop not null
 alter table products drop constraint products_reorderlevel_check
 
 -- drop the not null constraint on discontinued column we added (2)
-alter table products alter column discontinued drop not null
+alter table products alter discontinued drop not null
 
 -- add a check constraint to table order_details column unitprice to make sure it is a positive number
 alter table order_details add check(unitprice > 0)  --> creates order_details_unitprice_check constraint
@@ -2380,7 +2920,7 @@ alter table order_details alter column discount set not null
     alter table order_details alter column discount drop not null
 
 -- Section 17 : Sequences
--- Lecture 99:
+-- Lecture 100:
 -- Doc: http://www.neilconway.org/docs/sequences/
 -- Note: Sequences in postgresql is the same as generators in Python
 CREATE SEQUENCE test_sequence;      -- initialized to 0 by default
@@ -2411,6 +2951,14 @@ SELECT MAX(employeeid) FROM employees;  -- returns 9
     -- 9 + 1 = 10 is the next employeeid
     CREATE SEQUENCE IF NOT EXISTS employees_employeeid_seq
     START WITH 10 OWNED BY employees.employeeid;
+        -- If you want to hardcode X=10 into start with X, then:
+        -- https://stackoverflow.com/questions/37057643/postgresql-starting-a-sequence-at-maxthe-column1
+        create sequence employees_employeeid_seq
+        increment 1 owned by employees.employeeid;
+
+        select setval('employees_employeeid_seq',
+                     (select max(employeeid)+1 from employees),
+                     false);
 
     --This insert will fail; note that employeeid is not passed: null
     INSERT INTO employees
@@ -2433,18 +2981,20 @@ CREATE SEQUENCE IF NOT EXISTS orders_orderid_seq START WITH 11078 OWNED BY order
     ALTER COLUMN orderid SET DEFAULT nextval('orders_orderid_seq');      -- (2) make nextval of the sequence set the default value to the field
     INSERT INTO orders (customerid,employeeid,requireddate,shippeddate)  -- null orderid passed --> default constraint will be used
     VALUES ('VINET',5,'1996-08-01','1996-08-10') RETURNING orderid;      -- returns 11078
-    -- Lesson learned: If you want to set a default value to a field with the nextval from a sequence, you need to do 2 things in the following order:
-        -- (1) attach the sequence to the field in the table; make the field own the sequence
+    -- Lesson learned: If you want to set a default value to a field with the nextval from a sequence,
+    -- you need to do 3 things in the following order:
+        -- (0) create the sequence and attached it to table.column via owned by
+        -- (1) use "select setval('<seq_name>') to set the currval of the sequence
         -- (2) make nextval of the sequence set the default value to the field
 
 -- Docs: http://www.neilconway.org/docs/sequences/
 -- Lesson learned:
 -- serial = int + auto increment (+ not null)
 -- to accomplish auto increment part in serial, postgresql creates a sequence behind the scenes:
-    -- serial indicates that the values for the column will be generated by consulting the sequence
+    -- serial indicates that the values for the column will be generated from the sequence
     -- therefore, it creates a new sequence object, and sets the default value for the column to be the next value produced by the sequence
     -- since a sequence always produces non-NULL values, it adds a NOT NULL constraint to the column
--- So, there is a relation between serial & automatically created sequence
+-- So, there is a direct relation between serial & automatically created sequence
 
 -- Lecture 100: Alter & Delete sequences
 -- Syntax:
@@ -2477,7 +3027,7 @@ create table table_name (
     field_name serial
 );
     -- is equivalent to
-    create sequence table_name_field_name_seq;
+    create sequence table_name_field_name_seq increment 1 start with 1;
     create table table_name (
         field_name int not null default nextval('table_name_field_name_seq')
     );
@@ -2502,13 +3052,15 @@ insert into pets(petname) values('Dobby') returning petid;
 
 -- Section 18: Common Table Expressions (CTE) (i.e. WITH Queries)
 -- Lecture 102: WITH Queries
--- Doc: https://www.postgresql.org/docs/current/queries-with.html#QUERIES-WITH-SELECT
+-- Doc: https://www.postgresqltutorial.com/postgresql-cte/  (use dvdrental_db)
 -- Syntax:
 with cte_name as (
     select statement
 )
 select statement that includes cte_name
 -- CTE creates temporary table that is used just for the current query
+-- Usage: Common Table Expressions or CTEs are typically used to simplify complex joins and subqueries in PostgreSQL
+-- Hint: if you have a complex join or a complex subquery, consider using CTE
 
 -- Task: We want to find out the number of units ordered and amount of sales
 -- for all the products from the top three categories by total_sales
@@ -2520,20 +3072,23 @@ select statement that includes cte_name
 with top_three_categories_by_total_sales as (
 	select
 		categories.categoryid,
-		sum((od.quantity*od.unitprice)-od.discount) as total_sales
-	from categories inner join products using(categoryid)
-					inner join order_details as od using(productid)
+		sum((od.unitprice * od.quantity) - od.discount) as total_sales
+	from categories
+	inner join products using(categoryid)
+	inner join order_details as od using(productid)
 	group by categories.categoryid
 	order by total_sales desc limit 3
 )
-select categoryname, productname,
-	   sum(quantity) as units_ordered,
-	   sum((od.quantity*od.unitprice)-od.discount) as total_sales
-from categories inner join products using(categoryid)
-				inner join order_details as od using(productid)
-where categories.categoryid in (select categoryid from top_three_categories_by_total_sales)
+select
+	categoryname, productname,
+	sum(od.quantity) as total_number_of_units_ordered,
+	sum((od.unitprice * od.quantity)-od.discount) as total_sales
+from categories
+inner join products using(categoryid)
+inner join order_details as od using(productid)
+where products.categoryid in (select categoryid from top_three_categories_by_total_sales)
 group by categoryname, productname
-order by categoryname, productname
+order by categoryname, productname;
    -- Observation: you need to find top three categories by total_sales first;
    -- this is your subquery. CTE/With query enables you to name that subquery and refer
    -- to the temporary table CTE yields. In the main query,
@@ -2547,21 +3102,60 @@ with top_three_categories_by_total_sales as (
 	group by categoryid
 	order by sum((od.unitprice*od.quantity)-od.discount) desc
 	limit 3
-),
-products_in_top_three_categories as (
+), products_in_top_three_categories as (
 	select productid, categoryid,
 		   sum(od.quantity) as units_ordered,
-		   sum((od.unitprice*od.quantity)-od.discount) as sales_amount
+		   sum((od.unitprice*od.quantity)-od.discount) as total_sales
 	from products inner join order_details as od using(productid)
-	where categoryid in (select * from top_three_categories_by_total_sales)
+	where categoryid in (select categoryid from top_three_categories_by_total_sales)
 	group by productid, categoryid
 )
-select categoryname, productname, units_ordered, sales_amount  
+select categoryname, productname, units_ordered, total_sales
 from categories inner join products_in_top_three_categories using (categoryid)
 				inner join products using(productid)
-order by categoryname, productname
+order by categoryname, productname;
 
 -- we want a list of customers, who ordered the 2 least ordered products
+-- order by customername in asc order
+-- (we want to see if we will loose any important customer if we quit
+-- carrying those 2 products)
+-- Solution #1:
+with two_least_ordered_products as (
+	select products.productid,
+		   sum(quantity) as units_ordered
+	from products inner join order_details using(productid)
+	group by products.productid
+	order by units_ordered asc limit 2
+)
+select distinct customers.customerid, customers.companyname
+from customers inner join orders using(customerid)
+	 		   inner join order_details using(orderid)
+where productid in (select productid from two_least_ordered_products)
+order by customers.companyname asc;
+    -- Solution #2:
+    with two_least_ordered_products(productid) as (
+        select
+            productid,
+            sum(quantity) as quantity_ordered
+        from order_details
+        group by productid
+        order by quantity_ordered asc limit 2
+    )
+    select
+        customers.customerid,
+        customers.companyname
+    from customers
+    inner join orders using(customerid)
+    inner join order_details as od using(orderid)
+    where od.productid in (select productid from two_least_ordered_products)
+    group by customers.customerid
+    order by customers.companyname asc;
+
+-- Extra: Not in the lecture:
+-- we want a list of customers, who ordered the 2 least ordered products
+-- in terms of units ordered
+-- and who are in top 10 list based on the total order cost
+-- order by customername in asc order
 -- (we want to see if we will loose any important customer if we quit
 -- carrying those 2 products)
 with two_least_ordered_products as (
@@ -2570,22 +3164,38 @@ with two_least_ordered_products as (
 	from products inner join order_details using(productid)
 	group by products.productid
 	order by units_ordered asc limit 2
+), top_10_buyers_by_total_order_cost as (
+	select
+		customers.customerid,
+		sum((od.quantity * od.unitprice) - od.discount) as total_order_cost
+	from customers
+	inner join orders using(customerid)
+	inner join order_details as od using(orderid)
+	group by customers.customerid
+	order by total_order_cost desc limit 10
 )
-select distinct companyname
-from customers inner join orders using(customerid)
-	 		   inner join order_details using(orderid)
-where productid in (select productid from two_least_ordered_products)
+select
+	distinct customers.customerid, customers.companyname
+from customers
+inner join orders using(customerid)
+inner join order_details as od using(orderid)
+where customers.customerid in (select customerid from top_10_buyers_by_total_order_cost)
+and od.productid in (select productid from two_least_ordered_products)
+order by customers.companyname asc;
+
 
 -- Lecture 103: Using CTE to grab identity field from insert
 -- Refer to Northwind Database
 -- Common Problem: I just inserted a record with id field: inserted an order
 -- and need orderid field for order_details records. How do i grab the orderid for the order
--- and use for further inserts into order_details records
+-- and use it for a further insert into order_details
 
--- below 3 lines re-starts orders_orderid_seq from the right value
-select currval('orders_orderid_seq');  --> returns 200007
-select max(orderid) from orders;       --> returns 11078
-alter sequence orders_orderid_seq restart with 11079;
+    -- note: in order the insert to orders to work, you need to have orders_orderid_seq
+    -- sequence attached to orders table's orderid field this way:
+    -- add a sequence for orderid in orders table
+    create sequence orders_orderid_seq owned by orders.orderid;
+    select setval('orders_orderid_seq', (select max(orderid)+1 from orders), false);
+    alter table orders alter column orderid set default nextval('orders_orderid_seq');
 
 WITH new_order AS (
 	INSERT INTO orders
@@ -2596,8 +3206,6 @@ WITH new_order AS (
 INSERT INTO order_details (orderid, productid, unitprice, quantity, discount)
 SELECT orderid, 1, 20, 5, 0
 FROM new_order;
-    -- note: in order the insert to orders to work, you need to have orders_orderid_seq
-    -- sequence attached to orders table's orderid field
     -- get the order we just inserted
     SELECT * FROM orders
     ORDER BY orderid DESC
@@ -2607,19 +3215,41 @@ FROM new_order;
     WHERE orderid = (SELECT MAX(orderid) FROM orders);
 
 
--- modify employees_employeeid_seq to point to the largest value in employeeid field in employees table
+-- modify employees_employeeid_seq to point 
+-- to the largest value in employeeid field in employees table
 -- create a new employee record yielding employeeid
 -- then use the returned employeeid in creating a new order
-select max(employeeid)+1 from employees;  --> 11
-alter sequence employees_employeeid_seq restart with 11;
-with new_employee as (
-    insert into employees(lastname, firstname, title, reportsto)
-    values ('Doger', 'Roger', 'Assistant', 2)
-    returning employeeid
+create sequence employees_employeeid_seq owned by employees.employeeid;
+select setval('employees_employeeid_seq', (
+	select max(employeeid)+1 from employees
+), false);
+alter table employees alter column employeeid
+set default nextval('employees_employeeid_seq');
+
+with new_employee_creation as (
+	insert into employees(lastname, firstname, title)
+	values ('Cuzdan', 'Hakan', 'Test Automation Developer')
+	returning employeeid
 )
-insert into orders(customerid, employeeid, orderdate, requireddate)
-select 'ALFKI', employeeid, '1997-03-10'::date, '1997-03-25'::date
-from new_employee;
+insert into orders(customerid,
+				   employeeid,
+				   orderdate,
+				   requireddate,
+				   shippeddate,
+				   shipvia,
+				   freight,
+				   shipname,
+				   shipaddress,
+				   shipcity,
+				   shipregion,
+				   shippostalcode,
+				   shipcountry
+				  )
+select 'ANTON', employeeid, '13-09-2021'::date, '23-09-2021'::date,
+       '15-09-2021'::date, 3, 9.99, 'Test Monkeys Oy', 'Eerikinkatu 25B 31',
+	   'Helsinki', 'Uusimaa', '00180', 'Finland'
+from new_employee_creation
+returning orderid;
     -- get the latest employee just inserted
     select * from employees
     order by employeeid desc limit 1;
@@ -2629,7 +3259,10 @@ from new_employee;
 
 -- Lecture 104 : Creating hierarchical data to use with recursive WITH queries
 -- Using the Northwind database:
-        delete from orders where employeeid = 11;  -- delete the order we created in the previous lecture
+        -- delete the order we created in the previous lecture:
+        delete from orders where employeeid = (select max(employeeid) from employees);
+        -- delete the employee created in the previous lecture:
+        delete from employees where employeeid = (select max(employeeid) from employees);
 
         UPDATE employees
         SET reportsto = NULL
@@ -2711,25 +3344,38 @@ with recursive my_set(t) as (
     select t-2 from my_set where t >= 4
 )
 select * from my_set
+    -- Solution 2:
+    with recursive count_down_from_500_by_2 as (
+        select 500 as counter
+        union all
+        select counter-2 as counter from count_down_from_500_by_2 where counter >= 4
+    )
+    select * from count_down_from_500_by_2;
+    -- Solution 3:
+    with recursive count_down_from_500_by_2(counter) as (
+        select 500
+        union all
+        select counter-2 from count_down_from_500_by_2 where counter >= 4
+    )
+    select * from count_down_from_500_by_2;
 
 -- Task: Find everyone that the CEO is responsible for (employeeid = 200)
 -- Find everyone that the CEO is responsible for (employeeid = 200)
-with recursive bosses as (
-	select employeeid, firstname, lastname from employees where reportsto = 200
+with recursive everyone_under_CEO as (
+	select employeeid, firstname, lastname, title from employees where reportsto = 200
 	union all
-	select e.employeeid, e.firstname, e.lastname from bosses as b inner join employees as e on e.reportsto = b.employeeid
+	select e.employeeid, e.firstname, e.lastname, e.title from employees as e inner join everyone_under_CEO on e.reportsto = everyone_under_CEO.employeeid
 )
-select * from bosses;
+select * from everyone_under_CEO;
 
 -- Find the chain of command from Dudlye Kiona (employeeid = 218) up to the CEO (employeeid = 200)
-with recursive subordinate as (
-	select employeeid, firstname, lastname, reportsto from employees
-	where employeeid = 218
+with recursive chain_of_command as (
+	select employeeid, firstname, lastname, title, reportsto from employees where employeeid = 218
 	union all
-	select e.employeeid, e.firstname, e.lastname, e.reportsto
-	from employees as e inner join subordinate as s on e.employeeid = s.reportsto
+	select boss.employeeid, boss.firstname, boss.lastname, boss.title, boss.reportsto
+	from employees as boss inner join chain_of_command on boss.employeeid = chain_of_command.reportsto
 )
-select * from subordinate
+select * from chain_of_command;
 
 -- Section 19: Views
 -- Documentation: https://www.postgresqltutorial.com/postgresql-views/
@@ -2746,8 +3392,20 @@ select * from subordinate
 create view view_name as
 select statement
 
--- My additional task: create a view called list_report_chain returning
--- employeeid, firstname, lastname, reportsto of all employees starting from employeeid up to the CEO
+-- My additional task: create a view called
+-- list_report_chain returning
+-- employeeid, firstname, lastname, reportsto of all
+-- employees starting from employeeid=218 up to the CEO
+create recursive view list_report_chain(employeeid, firstname, lastname, reportsto) as
+select
+	employeeid, firstname, lastname, reportsto
+from employees where employeeid=218
+union all
+select
+	e.employeeid, e.firstname, e.lastname, e.reportsto
+from employees as e inner join list_report_chain
+on e.employeeid = list_report_chain.reportsto;
+-- OR
 create view list_report_chain as (
 	with recursive subordinate as (
 		select employeeid, firstname, lastname, reportsto from employees
@@ -2757,7 +3415,7 @@ create view list_report_chain as (
 		from employees as e inner join subordinate as s on e.employeeid = s.reportsto
 	)
 	select * from subordinate
-)
+);
 select * from list_report_chain
 
 -- create a view called customer_order_details that links customers, orders and order_details
@@ -2812,7 +3470,7 @@ CREATE VIEW north_america_customers AS
 SELECT *
 FROM customers
 WHERE country in ('USA','Canada','Mexico');
-    -- !!! OBSERVATION: data can be inserted via the updatable view to the table the view refers
+    -- !!! OBSERVATION: data can be inserted via the updatable view to the base table the view refers
     -- Note that updatable view must satisfy the constrains (1)-(3)
     INSERT INTO north_america_customers
     (customerid,companyname,contactname,contacttitle,address,city,region,postalcode,country,phone,fax)
@@ -2884,8 +3542,8 @@ WHERE customerid=’CFDCM’;   -- returns nothing
 -- How to prevent inserting data via a view that does not belong to an the view?
 -- Answer: By using WITH CHECK OPTION
 -- Syntax:
-    with local check option    --> if the updatable view is not cascaded to another updatable view(s)
-    with cascaded check option --> if the updatable view is cascaded to another updatable view(s)
+    with local check option    --> if the updatable view is not cascaded to other updatable view(s)
+    with cascaded check option --> if the updatable view is cascaded to other updatable view(s)
         -- remember from lecture 106 that a views can casccade to another view and so on..
 
 -- Change north_america_customers to check that the country is correct and test
@@ -2960,7 +3618,7 @@ from products;
 -- Second Syntax for CASE WHEN: Same as switch statements in C++
 case field when value1 then result1
            when value2 then result2
-           else default
+           else default_result
 end
 
 -- Pull back orders with orderid, customerid and year1 if orderdate is 1996,
@@ -3101,11 +3759,14 @@ select * from test_time;
 -- 2. Abbreviation: EST (Eastern Standard Time)
 -- POSIX-style: EST+5 or EST+5EDT  (Eastern Standard Time + daylight saving)
     -- Full names allow the db to calculate if daylight saving time is present
-    -- depending on the date. The appreviation does not let you do this (???)
+    -- depending on the date. The abbreviation does not let you do this (???)
 
 -- How to see the available TZ names?
 select * from pg_timezone_names   --> a pre-set view
+    -- https://www.postgresql.org/docs/9.2/view-pg-timezone-names.html
 select * from pg_timezone_abbrevs --> a pre-set view
+    -- https://www.postgresql.org/docs/9.2/view-pg-timezone-abbrevs.html
+    -- 
 
 -- add new columns to test_time
 alter table test_time
@@ -3288,6 +3949,9 @@ date_part('field', source)
 select employeeid, firstname, lastname, birthdate from employees
 select employeeid, firstname, lastname, extract(years from age(birthdate)) as age_in_years from employees
 
+select date_part('year', age('27-04-1978'::date));
+select age('27-04-1978'::date);
+
 -- Find the day part of the ship date on all orders. Use date_part
 select shippeddate from orders
 select date_part('day', shippeddate) as day_part from orders
@@ -3323,6 +3987,12 @@ select cast('2015-10-03' as date), 375::text
 -- What is a window?
 -- A window is a set of rows returned by group by/partition by clause
 
+-- Similar to an aggregate function, a window function operates on a set of rows.
+-- However, it does not reduce the number of rows returned by the query.
+
+-- The term window describes the set of rows on which the window function operates.
+-- A window function returns values from the rows in a window.
+
 -- What is a window function?
 -- A function that operates on the window X and returns a value per row in X.
 -- In other words, a window function returns values from the rows in X in a window Y.
@@ -3345,14 +4015,19 @@ from products inner join product_groups using(group_id)
     -- In this syntax, the PARTITION BY distributes the rows of the result set into groups/windows and
     -- the AVG() function is applied to each group to return the average price for each.
 
--- Use Northwind database & the lecture 120 video content:
--- Lets find out product prices in a category compared to average for each category
+-- Lets find out product unitprices in a category
+-- along with the average unitprice for each category
 -- ordered by categoryname and unitprice in desc order
 select
-	categoryname, productname, unitprice,
-	avg(unitprice) over(partition by categoryid)
-from products inner join categories using(categoryid)
-order by categoryname desc, unitprice desc
+	categoryname,
+	productname,
+	unitprice,
+	avg(unitprice) over (
+		partition by categories.categoryid
+	)  as avg_unitprice_for_category
+from categories
+inner join products using(categoryid)
+order by categoryname desc, unitprice desc;
 
 -- We are looking for orders of the product 'Alice Mutton'.
 -- For this product, list all its order details' quantities
@@ -3364,174 +4039,90 @@ select productname, quantity,
 	   )
 from products inner join order_details using(productid)
 where productname = 'Alice Mutton'
-order by quantity desc
+order by quantity desc;
+    -- OR:
+    select
+        productname,
+        quantity,
+        avg(quantity) over (
+    ) as avg_order_quantity
+    from products inner join order_details using(productid)
+    where productname = 'Alice Mutton'
+    order by quantity desc;
 
 -- Lecture 121: Using Window functions Within Subqueries
 -- Nesting Queries Gives You Great Power
--- Imagine that in Northwind company, we consider an order a fraud if an order's total amount
--- is 5 times greater than the customers's average order total amount
+-- Imagine that in Northwind company, we consider an order a fraud
+-- if an order's total amount
+-- is 5 times greater than the customers's average total order amount
 -- Get a list of only fraud orders with companyname, orderid, orderamount and average
 -- order amount for the customer
-
-        -- Step 1: Lets get a list of customerid, companyname, orderid and order details's sum
-        select
-            c.customerid, companyname, o.orderid, ((unitprice*quantity)-discount) as order_details_sum
-        from customers as c inner join orders as o using(customerid)
-                    inner join order_details using(orderid)
-
-        -- Step 2: Using Step 1's result, per customerid, per orderid, lets find
-        -- the sum of each order as customerid, companyname, orderid, order_sum
-        select
-                customerid, companyname, orderid, sum(order_details_sum) as order_sum
-        from(
+    --- Teachers incorrect solution:
+    SELECT companyname, orderid, amount , average_order FROM
+        ( SELECT companyname, orderid, amount ,AVG(amount) OVER (PARTITION BY companyname) AS average_order
+        FROM
+        (SELECT companyname,orders.orderid,SUM(unitprice*quantity) AS amount
+        FROM customers
+        JOIN orders ON orders.customerid=customers.customerid
+        JOIN order_details ON orders.orderid=order_details.orderid
+        GROUP BY companyname,orders.orderid) as order_amounts) as order_averages
+        WHERE amount > 5 * average_order
+        ORDER BY companyname
+    -- A correct & simpler solution may be:
+    	with step_one as (
             select
-            c.customerid, companyname, o.orderid, ((unitprice*quantity)-discount) as order_details_sum
-            from customers as c inner join orders as o using(customerid)
-                                inner join order_details using(orderid)
-        ) as per_customer_per_order_details
-        group by customerid, companyname, orderid
-        order by customerid
-
-
-        -- Step 3: To Step 2's result, lets add a column named avg_order_sum. Use avg() as window function
-        -- and utilize the Step 2's result as subquery
-        select
-            customerid, companyname, orderid, order_sum,
-            avg(order_sum) over( partition by customerid) as avg_customers_order_sum
-        from (
+                customerid,
+                avg((od.unitprice * od.quantity) - od.discount) as avg_total_order_amount
+            from customers
+            inner join orders using(customerid)
+            inner join order_details as od using(orderid)
+            group by customers.customerid
+        ), step_two as (
             select
-                customerid, companyname, orderid, sum(order_details_sum) as order_sum
-            from(
-                select
-                    c.customerid, companyname, o.orderid, ((unitprice*quantity)-discount) as order_details_sum
-                from customers as c inner join orders as o using(customerid)
-                    inner join order_details using(orderid)
-            ) as per_customer_per_order_details
-            group by customerid, companyname, orderid
-            order by customerid
-        ) as per_customer_per_order
-
-        -- Step 4: Detect the fraud; if order_sum is more than 5 times greater than avg_customers_order_sum
-        -- Then list those orders. Use the result of Step 3 as a subquery.
-        select
-        customerid, companyname, orderid, order_sum, avg_customers_order_sum
-        from (
+                companyname,
+                orders.orderid,
+                ((od.unitprice * od.quantity)-od.discount) as orderamount,
+                avg_total_order_amount
+            from customers
+            inner join orders using(customerid)
+            inner join order_details as od using(orderid)
+            inner join step_one using(customerid)
+        )
+        select * from step_two
+        where orderamount >= 5*avg_total_order_amount;
+    -- Another correct solution utilizing a window function:
+        with step_one as (
             select
-                customerid, companyname, orderid, order_sum,
-                avg(order_sum) over( partition by customerid) as avg_customers_order_sum
-            from (
-                select
-                    customerid, companyname, orderid, sum(order_details_sum) as order_sum
-                from(
-                    select
-                        c.customerid, companyname, o.orderid, ((unitprice*quantity)-discount) as order_details_sum
-                    from customers as c inner join orders as o using(customerid)
-                                        inner join order_details using(orderid)
-                ) as per_customer_per_order_details
-                group by customerid, companyname, orderid
-                order by customerid
-            ) as per_customer_per_order
-        ) as final_table
-        where order_sum > (5*avg_customers_order_sum)
+                companyname, orders.orderid,
+                ((unitprice*quantity)-discount) as orderamount,
+                avg((unitprice*quantity)-discount) over (
+                    partition by customers.customerid
+                ) as avg_total_order_amount
+            from customers
+            inner join orders using(customerid)
+            inner join order_details using(orderid)
+        )
+        select * from step_one
+        where orderamount >= 5*avg_total_order_amount
+        order by companyname asc;
 
 
--- Find any suppliers that had 3 times the total
--- quantity of orders over all their products
--- versus the average order quantity per month per year
-    -- !!! My interpretation, which seems to be different from teachers solution, of the requirement
-
-    -- Step 1: get s.companyname, productname, quantity, ordermonth, orderyear
-    -- from supplier & products & order_details and orders joint
-	select
-		supplierid, companyname, productid, productname,
-		extract(month from orderdate) as order_month,
-		extract(year from orderdate) as order_year,
-		quantity
-	from suppliers inner join products using(supplierid)
-				   inner join order_details using(productid)
-				   inner join orders using(orderid)
-
-    -- Step 2: Referring to Step 1's result, note that a product can be ordered within the same months.
-    -- We want to know total_quantity_ordered_per_month_per_year for each product.
-    -- Use Step 1 in a subquery:
-    select
-		supplierid, companyname, productid, productname, order_month, order_year,
-		sum(quantity) as total_quantity_ordered_per_month_per_year
-	from (
-		select
-			supplierid, companyname, productid, productname,
-			extract(month from orderdate) as order_month,
-			extract(year from orderdate) as order_year,
-			quantity
-		from suppliers inner join products using(supplierid)
-					   inner join order_details using(productid)
-					   inner join orders using(orderid)
-	) as step_one
-	group by supplierid, companyname, productid, productname, order_month, order_year
-
-    -- Step 3: Using Step 2 in a subquery, append a new column named avg_quantity_per_month_per_year, which
-    -- lists the average quantity sold for a company's all products in a given month & year
-        -- i.e. a window of supplierid, order_month, order_year needs to be defined within a window function
-    select
-            companyname, productname, order_month, order_year, total_quantity_ordered_per_month_per_year,
-            avg(total_quantity_ordered_per_month_per_year) over(partition by supplierid, order_month, order_year) as avg_quantity_per_month_per_year
-    from (
-        select
-			supplierid, companyname, productid, productname, order_month, order_year,
-			sum(quantity) as total_quantity_ordered_per_month_per_year
-		from (
-				select
-					supplierid, companyname, productid, productname,
-					extract(month from orderdate) as order_month,
-					extract(year from orderdate) as order_year,
-					quantity
-				from suppliers inner join products using(supplierid)
-							inner join order_details using(productid)
-							inner join orders using(orderid)
-		) as step_one
-		group by supplierid, companyname, productid, productname, order_month, order_year
-    ) as step_two
-
-    -- Step 4 (Final Step): Using Step 3 in a subquery, list the suppliers' products, where
-    -- total_quantity_ordered_per_month_per_year > (3*avg_total_quantity_ordered). In other
-    -- words; Find any suppliers that had 3 times the total
-    -- quantity of orders over all their products
-    -- versus the average order quantity per month per year
-    select
-        companyname, productname, order_month, order_year, total_quantity_ordered_per_month_per_year, avg_quantity_per_month_per_year
-    from (
-        select
-            companyname, productname, order_month, order_year, total_quantity_ordered_per_month_per_year,
-            avg(total_quantity_ordered_per_month_per_year) over(partition by supplierid, order_month, order_year) as avg_quantity_per_month_per_year
-        from (
-            select
-				supplierid, companyname, productid, productname, order_month, order_year,
-				sum(quantity) as total_quantity_ordered_per_month_per_year
-			from (
-				select
-					supplierid, companyname, productid, productname,
-					extract(month from orderdate) as order_month,
-					extract(year from orderdate) as order_year,
-					quantity
-				from suppliers inner join products using(supplierid)
-							inner join order_details using(productid)
-							inner join orders using(orderid)
-			) as step_one
-			group by supplierid, companyname, productid, productname, order_month, order_year
-        ) as step_two
-    ) as step_three
-    where total_quantity_ordered_per_month_per_year > (3*avg_quantity_per_month_per_year)
-
-    -- Teacher's implementation of the same requirement:
-    -- My question in Udemy about it: https://www.udemy.com/course/postgresql-from-zero-to-hero/learn/lecture/14284344#questions/13382268
+-- Task 1:
+-- Wrong task definition: Find any suppliers that had 3 times the normal quantity of orders over all their products
+-- vs. the average order per month
+-- Corrected task 1 definition:
+-- Find suppliers that meets the following criteria:
+-- Total order quantity for a particular month of a year for a particular supplier
+-- must be three times more than the average total order quantity (company average) for a particular supplier (over all periods)
+-- My question in Udemy about it: https://www.udemy.com/course/postgresql-from-zero-to-hero/learn/lecture/14284344#questions/13382268
         SELECT
-                companyname,order_month,order_year,total_orders,company_average
+                companyname,order_month,order_year,total_order_quantity,company_average
         FROM (
                 SELECT
-                    companyname, total_orders, order_month, order_year,
-                    AVG(total_orders) OVER (PARTITION BY companyname) as company_average
+                    companyname, total_order_quantity, order_month, order_year,
+                    AVG(total_order_quantity) OVER (PARTITION BY companyname) as company_average
                 FROM (
-                        SELECT companyname,SUM(quantity) as total_orders,
+                        SELECT companyname,SUM(quantity) as total_order_quantity,
                             date_part('month',orderdate) as order_month,
                             date_part('year',orderdate) as order_year
                         FROM order_details INNER JOIN products USING(productid)
@@ -3540,48 +4131,116 @@ order by quantity desc
                         GROUP BY companyname,order_month,order_year
                 )  as order_by_month
         ) as final_subquery
-        WHERE total_orders > 3 * company_average
+        WHERE total_order_quantity > 3 * company_average
+		order by companyname asc, order_year asc, order_month asc;
+            -- Observation: when you have a select statement being part of a more complex query,
+            -- ask yourself, do you want to use the select statement as a subquery or CTE in that more complex query?
+        -- Task 1 (Teacher's task):
+        -- Corrected task definition:
+        -- Find all suppliers that meets the following criteria:
+        -- Total order quantity for a particular month of a year for a particular supplier
+        -- must be three times more than the average total order quantity (supplier average)
+        -- over all periods
+        select
+            distinct companyname
+        from
+        ( select
+            supplierid,
+            companyname,
+            order_month,
+            order_year,
+            total_order_quantity,
+            avg(total_order_quantity) over (
+                partition by supplierid
+            ) as avg_total_order_quantity
+        from (
+            select
+                suppliers.supplierid,
+                companyname,
+                date_part('month', orderdate) as order_month,
+                date_part('year', orderdate) as order_year,
+                sum(quantity) as total_order_quantity
+            from suppliers
+            inner join products using(supplierid)
+            inner join order_details using(productid)
+            inner join orders using(orderid)
+            group by suppliers.supplierid, date_part('month', orderdate), date_part('year', orderdate)
+            order by suppliers.supplierid asc, order_month asc, order_year asc
+        ) as step_one
+        ) as step_two
+        where total_order_quantity > 3 * avg_total_order_quantity
+        order by companyname asc;
 
--- Find any suppliers that had 3 times the normal
+
+-- Task 2 (extra, not in the course):
+-- Find any suppliers that had the total order
+-- quantity over all their products (for all periods)
+-- versus 3 times the average order quantity for an individual supplier for a particular month & year
+-- order by companyname in ascending order
+with step_one as (
+	select
+		suppliers.supplierid,
+		companyname,
+		date_part('month', orderdate) as order_month,
+		date_part('year', orderdate) as order_year,
+		avg(quantity) as avg_order_quantity
+	from suppliers
+	inner join products using(supplierid)
+	inner join order_details using(productid)
+	inner join orders using(orderid)
+	group by suppliers.supplierid, date_part('month', orderdate), date_part('year', orderdate)
+	order by suppliers.supplierid asc, date_part('month', orderdate) asc, date_part('year', orderdate) asc
+), step_two as (
+	select
+		suppliers.supplierid,
+		companyname,
+		sum(quantity) as total_quantity_of_orders
+	from suppliers
+	inner join products using(supplierid)
+	inner join order_details using(productid)
+	group by suppliers.supplierid
+), step_three as (
+	select	s1.companyname,
+			s1.order_month,
+			s1.order_year,
+			s1.avg_order_quantity,
+			s2.total_quantity_of_orders
+	from step_one as s1 inner join step_two as s2 using(supplierid)
+)
+select distinct companyname from step_three
+where total_quantity_of_orders > 3 * avg_order_quantity
+order by companyname asc;
+
+
+-- Find any suppliers that fits per year per month, had the total
 -- quantity of orders over all their products
--- versus the average order quantity per month per year
-    -- Desired outcome: companyname, productname, order_month, order_year,
-    -- total_quantity_ordered, avg_quantity_per_month_per_year
-    -- This time, implement the solution with chained CTEs/WITH clauses (Lecture 102).
-    -- One of the CTE must use a Window Function
-    with step_one as (
-        select
-            s.supplierid, companyname, p.productid, productname,
-            extract(month from orderdate) as order_month,
-            extract(year from orderdate) as order_year,
-            quantity
-        from suppliers as s inner join products as p using(supplierid)
-                       inner join order_details using(productid)
-                       inner join orders using(orderid)
-    ),
-    step_two as(
-        select
-            supplierid, companyname, productid, productname,
-            order_month, order_year,
-            sum(quantity) as total_quantity_ordered_per_month_per_year
-        from step_one
-        group by supplierid, companyname, productid, productname, order_month, order_year
-    ),
-    step_three as(
-        select
-            supplierid, companyname, productid, productname,
-            order_month, order_year,
-            total_quantity_ordered_per_month_per_year,
-            avg(total_quantity_ordered_per_month_per_year) over (partition by supplierid, order_month, order_year) as avg_total_quantity_ordered
-        from step_two
-    )
-    select companyname, productname, order_month, order_year,
-           total_quantity_ordered_per_month_per_year, avg_total_quantity_ordered
-    from step_three
-    where total_quantity_ordered_per_month_per_year > (3*avg_total_quantity_ordered)
+-- versus three times the average order quantity
+-- order by supplierid, year & month in ascending fashion
+select supplierid, companyname, orderyear, ordermonth, totalquantity, avgtotalquantity
+from
+(select
+	supplierid, companyname, orderyear, ordermonth, totalquantity,
+	avg(totalquantity) over (
+		partition by supplierid
+	) as avgtotalquantity
+from
+( select
+	suppliers.supplierid,
+	companyname,
+	date_part('year', orderdate) as orderyear,
+	date_part('month', orderdate) as ordermonth,
+	sum(quantity) as totalquantity
+from suppliers
+inner join products using(supplierid)
+inner join order_details using(productid)
+inner join orders using(orderid)
+group by suppliers.supplierid, date_part('year', orderdate), date_part('month', orderdate)
+order by suppliers.supplierid asc, orderyear asc, ordermonth asc
+) as part_one
+) as part_two
+where totalquantity > 3 * avgtotalquantity;
 
-
--- Lecture 122: Using Rank() to Find First N / Last N Records in Join
+-- Lecture 123: Using Rank() to Find First N / Last N Records in Join
 -- Documentation: https://www.postgresqltutorial.com/postgresql-rank-function/
 -- Use practice_db
 -- Referring to the documentation:
@@ -3619,13 +4278,16 @@ FROM
     -- Third, the RANK() function assigns a rank to every row within a partition (p.group_id)
     -- based on ORDER BY clause (i.e. ORDER BY price DESC --> based on descending price):
         -- (*) For each partition, the rank of the first row is 1.
+        --     In addition, rows with the same values will get the same rank.
         --     The RANK() function adds the number of tied rows to the rank to
         --     calculate the rank of the next row, so the ranks may not be sequential.
-        --     In addition, rows with the same values will get the same rank.
 
     -- Use practice_db
     -- Based on this example, if we want to get:
     -- Top 2 most expensive products for each product group
+        -- The definition of 2 most expensive products is unclear.
+        -- Referring to the teacher's solution below, the 2 most expensive products
+        -- are the ones with ranks 1 or 2.
     with step_one as(
         SELECT
 	        product_id,
@@ -3634,29 +4296,33 @@ FROM
 	        group_name,
 	        price,
 	        RANK () OVER (
-		        PARTITION BY p.group_id
+		        PARTITION BY pg.group_id
 		        ORDER BY price DESC
 	        ) price_rank
-        FROM products as p INNER JOIN product_groups using(group_id)
+        FROM products as p INNER JOIN product_groups as pg using(group_id)
     )
     select * from step_one
-    where price_rank <= 2    --> If many new entries are added to products table with the same price, static value 2 wont work,
-                             --> Because RANK() will give the rank of the 2.nd row a dynamic value (i.e. not 2) due to (*)
-                             --> For each partition, there can be multiple products in each rank. And we are interested
-                             -- in the first two minimum ranked products in each partition.
+    where price_rank <= 2
+
+
+-- Extra Task 2: If we are interested
+-- in the first two minimum ranked products in each partition
+    -- For each partition, there can be multiple products in each rank.
+    -- If many new entries are added to products table with the same price, static value 2 wont work,
+    --> Because RANK() will give the rank of the 2.nd row a dynamic value (i.e. not 2) due to (*)
         -- Solution:
             with step_one as(
                 SELECT
                     product_id,
                     product_name,
-                    group_id,
+                    p.group_id,
                     group_name,
                     price,
                     RANK () OVER (
-                        PARTITION BY p.group_id
+                        PARTITION BY pg.group_id
                         ORDER BY price DESC
                     ) price_rank
-                FROM products as p INNER JOIN product_groups using(group_id)
+                FROM products as p INNER JOIN product_groups as pg using(group_id)
             ),
             step_two as(
                 select
@@ -3673,87 +4339,58 @@ FROM
                 union
                 select * from step_three
             )
-            select * from step_one
-            where group_id in (select group_id from step_four) and
-                price_rank in (select price_rank from step_four)
+            select s1.product_id,
+				   s1.product_name,
+				   s1.group_id,
+				   s1.group_name,
+				   s1.price,
+				   s1.price_rank
+			from step_one as s1 inner join step_four as s4
+			on ((s1.group_id = s4.group_id) and (s1.price_rank = s4.price_rank))
+			order by group_name asc, price desc;
 
 -- Back to the udemy course, lecture 122:
 -- Use Northwind database
--- List top 2 most expensive order_details_total_price for each order:
--- Solution 1:
+-- List the highest 2 ranks for order_details_total_price for each order:
 with step_one as (
-    select
-            o.orderid, productid, ((unitprice*quantity)-discount) as total_price,
-            rank() over (
-                partition by o.orderid
-                order by ((unitprice*quantity)-discount) desc
-            ) as rank_by_total_price
-    from orders as o inner join order_details using(orderid)
-),
-step_two as(
-	select orderid, productid, 1 as rank_by_total_price
+	select
+		o.orderid,
+		od.productid,
+		((unitprice * quantity) - discount) as total_price,
+		rank() over (
+			partition by o.orderid
+			order by ((unitprice * quantity) - discount) desc
+		) as rank_by_total_price
+	from orders as o
+	inner join order_details as od using(orderid)
+	order by o.orderid asc, total_price desc
+), step_two as (
+	select
+		orderid,
+		rank_by_total_price
 	from step_one
 	where rank_by_total_price = 1
-),
-step_three as(
-	select orderid, productid, rank_by_total_price,
-	min(rank_by_total_price) over (
-		partition by orderid
-	) as min_rank_by_total_price
+), step_three as (
+	select
+		orderid,
+		min(rank_by_total_price)
 	from step_one
 	where rank_by_total_price != 1
-),
-step_four as(
-	select orderid, productid, rank_by_total_price
-	from step_three
-	where rank_by_total_price = min_rank_by_total_price
-),
-step_five as(
+	group by orderid
+), step_four as (
 	select * from step_two
-	union
-	select * from step_four
+	union all
+	select * from step_three
 )
-select * from step_one
-where orderid in (select orderid from step_five) and
-	  productid in (select productid from step_five) and
-      rank_by_total_price in (select rank_by_total_price from step_five)
--- Use Northwind database
--- List top 2 most expensive order_details_total_price for each order:
--- Solution 2:
-with step_one as (
-    select
-            o.orderid, productid, ((unitprice*quantity)-discount) as total_price,
-            rank() over (
-                partition by o.orderid
-                order by ((unitprice*quantity)-discount) desc
-            ) as rank_by_total_price
-    from orders as o inner join order_details using(orderid)
-),
-step_two as(
-	select orderid, productid, total_price, rank_by_total_price
-	from step_one
-	where rank_by_total_price = 1
-),
-step_three as(
-	select orderid, productid, total_price, rank_by_total_price,
-	min(rank_by_total_price) over (
-		partition by orderid
-	) as min_rank_by_total_price
-	from step_one
-	where rank_by_total_price != 1
-),
-step_four as(
-	select orderid, productid, total_price, rank_by_total_price
-	from step_three
-	where rank_by_total_price = min_rank_by_total_price
-),
-step_five as(
-	select * from step_two
-	union
-	select * from step_four
-)
-select * from step_five
-order by orderid, rank_by_total_price asc
+select
+	s1.orderid,
+	s1.productid,
+	s1.total_price,
+	s1.rank_by_total_price
+from step_one as s1
+inner join step_four as s4
+on ((s1.orderid = s4.orderid) and (s1.rank_by_total_price = s4.rank_by_total_price))
+order by orderid asc, total_price desc
       -- This is the teacher's solution:
       SELECT * FROM
             (SELECT orders.orderid, productid, unitprice, quantity,
@@ -3818,7 +4455,7 @@ final_step as (
 	select * from step_seven
 )
 select companyname, productname, unitprice from final_step
-order by supplierid, rank_by_unitprice
+order by supplierid asc, unitprice asc;
     -- Teacher's solution (IMO, it is incorrect)
     SELECT companyname,productname,unitprice FROM
             (SELECT companyname,productname,unitprice,
@@ -3826,7 +4463,24 @@ order by supplierid, rank_by_unitprice
     FROM suppliers NATURAL JOIN products) as ranked_products
     WHERE price_rank <=3;
         -- Made a Question about the issue: https://www.udemy.com/course/postgresql-from-zero-to-hero/learn/lecture/14284344#questions/13422826
-
+    -- May be a better task description:
+    -- Find the least expensive products by rank level 1,2,3 from each supplier.
+    -- Return supplier name, product name, and price
+    with least_expensive_products as (
+        select
+            companyname,
+            productname,
+            unitprice,
+            rank() over (
+                partition by suppliers.supplierid
+                order by unitprice asc
+            ) as rank_by_unitprice
+        from suppliers
+        inner join products using(supplierid)
+        order by suppliers.supplierid asc, unitprice asc
+    )
+    select * from least_expensive_products
+    where rank_by_unitprice <= 3;
 
 -- Section 23 : Composite Types
 -- What are composite types?
@@ -3863,7 +4517,7 @@ create table friends (
 -- How to remove a composite?
 drop type if exists composite_name  --> if the composite_name is not used in any table yet
 drop type if exists composite_name cascade --> if the composite_name is used in any table already
-    -- it will remove all the composite colums from the relevant tables
+    -- NOTE! it will remove all the composite colums from the relevant tables
     drop type if exists address cascade;
     drop table if exists friends
 
@@ -3956,7 +4610,7 @@ from friends where (full_name).last_name = 'Gregory'
 
 -- Section 24: SQL Functions& Procedures
 -- use Northwind database in this section
--- Lecture 125: Write your first function
+-- Lecture 126: Write your first function
 -- Four kinds of functions:
 -- 1. Functions written in SQL (what we are doing in this section)
 -- 2. Functions written in PL/SQL (written in another section)
@@ -3976,15 +4630,16 @@ $$ Language SQL
 select fix_homepage()
 
 -- Create a function called set_default_photo to update any missing photopath
--- to a default 'http://accweb/emmployees/default.bmp and run the function
+-- in employees table
+-- to a default 'http://accweb/emmployees/default.bmp' and run the function
+select photopath from employees;
 create or replace function set_default_photo() returns void as $$
-    update employees
-    set photopath = 'http://accweb/emmployees/default.bmp'
-    where photopath is null
-$$ Language SQL
+	update employees
+	set photopath = 'http://accweb/emmployees/default.bmp'
+	where photopath is null
+$$ Language SQL;
 
-select set_default_photo()
-select * from employees
+select set_default_photo();
 
 -- Lecture 126: Write a Function that returns a single value
 -- Syntax:
@@ -3996,12 +4651,32 @@ $$ Language SQL
 -- Find the maximum price of any product
 create or replace function max_price_of_any_product() returns real as $$
     select max(unitprice) from products
-$$ Language SQL
-select max_price_of_any_product()
+$$ Language SQL;
+select max_price_of_any_product();
+
+-- Write a function biggest_order() that returns the largest order in terms of total money spent
+-- Q: return the whole order from the function
+drop function if exists biggest_order;
+create or replace function biggest_order() returns setof orders as $$
+	with largest_order as (
+		select
+			orderid,
+			sum((unitprice*quantity)-discount) as total_spent_per_order
+		from order_details
+		group by orderid
+		order by total_spent_per_order desc limit 1
+	)
+	select
+		orders.*
+	from orders
+	inner join largest_order using(orderid)
+
+$$ Language SQL;
+select * from biggest_order();
 
 -- Write a function biggest_order() that returns the largest order in terms of total money spent
 -- Solution 1: Using window functions
-create or replace function biggest_order() returns int as $$
+create or replace function biggest_order() returns setof orders as $$
 	with step_one as(
 		select
 			  orderid, sum((unitprice*quantity)-discount) as total_spent_per_order
@@ -4013,30 +4688,57 @@ create or replace function biggest_order() returns int as $$
 			  orderid, total_spent_per_order,
 			  max(total_spent_per_order) over () as max_total_spent_per_order
 		from step_one
-	),
-    step_three as(
-		select orderid
-		from step_two
-		where total_spent_per_order = max_total_spent_per_order
-		limit 1
 	)
-	select orderid from step_three
-$$ Language SQL
-select biggest_order()
--- Solution 2:
-create or replace function biggest_order() returns int as $$
-	with step_one as(
-		select orderid, sum((unitprice*quantity)-discount) as total_spent_per_order
+	select * from orders where orderid in 
+	(
+			select orderid
+			from step_two
+			where total_spent_per_order = max_total_spent_per_order
+	)
+$$ Language SQL;
+select * from biggest_order();
+
+
+-- Write a function biggest_order() that returns
+-- the largest order in terms of total money spent
+-- Q: return the whole order + the total_spent from the function
+create type orders_extended as (
+	orderid smallint,
+    customerid bpchar,
+    employeeid smallint,
+    orderdate date,
+    requireddate date,
+    shippeddate date,
+    shipvia smallint,
+    freight real,
+    shipname character varying(40),
+    shipaddress character varying(60),
+    shipcity character varying(15),
+    shipregion character varying(15),
+    shippostalcode character varying(10),
+    shipcountry character varying(15),
+	total_spent real
+);
+
+drop function if exists biggest_order;
+create or replace function biggest_order() returns orders_extended  as $$
+	with largest_order as (
+		select
+			orderid,
+			sum((unitprice*quantity)-discount) as total_spent
 		from order_details
 		group by orderid
-		order by total_spent_per_order desc
-		limit 1
+		order by total_spent desc limit 1
 	)
-	select orderid from step_one
-$$ Language SQL
-select biggest_order()
+	select
+		(orders.*, total_spent)::orders_extended
+	from orders
+	inner join largest_order using(orderid)
 
--- Lecture 127: Functions with Parameters
+$$ Language SQL;
+select * from biggest_order();
+
+-- Lecture 128: Functions with Parameters
 -- Syntax:
 create or replace function function_name(param1 data_type, param2 data_type, ...) returns data_type as $$
     SQL statment that returns data_type
@@ -4048,15 +4750,16 @@ $$ Language SQL
                 -- customerid = customerid --> customerid = $1
 
 -- Find the largest order amount given a specific customer(id)
-create or replace function largest_order_amount(customerid  nchar(5)) returns real as $$
-    with step_one as (
-        select
-              orderid, sum((unitprice*quantity)-discount) as order_amount
-        from orders inner join order_details using(orderid)
-        where customerid = $1
-        group by orderid
-    )
-    select max(order_amount) from step_one
+reate or replace function largest_order_amount(customerid nchar(5)) returns real as $$
+	with step_one as (
+		select
+			sum((unitprice * quantity) - discount) as orderamount
+		from orders
+		inner join order_details using(orderid)
+		where orders.customerid = $1
+		group by orders.orderid
+	)
+	select max(orderamount) from step_one
 $$ Language SQL
 
 select * from customers  --> pick a customerid from there (e.g. ANATR)
@@ -4122,27 +4825,27 @@ select most_ordered_product('ANATR')
         );
     $$ LANGUAGE SQL;
 
--- Lecture 128: Functions that have composite parameters
+-- Lecture 129: Functions that have composite parameters
 -- Documentation: https://www.postgresql.org/docs/11/xfunc-sql.html#XFUNC-SQL-COMPOSITE-FUNCTIONS
 -- Note: a table is treated as a composite type in postgresql, so
 -- you can pass a table_name as a composite parameter
--- to a function. The table_name is treaded as a composite type that
+-- to a function. The table_name is treated as a composite type that
 -- is a single ROW with all the column names in order
 
 -- Build a function that takes a product and price increase percentage as int
 -- and returns the new price
-create or replace function new_price(products, price_increase_percentage int)
-returns double precision as $$
-    select  $1.unitprice * price_increase_percentage / 100
-$$ Language SQL
+create or replace function increase_unitprice(products, percentage int) returns real as $$
+	select ($1).unitprice * (1.0::real + (percentage::real/100));
+$$ Language SQL;
     -- a single row from products table as a composite as an argument
     -- given a row/composite in products table, new_price() operates on a single field
     -- returning a value forming a column for new price
-select products.* from products
+select * from products
     --> returns all the data from products table, same as
     --> select * from products
-select productname, unitprice, new_price(products.*, 110) as new_price
+select productid, productname, increase_unitprice(products.*, 20)
 from products
+where productid = 2;
 
 -- create a function full_name() that takes employees and return
 -- title, firstname and lastname concatenated together.
@@ -4159,6 +4862,29 @@ select employeeid, full_name(employees.*) from employees
 -- Used to return a single row of a table
 -- order of the fields must be the same as the table
 -- each type must match the corresponding composite column
+
+-- Extra task: create a function full_name() that takes employees and returns
+-- a composite consisting of title, firstname and lastname.
+-- Then use the composite in a select statement
+    create type outcome as (
+        title varchar(30),
+        firstname varchar(10),
+        lastname varchar(20)
+    );
+
+    create or replace function get_full_name(employees) returns outcome as $$
+        select (($1).title, ($1).firstname, ($1).lastname)::outcome;
+    $$ Language SQL;
+
+    select * from employees;
+
+    select get_full_name(employees.*)
+    from employees
+    where employeeid = 4;
+
+    select (get_full_name(employees.*)).*
+    from employees
+    where employeeid = 4;
 
 -- return the most recent hire
 create or replace function newest_hire() returns employees as $$
@@ -4180,16 +4906,11 @@ create or replace function highest_inventory() returns products as $$
     with step_one as (
         select productid, (unitprice*unitsinstock) as inventory_total
         from products
-    ),
-    step_two as(
-        select productid, inventory_total
-        from step_one
-        order by inventory_total desc
-        limit 1
+		order by inventory_total desc limit 1
     )
     select * from products
-    where productid = (select productid from step_two)
-$$ Language SQL
+    where productid = (select productid from step_one);
+$$ Language SQL;
 
 select highest_inventory()
     -- Teachers solution (Better!)
@@ -4202,7 +4923,7 @@ select highest_inventory()
 SELECT (highest_inventory()).*;
 SELECT productname(highest_inventory());
 
--- Lecture 130: Functions with Output Parameters
+-- Lecture 131: Functions with Output Parameters
 -- Documentation: https://www.postgresql.org/docs/11/xfunc-sql.html#XFUNC-OUTPUT-PARAMETERS
 -- Using IN, OUT, INOUT (both input and output)
 -- Syntax:
@@ -4252,6 +4973,17 @@ $$ Language SQL
         select $1.unitprice * price_increase_percentage /100
     $$ Language SQL
     select productid, productname, unitprice, new_price(products.*) from products
+    -- A bit more generic way:
+    create or replace function new_price(in p products, in percentage int, out increased_unit_price real) as $$
+        select (p).unitprice * (1.0::real + (percentage::real/100));
+    $$ Language SQL;
+
+    select * from products;
+
+    select
+        new_price(products.*, 5)
+    from products
+    where productid in (2, 3, 4);
 
 -- Redo square_n_cube using OUT parameters. Give the input a default value 10
 -- Run the function without any input
@@ -4266,13 +4998,13 @@ select (square_n_cube(3)).*
     $$ Language SQL
     select (square_n_cube()).*
 
--- Lecture 132: Using Functions as table sources
+-- Lecture 133: Using Functions as table sources
 -- Documentation: https://www.postgresql.org/docs/11/xfunc-sql.html#XFUNC-SQL-TABLE-FUNCTIONS
 -- Given that the function returns a composite, you can use the return value of the
 -- function as table by using 'FROM function_name()' clause
 
 -- Select firstname, lastname and hiredate from newest_hire()
-select firstname, lastname, hiredate from newest_hire()
+select firstname, lastname, hiredate from most_recent_hire();
 
 -- Use highest_inventory() to pull back productname, supplier companyname
 select productname, companyname
@@ -4305,6 +5037,23 @@ returns setof products as $$
     select * from products
     where productid in (select productid from step_two)
 $$ Language SQL
+    --  OR:
+    create or replace function sold_more_than(in min_total_sales real) returns setof products as $$
+        with step_one as (
+            select
+                products.productid,
+                sum((od.unitprice * od.quantity)-od.discount) as total_sales
+            from products
+            inner join order_details as od using(productid)
+            group by products.productid
+        )
+        select
+            products.*
+        from products
+        inner join step_one using(productid)
+        where total_sales >= min_total_sales;
+    $$ Language SQL;
+
 
 SELECT * FROM sold_more_than(25000);
     -- Teachers solution:
@@ -4326,92 +5075,27 @@ SELECT * FROM sold_more_than(25000);
 
 -- Task: Create a function called next_birthday()
 -- that return all employees next_birthday, firstname, lastname and hiredate
--- Solution 1 ( a bit verbose towards the end)
-create type day_and_month as (
-    day_of_birth int,
-    month_of_birth int
-)
-
-create or replace function day_and_month_of_birth(birthdate date) returns day_and_month as $$
-        select extract(day from $1), extract(month from $1)
-$$ Language SQL
-
-select day_and_month_of_birth('27-04-1978'::date) --> returns (27, 4)
-
-create or replace function this_years_birthday(birthdate date) returns timestamp with time zone as $$
-    with step_one as (
-        select (day_and_month_of_birth(birthdate)).day_of_birth::varchar || '-' ||
-               (day_and_month_of_birth(birthdate)).month_of_birth::varchar || '-' ||
-                extract(year from now())::varchar || ' 23:59:59.999'
-    )
-    select (select * from step_one)::timestamp with time zone
-$$ Language SQL
-
-select this_years_birthday('27-04-1978')  --> 2020-04-27 00:00:00+03
-
-create or replace function next_years_birthday(birthdate date) returns timestamp with time zone as $$
-    with step_one as (
-        select (day_and_month_of_birth(birthdate)).day_of_birth::varchar || '-' ||
-               (day_and_month_of_birth(birthdate)).month_of_birth::varchar || '-' ||
-                (extract(year from now())+1)::varchar || ' 23:59:59.999'
-    )
-    select (select * from step_one)::timestamp with time zone
-$$ Language SQL
-
-select next_years_birthday('27-04-1978')  --> 2020-04-27 00:00:00+03
-
-create or replace function get_next_birthday(employees) returns setof datetime as $$
-    select
-        case when this_years_birthday($1.birthdate) >= now() then this_years_birthday($1.birthdate)
-             else next_years_birthday($1.birthdate)
-        end as next_birthday
-$$ Language SQL
-
-select get_next_birthday(employees.*) from employees
-
+-- Solution: (more compact)
 create type employee as (
-    next_birthday date,
-    firstname varchar,
-    lastname varchar,
-    hiredate date
-)
+	next_birthday date,
+	firstname varchar(10),
+	lastname varchar(20),
+	hiredate date
+);
+
+drop function next_birthday();
+
 create or replace function next_birthday() returns setof employee as $$
-    select get_next_birthday(employees.*)::date, firstname, lastname, hiredate from employees
-$$ Language SQL
+	with step_one as (
+		select employeeid, (birthdate + interval '1 year') as upcoming_birthday
+		from employees
+	)
+	select upcoming_birthday, firstname, lastname, hiredate
+	from employees
+	inner join step_one using(employeeid);
+$$ Language SQL;
 
-select (next_birthday()).*  --> gives the desired result
-
--- Solution 2: (more compact)
-create type day_and_month as (
-	birthday_day  int,
-	birthday_month int
-)
-
-create or replace function day_and_month_of_birth(birthdate date) returns day_and_month as $$
-	select extract(day from birthdate)::int, extract(month from birthdate)::int
-$$ Language SQL
-
-create or replace function this_years_birthday(birthdate date) returns timestamp with time zone as $$
-	select (((day_and_month_of_birth(birthdate)).birthday_day)::varchar || '-' ||
-		   ((day_and_month_of_birth(birthdate)).birthday_month)::varchar || '-' ||
-		    extract(year from now())::varchar || ' ' || '23:59:59.999')::timestamp with time zone
-$$ Language SQL
-
-create or replace function next_years_birthday(birthdate date) returns timestamp with time zone as $$
-	select (((day_and_month_of_birth(birthdate)).birthday_day)::varchar || '-' ||
-		   ((day_and_month_of_birth(birthdate)).birthday_month)::varchar || '-' ||
-		    ((extract(year from now()))::int+1)::varchar || ' ' || '23:59:59.999')::timestamp with time zone
-$$ Language SQL
-
-create or replace function next_birthday(birthdate date) returns date as $$
-	select
-		case when this_years_birthday(birthdate) > now() then this_years_birthday(birthdate)::date
-		else next_years_birthday(birthdate)::date
-		end as next_birthday
-$$ Language SQL
-
-select next_birthday(birthdate), birthdate, firstname, lastname, hiredate
-from employees
+select * from next_birthday();
         -- Teachers solution: (produces the same result)
         -- Observation: next_birthday = birthdate + (current age + 1) * years
         create or replace function next_birthday()
@@ -4421,6 +5105,7 @@ from employees
             from employees
         $$ Language SQL
 		select (next_birthday()).*
+            -- OBSERVATION: When you want to return a set of composites / a table, then use returns table construct
 
 -- Task: Create a function that returns all suppliers that have products
 -- that need to be ordered (units on hand plus units ordered is less than reorder level)
@@ -4447,6 +5132,44 @@ select * from suppliers_to_reorder_from()
     $$ LANGUAGE SQL;
 
     SELECT * FROM suppliers_to_reorder_from()
+        -- A bit better solution, which also tells what product to order from the suppliers
+        create type products_to_reorder as (
+        supplierid int,
+        companyname varchar(40),
+        productid int,
+        productname varchar(40),
+        categoryid int,
+        quantityperunit varchar(20),
+        unitprice real,
+        unitsinstock smallint,
+        unitsonorder smallint,
+        reoderlevel smallint,
+        discontinued int
+        );
+
+
+        create or replace function suppliers_to_reorder_from() returns setof products_to_reorder as $$
+            with stepone as (
+                select productid from products where ((unitsinstock + unitsonorder) < reorderlevel)
+            )
+            select
+                supplierid,
+                companyname,
+                productid,
+                productname,
+                categoryid,
+                quantityperunit,
+                unitprice,
+                unitsinstock,
+                unitsonorder,
+                reorderlevel,
+                discontinued
+            from suppliers inner join products using(supplierid)
+            where productid in (select productid from stepone);
+        $$ Language SQL;
+
+        select * from suppliers_to_reorder_from();
+
 
 -- Task: Crate a function that return the excess inventory, productid and productname
 -- from products based on an input parameter of inventory threshold percent.
@@ -4454,18 +5177,17 @@ select * from suppliers_to_reorder_from()
 -- ceil((unitsinstock + unitsonorder)-(reoderlevel * inventory_threshold_percent/100))
 -- Use returns table syntax
 create or replace function get_access_inventory(inventory_threshold_percent int)
-returns table (excess_inventory int, productid int, productname varchar(40)) as $$
-	with step_one as(
-		select
-			((unitsinstock + unitsonorder)-(reorderlevel * inventory_threshold_percent/100)) as excess_inventory,
-			productid, productname
-    	from products
+returns table (productid int, productname varchar(40), excess_inventory smallint)
+as $$
+	with step_one as (
+		select 	productid, productname,
+				ceil((unitsinstock + unitsonorder)-(reorderlevel * inventory_threshold_percent/100)) as excess_inventory
+		from products
 	)
-	select ceil(excess_inventory), productid, productname from step_one
-	where excess_inventory > 0
-$$ Language SQL
+	select * from step_one where excess_inventory > 0;
+$$ Language SQL;
 
-select * from get_access_inventory(1000)
+select * from get_access_inventory(1000);
 
 
 -- Lecture 134: Procedures; Functions that return void
@@ -4499,7 +5221,7 @@ $$ Language SQL
 call change_supplier_prices(20, 0.5)
 
 -- SECTION 25: Transactions & Concurrency Control
--- Lecture 135: ACID Transactions
+-- Lecture 136: ACID Transactions
 -- Documentation: https://www.geeksforgeeks.org/acid-properties-in-dbms/
 -- Consider a bank moving money from one account to another
 -- This involves two queries; it substracts an amount from sources's debit sum and it adds the amount into the target's
@@ -4539,7 +5261,7 @@ start transaction;
 commit;
 
 -- Postgres Syntax:
-begin transaction
+begin transaction;
     statement_1;
     statement_2;
     statement_3;
@@ -4617,9 +5339,11 @@ SELECT * FROM employees WHERE employeeid=501;
 
 -- Lecture 138: SQL Transaction Isolation
 -- If you have run some statements in a transaction, can others see the partial results
--- before the transaction finished? (My answer is NO)
--- Isolation is a property that defines how & when the changes made by one statement
+-- before the transaction finished? (My initial answer is NO, a more correct answer is it depends on the transaction
+-- isolation level)
+-- Isolation is a property that defines how & when the changes made by one transaction
 -- becomes visible to others
+-- Documentation: https://www.geeksforgeeks.org/acid-properties-in-dbms/
 -- Documentation: https://en.wikipedia.org/wiki/Isolation_(database_systems)
 -- Tutorial: https://www.youtube.com/watch?v=4EajrPgJAk0  << This one first @17:45
 -- Tutorial: https://www.youtube.com/watch?v=pomxJOFVcQs
@@ -4713,7 +5437,7 @@ VALUES (ROW('Scott','X','Levy'),
 
 -- Lecture 142: Accesing Arrays
 -- Documentation: https://www.postgresql.org/docs/11/arrays.html#ARRAYS-ACCESSING
--- Use [] for each dimensions; multi dimentions need more than one (e.g. schedule[2][1])
+-- Use [] for each dimension; multi dimentions need more than one (e.g. schedule[2][1])
 -- INDEXING IN ARRAYS: indexing starts from 1, not from 0
 -- Syntax for range of elements
 -- To get more than one element in an array, use slice notation [lower-bound:upper-bound]
@@ -4933,12 +5657,41 @@ $$ language plpgsql;
 -- It returns the largest_order_amount
 create or replace function biggest_order() returns int as $$
 begin
-    return orderid from order_details
-    group by orderid
-    order by sum((unitprice*quantity)-discount) desc limit 1;
+	return orderid
+	from order_details
+	group by orderid
+	order by sum((unitprice * quantity) - discount) desc limit 1;
 end;
 $$ language plpgsql;
+
 select biggest_order();
+
+-- Extra task: create a function called biggest_order_total() that
+-- returns the total of biggest order
+drop function biggest_order_total();
+
+create or replace function biggest_order_total() returns real as $$
+begin
+	return sum((unitprice * quantity) - discount) as total
+	from order_details
+	group by orderid
+	order by total desc limit 1;
+end;
+$$ language plpgsql;
+
+select biggest_order_total();
+    -- Teacher's solution utilizing a subquery
+    create or replace function biggest_order_total() returns real as $$
+    begin
+        return max(total) from (
+            select orderid, sum((unitprice * quantity) - discount) as total
+            from order_details
+            group by orderid
+        ) as subquery;
+    end;
+    $$ language plpgsql;
+
+    select biggest_order_total();
 
 -- Lecture 147: Handling PLPGSQL Functions With Output Variables
 -- Documentation: https://www.postgresql.org/docs/11/plpgsql-statements.html#PLPGSQL-STATEMENTS-ASSIGNMENT
@@ -4959,18 +5712,21 @@ $$ language plpgsql;
     output_variable1 := value1;
     output_variable  := expression1; --> (x*y)
     return;  --> must exist in the end of the function
-select (add_n_product(5,20)).*;
+select (add_n_product(5,20)).*;     --> the function returns composite having the sum & product values
+select (add_n_product(5,20)).sum;
 
 -- Use Northwind database
--- Task: replace square_n_cube with PLPGSQL function.
-drop function if exists square_n_cube;
-create or replace function square_n_cube(in x int, out square bigint, out cube bigint) as $$
+-- Task: replace square_n_cube with PLPGSQL function
+drop function if exists square_n_cube(in n int, out square bigint, out cube bigint);
+
+create or replace function square_n_cube(in n int, out square bigint, out cube bigint) as $$
 begin
-    square := (x*x);
-    cube := (x*x*x);
-    return;
+	square = n * n;
+	cube = n * n * n;
+	return;
 end;
 $$ language plpgsql;
+
 select (square_n_cube(3)).*;
 
 -- Lecture 148: Returning More than one row (i.e. a table ) in PLPGSQL functions
@@ -5005,6 +5761,7 @@ begin
 		group by productid
 		having sum((unitprice*quantity)-discount) > total_sold
 	);
+    return;
 end;
 $$ language plpgsql;
 
@@ -5079,13 +5836,13 @@ select (products_in_price_range()).*;  --> select * from products_in_price_range
 -- that are between %75 and %130 of that order
 create or replace function orders_in_range() returns setof orders as $$
 declare
-    average_order_amount real := (select avg(order_amount) from (
+    average_order_amount real = (select avg(order_amount) from (
         select orderid, sum((unitprice*quantity)-discount) as order_amount
         from order_details
         group by orderid) as subquery
     );
-    min_order_amount real := average_order_amount * 0.75;
-    max_order_amount real := average_order_amount * 1.3;
+    min_order_amount real = average_order_amount * 0.75;
+    max_order_amount real = average_order_amount * 1.3;
 begin
     return query select * from orders
     where orderid in (
@@ -5119,7 +5876,7 @@ select * from orders_in_range();
     $$ language plpgsql;
     select * from orders_in_range();
 
--- Lecture 150: Looping through results in PLPGSQL functions
+-- Lecture 151: Looping through results in PLPGSQL functions
 -- Documentation: https://www.postgresql.org/docs/current/plpgsql-control-structures.html#PLPGSQL-RECORDS-ITERATING
 -- Syntax:
 for variable_name in select_statement loop
@@ -5157,12 +5914,14 @@ end;
 $$ language plpgsql;
 
 select get_report_chain_array(218);
+select firstname, lastname, employeeid, get_report_chain_array(employeeid)
+from employees;
 
 -- Task: Build a function that returns the average of the square of products' unitprices
 -- Use FOR loop
 create or replace function average_of_square_of_unitprices() returns real as $$
 declare
-    square_total real := 0;
+    square_total real := 0.0;
     total_count int := 0;
     product record;
 begin
@@ -5222,23 +5981,24 @@ select product_price_category(unitprice), * from products;
 -- Winter for December through February
 -- Use a single parameter date
 -- Use time_of_year against orderdate in orders table
-create or replace function time_of_year(in t date) returns text as $$
+create or replace function time_of_year(in ts timestamp) returns text as $$
 declare
-	m integer := extract(month from t);
+	m int = extract(month from ts);
 begin
 	if m in (3, 4, 5) then
 		return 'Spring';
 	elsif m in (6, 7, 8) then
 		return 'Summer';
 	elsif m in (9, 10, 11) then
-		return 'Fall';
+		return 'Autumn';
 	else
 		return 'Winter';
 	end if;
 end;
 $$ language plpgsql;
 
-select time_of_year(orderdate), * from orders;
+select time_of_year('27-04-1978 04:00:00'::timestamp);
+select time_of_year(orderdate::timestamp), * from orders;
 
 -- Lecture 152: Returning query results continued
 -- Documentation: https://www.postgresql.org/docs/current/plpgsql-control-structures.html#PLPGSQL-STATEMENTS-RETURNING
@@ -5253,7 +6013,7 @@ $$ language plpgsql;
 -- In this lecture, we focus on functions that returns set of some_type/composite
 -- In this case we do not use RETURN scalar_type (e.g. return 'Winter';) which would return from the function immediately.
 -- We have 2 commands for this case:
-    RETURN NEXT expression;  -- (e.g. return next row_of_table;)
+    RETURN NEXT expression;  -- (e.g. return next row_of_table; return product;)
     RETURN QUERY query;      -- (e.g. return query select flightid from flights where flightdate >= $1 and flightdate < ($1 + 1);)
 -- RETURN NEXT and RETURN QUERY do not actually return from the function —
 -- they simply append zero or more rows to the function's result set.
@@ -5322,7 +6082,7 @@ SELECT * FROM after_christmas_sale();  --> a new result set, a set of products w
 select * from products;    --> orig product table with untouched unitprices
     -- Observation: If a function returns a setof table_name, it means it returns a COPY of some processed rows from table_name, not the original table_name.
 
--- Lecture 153: Loop and While Loops
+-- Lecture 154: Loop and While Loops
 -- Documentation: https://www.postgresql.org/docs/current/plpgsql-control-structures.html#PLPGSQL-CONTROL-STRUCTURES-LOOPS
 -- Syntax:
 LOOP
@@ -5447,7 +6207,7 @@ select first_multiple(ARRAY[13, 12, 64, 10], 11);
             last_user text
         );
 
-        CREATE FUNCTION emp_stamp() RETURNS trigger AS $emp_stamp$	
+        CREATE FUNCTION emp_stamp() RETURNS trigger AS $emp_stamp$
             BEGIN
                 -- Check that empname and salary are given
                 IF NEW.empname IS NULL THEN
@@ -5528,7 +6288,7 @@ select first_multiple(ARRAY[13, 12, 64, 10], 11);
         INSTEAD OF INSERT OR UPDATE OR DELETE ON emp_view
             FOR EACH ROW EXECUTE FUNCTION update_emp_view();
 
-        UPDATE emp_view SET salary = 10000 WHERE empname = 'David';  --> Observation updating a view updates its table!
+        UPDATE emp_view SET salary = 10000 WHERE empname = 'David';  --> Observation: updating a view updates its table!
         select * from emp;
         select * from emp_view;
 
@@ -5627,7 +6387,7 @@ update products set productname='puppy toy' where productid = 78;
 select * from products where productid = 78;
 delete from products where productid = 78;
 
--- Lecture 156: Statement Triggers
+-- Lecture 157: Statement Triggers
 -- Syntax:
 create trigger trigger_name before insert on table_name
 referencing new table as new_table
@@ -5675,26 +6435,32 @@ begin
     return null;
 end;
 $$ language plpgsql;
-    -- refer to insert into select lecture 61
+    -- refer to insert into select Lecture 61
 
 create trigger delete_order_details after delete on order_details
 referencing old table as old_table
 for each statement execute function audit_order_details();
+    -- Observation: old_table contains the rows that have been deleted.
+    -- old_table does not contain all the rows before the delete operation.
+    -- You can rename old_table as rows_deleted
 
 create trigger update_order_details after update on order_details
 referencing old table as old_table new table as new_table
 for each statement execute function audit_order_details();
+    -- Observation: new_table contains only the updated rows. Not all the rows after the update operation.
+    -- You can rename new_table as updated_rows
 
 create trigger insert_order_details after insert on order_details
 referencing new table as new_table
 for each statement execute function audit_order_details();
+    -- Observation: new_table contains only the order_details rows that have been inserted.
+    -- new_table does not contain all the rows after the insert operation.
+    -- You can rename the new_table as inserted_rows
 
 select orderid from orders; --> pick order id: 10250
 select productid from products; --> pick product id: 1
 insert into order_details
 values (10250, 1, 10.0, 3, 0);
-select * from order_details_audit;
-
 select * from order_details_audit;
 
 update order_details
@@ -5747,7 +6513,7 @@ begin
     return null;
 end;
 $$ language plpgsql;
-    -- refer to insert into select lecture 61
+    -- refer to insert into select Lecture 61
 
 create trigger delete_orders after delete on orders
 referencing old table as old_table
@@ -6583,7 +7349,7 @@ grant sales to jill;
 
 -- What we have accomplished at Lecture 172:
     -- Created generic roles without logins that users can be granted to (e.g. sales)
-    -- Removed all permissions for public on Northwind database
+    -- Removed all permissions for the role public on Northwind database
     -- Assigned users to generic roles (i.e. jill)
 
 -- Next Steps: Work on Database permissions so suzy and boby can reach northwind database
@@ -6614,7 +7380,7 @@ grant create on database northwind to sales;
     psql -d northwind
     create schema jills_schema;
 
--- Lecture 174 : Schema Level Security
+-- Lecture 175 : Schema Level Security
 -- controls the following permissions:
 create - put objects like tables, functions into the schema
 usage - look in the schema and see what is present
@@ -6633,7 +7399,7 @@ usage - look in the schema and see what is present
             -- we have boby role defined in Postres
                 -- we CAN login to northwind database as boby, because we have granted
                 -- database level connect privilige to to hr role, to which boby is granted
-
+psql -d northwind -u boby
 psql northwind=> create table bobys_table (
                         name varchar(255),
                         age integer
@@ -6777,7 +7543,7 @@ REVOKE SELECT ON TABLE employees FROM accounting;
 GRANT SELECT (employeeid, lastname, firstname, title, titleofcourtesy, hiredate, country, extension, photo, photopath)
 ON employees
 TO accounting;
-    select * from empoyees; --> wont work (*) means every column in the table
+    select * from employees; --> wont work (*) means every column in the table
     select employeeid, lastname, firstname, title, titleofcourtesy, hiredate, country, extension, photo, photopath from employees;
         -- it works!
 
@@ -6785,7 +7551,7 @@ TO accounting;
 -- but only contactname, contacttitle and phone fields (i.e. column level security)
 grant update (contactname, contacttitle, phone) on customers to sales;
 
--- Lecture 177: Row Level Security
+-- Lecture 178: Row Level Security
 -- Must be turned on at table level, not turned on by default
 alter table table_name enable row level security;
 -- default row level security is to deny a role to see any rows

@@ -1,0 +1,10 @@
+datsrcln
+footnote
+weight
+nut_data
+food_des
+src_cd
+fd_group
+deriv_cd
+data_src
+nutr_def

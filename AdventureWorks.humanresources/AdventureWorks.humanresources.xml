@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<database name="AdventureWorks" schema="humanresources" type="PostgreSQL - 13.4 (Ubuntu 13.4-1.pgdg18.04+1)">
+   <tables>
+      <table name="department" numRows="16" remarks="Lookup table containing the departments within the Adventure Works Cycles company." schema="humanresources" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('humanresources.department_departmentid_seq'::regclass)" digits="0" id="0" name="departmentid" nullable="false" remarks="Primary key for Department records." size="10" type="serial">
+            <child column="departmentid" foreignKey="FK_EmployeeDepartmentHistory_Department_DepartmentID" implied="false" onDeleteCascade="false" table="employeedepartmenthistory"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="Name of the department." size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="2" name="groupname" nullable="false" remarks="Name of the group to which the department belongs." size="54" type="Name"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="3" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="departmentid" sequenceNumberInPK="1"/>
+         <index name="PK_Department_DepartmentID" unique="true">
+            <column ascending="true" name="departmentid"/>
+         </index>
+      </table>
+      <table name="employee" numRows="290" remarks="Employee information such as salary, department, and title." schema="humanresources" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="false" remarks="Primary key for Employee records.  Foreign key to BusinessEntity.BusinessEntityID." size="10" type="int4">
+            <child column="owner" foreignKey="FK_Document_Employee_Owner" implied="false" onDeleteCascade="false" table="document"/>
+            <child column="businessentityid" foreignKey="FK_EmployeeDepartmentHistory_Employee_BusinessEntityID" implied="false" onDeleteCascade="false" table="employeedepartmenthistory"/>
+            <child column="businessentityid" foreignKey="FK_EmployeePayHistory_Employee_BusinessEntityID" implied="false" onDeleteCascade="false" table="employeepayhistory"/>
+            <child column="businessentityid" foreignKey="FK_JobCandidate_Employee_BusinessEntityID" implied="false" onDeleteCascade="false" table="jobcandidate"/>
+            <child column="employeeid" foreignKey="FK_PurchaseOrderHeader_Employee_EmployeeID" implied="false" onDeleteCascade="false" table="purchaseorderheader"/>
+            <child column="businessentityid" foreignKey="FK_SalesPerson_Employee_BusinessEntityID" implied="false" onDeleteCascade="false" table="salesperson"/>
+            <child column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="vemployee"/>
+            <child column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="vemployeedepartment"/>
+            <child column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="vemployeedepartmenthistory"/>
+            <child column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="vjobcandidate"/>
+            <parent column="businessentityid" foreignKey="FK_Employee_Person_BusinessEntityID" implied="false" onDeleteCascade="false" table="person"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="nationalidnumber" nullable="false" remarks="Unique national identification number such as a social security number." size="15" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="loginid" nullable="false" remarks="Network login." size="256" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="jobtitle" nullable="false" remarks="Work title such as Buyer or Sales Representative." size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="birthdate" nullable="false" remarks="Date of birth." size="13" type="date"/>
+         <column autoUpdated="false" digits="0" id="5" name="maritalstatus" nullable="false" remarks="M = Married, S = Single" size="1" type="bpchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="gender" nullable="false" remarks="M = Male, F = Female" size="1" type="bpchar"/>
+         <column autoUpdated="false" digits="0" id="7" name="hiredate" nullable="false" remarks="Employee hired on this date." size="13" type="date"/>
+         <column autoUpdated="false" defaultValue="true" digits="0" id="8" name="salariedflag" nullable="false" remarks="Job classification. 0 = Hourly, not exempt from collective bargaining. 1 = Salaried, exempt from collective bargaining." size="1" type="Flag"/>
+         <column autoUpdated="false" defaultValue="0" digits="0" id="9" name="vacationhours" nullable="false" remarks="Number of available vacation hours." size="5" type="int2"/>
+         <column autoUpdated="false" defaultValue="0" digits="0" id="10" name="sickleavehours" nullable="false" remarks="Number of available sick leave hours." size="5" type="int2"/>
+         <column autoUpdated="false" defaultValue="true" digits="0" id="11" name="currentflag" nullable="false" remarks="0 = Inactive, 1 = Active" size="1" type="Flag"/>
+         <column autoUpdated="false" defaultValue="uuid_generate_v1()" digits="0" id="12" name="rowguid" nullable="false" remarks="" size="2147483647" type="uuid"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="13" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <column autoUpdated="false" defaultValue="'/'::character varying" digits="0" id="14" name="organizationnode" nullable="true" remarks="Where the employee is located in corporate hierarchy." size="2147483647" type="varchar"/>
+         <primaryKey column="businessentityid" sequenceNumberInPK="1"/>
+         <index name="PK_Employee_BusinessEntityID" unique="true">
+            <column ascending="true" name="businessentityid"/>
+         </index>
+      </table>
+      <table name="employeedepartmenthistory" numRows="296" remarks="Employee department transfers." schema="humanresources" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="false" remarks="Employee identification number. Foreign key to Employee.BusinessEntityID." size="10" type="int4">
+            <parent column="businessentityid" foreignKey="FK_EmployeeDepartmentHistory_Employee_BusinessEntityID" implied="false" onDeleteCascade="false" table="employee"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="departmentid" nullable="false" remarks="Department in which the employee worked including currently. Foreign key to Department.DepartmentID." size="5" type="int2">
+            <parent column="departmentid" foreignKey="FK_EmployeeDepartmentHistory_Department_DepartmentID" implied="false" onDeleteCascade="false" table="department"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="shiftid" nullable="false" remarks="Identifies which 8-hour shift the employee works. Foreign key to Shift.Shift.ID." size="5" type="int2">
+            <parent column="shiftid" foreignKey="FK_EmployeeDepartmentHistory_Shift_ShiftID" implied="false" onDeleteCascade="false" table="shift"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="3" name="startdate" nullable="false" remarks="Date the employee started work in the department." size="13" type="date"/>
+         <column autoUpdated="false" digits="0" id="4" name="enddate" nullable="true" remarks="Date the employee left the department. NULL = Current department." size="13" type="date"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="5" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="businessentityid" sequenceNumberInPK="1"/>
+         <primaryKey column="startdate" sequenceNumberInPK="2"/>
+         <primaryKey column="departmentid" sequenceNumberInPK="3"/>
+         <primaryKey column="shiftid" sequenceNumberInPK="4"/>
+         <index name="PK_EmployeeDepartmentHistory_BusinessEntityID_StartDate_Departm" unique="true">
+            <column ascending="true" name="businessentityid"/>
+            <column ascending="true" name="startdate"/>
+            <column ascending="true" name="departmentid"/>
+            <column ascending="true" name="shiftid"/>
+         </index>
+      </table>
+      <table name="employeepayhistory" numRows="316" remarks="Employee pay history." schema="humanresources" type="TABLE">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="false" remarks="Employee identification number. Foreign key to Employee.BusinessEntityID." size="10" type="int4">
+            <parent column="businessentityid" foreignKey="FK_EmployeePayHistory_Employee_BusinessEntityID" implied="false" onDeleteCascade="false" table="employee"/>
+         </column>
+         <column autoUpdated="false" digits="6" id="1" name="ratechangedate" nullable="false" remarks="Date the change in pay is effective" size="29" type="timestamp"/>
+         <column autoUpdated="false" digits="0" id="2" name="rate" nullable="false" remarks="Salary hourly rate." size="0" type="numeric"/>
+         <column autoUpdated="false" digits="0" id="3" name="payfrequency" nullable="false" remarks="1 = Salary received monthly, 2 = Salary received biweekly" size="5" type="int2"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="4" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="businessentityid" sequenceNumberInPK="1"/>
+         <primaryKey column="ratechangedate" sequenceNumberInPK="2"/>
+         <index name="PK_EmployeePayHistory_BusinessEntityID_RateChangeDate" unique="true">
+            <column ascending="true" name="businessentityid"/>
+            <column ascending="true" name="ratechangedate"/>
+         </index>
+      </table>
+      <table name="jobcandidate" numRows="13" remarks="RÃ©sumÃ©s submitted to Human Resources by job applicants." schema="humanresources" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('humanresources.jobcandidate_jobcandidateid_seq'::regclass)" digits="0" id="0" name="jobcandidateid" nullable="false" remarks="Primary key for JobCandidate records." size="10" type="serial"/>
+         <column autoUpdated="false" digits="0" id="1" name="businessentityid" nullable="true" remarks="Employee identification number if applicant was hired. Foreign key to Employee.BusinessEntityID." size="10" type="int4">
+            <parent column="businessentityid" foreignKey="FK_JobCandidate_Employee_BusinessEntityID" implied="false" onDeleteCascade="false" table="employee"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="resume" nullable="true" remarks="RÃ©sumÃ© in XML format." size="2147483647" type="xml"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="3" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="jobcandidateid" sequenceNumberInPK="1"/>
+         <index name="PK_JobCandidate_JobCandidateID" unique="true">
+            <column ascending="true" name="jobcandidateid"/>
+         </index>
+      </table>
+      <table name="shift" numRows="3" remarks="Work shift lookup table." schema="humanresources" type="TABLE">
+         <column autoUpdated="true" defaultValue="nextval('humanresources.shift_shiftid_seq'::regclass)" digits="0" id="0" name="shiftid" nullable="false" remarks="Primary key for Shift records." size="10" type="serial">
+            <child column="shiftid" foreignKey="FK_EmployeeDepartmentHistory_Shift_ShiftID" implied="false" onDeleteCascade="false" table="employeedepartmenthistory"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="name" nullable="false" remarks="Shift description." size="54" type="Name"/>
+         <column autoUpdated="false" digits="6" id="2" name="starttime" nullable="false" remarks="Shift start time." size="15" type="time"/>
+         <column autoUpdated="false" digits="6" id="3" name="endtime" nullable="false" remarks="Shift end time." size="15" type="time"/>
+         <column autoUpdated="false" defaultValue="now()" digits="6" id="4" name="modifieddate" nullable="false" remarks="" size="29" type="timestamp"/>
+         <primaryKey column="shiftid" sequenceNumberInPK="1"/>
+         <index name="PK_Shift_ShiftID" unique="true">
+            <column ascending="true" name="shiftid"/>
+         </index>
+      </table>
+      <table name="vemployee" numRows="0" remarks="" schema="humanresources" type="VIEW">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="true" remarks="" size="10" type="int4">
+            <parent column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="employee"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="title" nullable="true" remarks="" size="8" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="firstname" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="3" name="middlename" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="4" name="lastname" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="5" name="suffix" nullable="true" remarks="" size="10" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="jobtitle" nullable="true" remarks="" size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="7" name="phonenumber" nullable="true" remarks="" size="29" type="Phone"/>
+         <column autoUpdated="false" digits="0" id="8" name="phonenumbertype" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="9" name="emailaddress" nullable="true" remarks="" size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="10" name="emailpromotion" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="11" name="addressline1" nullable="true" remarks="" size="60" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="12" name="addressline2" nullable="true" remarks="" size="60" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="13" name="city" nullable="true" remarks="" size="30" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="14" name="stateprovincename" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="15" name="postalcode" nullable="true" remarks="" size="15" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="16" name="countryregionname" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="17" name="additionalcontactinfo" nullable="true" remarks="" size="2147483647" type="xml"/>
+      </table>
+      <table name="vemployeedepartment" numRows="0" remarks="" schema="humanresources" type="VIEW">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="true" remarks="" size="10" type="int4">
+            <parent column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="employee"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="title" nullable="true" remarks="" size="8" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="firstname" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="3" name="middlename" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="4" name="lastname" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="5" name="suffix" nullable="true" remarks="" size="10" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="jobtitle" nullable="true" remarks="" size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="7" name="department" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="8" name="groupname" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="9" name="startdate" nullable="true" remarks="" size="13" type="date"/>
+      </table>
+      <table name="vemployeedepartmenthistory" numRows="0" remarks="" schema="humanresources" type="VIEW">
+         <column autoUpdated="false" digits="0" id="0" name="businessentityid" nullable="true" remarks="" size="10" type="int4">
+            <parent column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="employee"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="1" name="title" nullable="true" remarks="" size="8" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="firstname" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="3" name="middlename" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="4" name="lastname" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="5" name="suffix" nullable="true" remarks="" size="10" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="shift" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="7" name="department" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="8" name="groupname" nullable="true" remarks="" size="54" type="Name"/>
+         <column autoUpdated="false" digits="0" id="9" name="startdate" nullable="true" remarks="" size="13" type="date"/>
+         <column autoUpdated="false" digits="0" id="10" name="enddate" nullable="true" remarks="" size="13" type="date"/>
+      </table>
+      <table name="vjobcandidate" numRows="0" remarks="" schema="humanresources" type="VIEW">
+         <column autoUpdated="false" digits="0" id="0" name="jobcandidateid" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="1" name="businessentityid" nullable="true" remarks="" size="10" type="int4">
+            <parent column="businessentityid" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" table="employee"/>
+         </column>
+         <column autoUpdated="false" digits="0" id="2" name="Name.Prefix" nullable="true" remarks="" size="30" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="3" name="Name.First" nullable="true" remarks="" size="30" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="Name.Middle" nullable="true" remarks="" size="30" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="5" name="Name.Last" nullable="true" remarks="" size="30" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="Name.Suffix" nullable="true" remarks="" size="30" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="7" name="Skills" nullable="true" remarks="" size="2147483647" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="8" name="Addr.Type" nullable="true" remarks="" size="30" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="9" name="Addr.Loc.CountryRegion" nullable="true" remarks="" size="100" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="10" name="Addr.Loc.State" nullable="true" remarks="" size="100" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="11" name="Addr.Loc.City" nullable="true" remarks="" size="100" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="12" name="Addr.PostalCode" nullable="true" remarks="" size="20" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="13" name="EMail" nullable="true" remarks="" size="2147483647" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="14" name="WebSite" nullable="true" remarks="" size="2147483647" type="varchar"/>
+         <column autoUpdated="false" digits="6" id="15" name="modifieddate" nullable="true" remarks="" size="29" type="timestamp"/>
+      </table>
+      <table name="vjobcandidateeducation" numRows="0" remarks="" schema="humanresources" type="VIEW">
+         <column autoUpdated="false" digits="0" id="0" name="jobcandidateid" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="1" name="Edu.Level" nullable="true" remarks="" size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="2" name="Edu.StartDate" nullable="true" remarks="" size="13" type="date"/>
+         <column autoUpdated="false" digits="0" id="3" name="Edu.EndDate" nullable="true" remarks="" size="13" type="date"/>
+         <column autoUpdated="false" digits="0" id="4" name="Edu.Degree" nullable="true" remarks="" size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="5" name="Edu.Major" nullable="true" remarks="" size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="Edu.Minor" nullable="true" remarks="" size="50" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="7" name="Edu.GPA" nullable="true" remarks="" size="5" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="8" name="Edu.GPAScale" nullable="true" remarks="" size="5" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="9" name="Edu.School" nullable="true" remarks="" size="100" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="10" name="Edu.Loc.CountryRegion" nullable="true" remarks="" size="100" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="11" name="Edu.Loc.State" nullable="true" remarks="" size="100" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="12" name="Edu.Loc.City" nullable="true" remarks="" size="100" type="varchar"/>
+      </table>
+      <table name="vjobcandidateemployment" numRows="0" remarks="" schema="humanresources" type="VIEW">
+         <column autoUpdated="false" digits="0" id="0" name="jobcandidateid" nullable="true" remarks="" size="10" type="int4"/>
+         <column autoUpdated="false" digits="0" id="1" name="Emp.StartDate" nullable="true" remarks="" size="13" type="date"/>
+         <column autoUpdated="false" digits="0" id="2" name="Emp.EndDate" nullable="true" remarks="" size="13" type="date"/>
+         <column autoUpdated="false" digits="0" id="3" name="Emp.OrgName" nullable="true" remarks="" size="100" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="4" name="Emp.JobTitle" nullable="true" remarks="" size="100" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="5" name="Emp.Responsibility" nullable="true" remarks="" size="2147483647" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="6" name="Emp.FunctionCategory" nullable="true" remarks="" size="2147483647" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="7" name="Emp.IndustryCategory" nullable="true" remarks="" size="2147483647" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="8" name="Emp.Loc.CountryRegion" nullable="true" remarks="" size="2147483647" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="9" name="Emp.Loc.State" nullable="true" remarks="" size="2147483647" type="varchar"/>
+         <column autoUpdated="false" digits="0" id="10" name="Emp.Loc.City" nullable="true" remarks="" size="2147483647" type="varchar"/>
+      </table>
+   </tables>
+</database>

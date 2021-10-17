@@ -1,0 +1,42 @@
+// dot 2.40.1 on Linux 5.4.0-80-generic
+// SchemaSpy rev 590
+digraph "vjobcandidateeducation" {
+  graph [
+    rankdir="RL"
+    bgcolor="#f7f7f7"
+    nodesep="0.18"
+    ranksep="0.46"
+    fontname="Helvetica"
+    fontsize="11"
+  ];
+  node [
+    fontname="Helvetica"
+    fontsize="11"
+    shape="plaintext"
+  ];
+  edge [
+    arrowsize="0.8"
+  ];
+  "vjobcandidateeducation" [
+    label=<
+    <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" BGCOLOR="#ffffff">
+      <TR><TD COLSPAN="3" BGCOLOR="#9bab96" ALIGN="CENTER">vjobcandidateeducation</TD></TR>
+      <TR><TD PORT="jobcandidateid" COLSPAN="3" ALIGN="LEFT">jobcandidateid</TD></TR>
+      <TR><TD PORT="Edu.Level" COLSPAN="3" ALIGN="LEFT">Edu.Level</TD></TR>
+      <TR><TD PORT="Edu.StartDate" COLSPAN="3" ALIGN="LEFT">Edu.StartDate</TD></TR>
+      <TR><TD PORT="Edu.EndDate" COLSPAN="3" ALIGN="LEFT">Edu.EndDate</TD></TR>
+      <TR><TD PORT="Edu.Degree" COLSPAN="3" ALIGN="LEFT">Edu.Degree</TD></TR>
+      <TR><TD PORT="Edu.Major" COLSPAN="3" ALIGN="LEFT">Edu.Major</TD></TR>
+      <TR><TD PORT="Edu.Minor" COLSPAN="3" ALIGN="LEFT">Edu.Minor</TD></TR>
+      <TR><TD PORT="Edu.GPA" COLSPAN="3" ALIGN="LEFT">Edu.GPA</TD></TR>
+      <TR><TD PORT="Edu.GPAScale" COLSPAN="3" ALIGN="LEFT">Edu.GPAScale</TD></TR>
+      <TR><TD PORT="Edu.School" COLSPAN="3" ALIGN="LEFT">Edu.School</TD></TR>
+      <TR><TD PORT="Edu.Loc.CountryRegion" COLSPAN="3" ALIGN="LEFT">Edu.Loc.CountryRegion</TD></TR>
+      <TR><TD PORT="Edu.Loc.State" COLSPAN="3" ALIGN="LEFT">Edu.Loc.State</TD></TR>
+      <TR><TD PORT="Edu.Loc.City" COLSPAN="3" ALIGN="LEFT">Edu.Loc.City</TD></TR>
+      <TR><TD ALIGN="LEFT" BGCOLOR="#f7f7f7">  </TD><TD ALIGN="RIGHT" BGCOLOR="#f7f7f7">view</TD><TD ALIGN="RIGHT" BGCOLOR="#f7f7f7">  </TD></TR>
+    </TABLE>>
+    URL="tables/vjobcandidateeducation.html"
+    tooltip="vjobcandidateeducation"
+  ];
+}
