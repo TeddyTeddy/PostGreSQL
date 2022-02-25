@@ -483,6 +483,7 @@ select count(*) from products where categoryid in (1, 4, 6, 7)
     select count(*)  from person.person where additionalcontactinfo is not null;
 
 -- Section 8: Joining multiple tables together
+-- https://dataschool.com/how-to-teach-people-sql/full-outer-join-animated/
 -- Keep in mind, we use Northwind as the database, and refer to 01-Northwind-A4-Size-for-Print.png
 -- Lecture 37: Grabbing Info from Two tables
     -- Do you want records that only have data on both tables (inner join)
@@ -1230,32 +1231,76 @@ from customers inner join orders using(customerid)
 group by cube(supplier, buyer, product)
 order by supplier nulls first, buyer nulls first, product nulls first
     -- Note that in the previous solution, we use inner join. However, there are customers with no orders:
-    select
-        customers.companyname as customer,
-        categories.categoryname as category,
-        products.productname as product,
-        coalesce(sum((od.unitprice*od.quantity)-od.discount), 0) as total_sales
-    from customers
-    left join orders using(customerid)
-    left join order_details as od using(orderid)
-    left join products using(productid)
-    left join categories using(categoryid)
-    group by cube(customer, category, product)
-    having coalesce(sum((od.unitprice*od.quantity)-od.discount), 0) = 0
-    order by customer, category, product;
-        -- So, we actually need to use left join to take into customers without orders:
+    -- wrong solution: output set contains repeated rows for all nulls
         select
-            customers.companyname as customer,
-            categories.categoryname as category,
+			suppliers.companyname as supplier,
+            customers.companyname as buyer,
             products.productname as product,
             coalesce(sum((od.unitprice*od.quantity)-od.discount), 0) as total_sales
         from customers
         left join orders using(customerid)
         left join order_details as od using(orderid)
         left join products using(productid)
-        left join categories using(categoryid)
-        group by cube(customer, category, product)
-        order by customer, category, product;
+        left join suppliers using(supplierid)
+        group by cube(supplier, buyer, product)
+		having coalesce(sum((od.unitprice*od.quantity)-od.discount), 0) = 0
+        order by supplier nulls first, buyer nulls first, product nulls first;
+        -- So, we actually need to use left join to take into customers without orders:
+        -- wrong solution: output set contains repeated rows for all nulls
+        select
+			suppliers.companyname as supplier,
+            customers.companyname as buyer,
+            products.productname as product,
+            coalesce(sum((od.unitprice*od.quantity)-od.discount), 0) as total_sales
+        from customers
+        left join orders using(customerid)
+        left join order_details as od using(orderid)
+        left join products using(productid)
+        left join suppliers using(supplierid)
+        group by cube(supplier, buyer, product)
+        order by supplier nulls first, buyer nulls first, product nulls first;
+
+   -- There is another more advanced solution:
+    -- Do a cube of total sales by suppliers, buyer and products
+    -- Order by suppliers, products and customers (all of which nulls first)
+    with step_one as (
+        select *
+        from suppliers
+        left join products using(supplierid)
+    ), step_two as (
+        select *
+        from customers
+        left join orders using(customerid)
+        left join order_details as od using(orderid)
+    ), step_three as (
+        select
+            step_one.supplierid,
+            step_two.customerid,
+            step_two.productid,
+            coalesce(sum((step_two.unitprice*step_two.quantity)-step_two.discount), 0) as total_sales
+        from step_one
+        left join step_two using(productid)
+        group by cube(step_one.supplierid, step_two.customerid, step_two.productid)
+        order by step_one.supplierid nulls first, step_two.customerid nulls first, step_two.productid nulls first
+    )
+    select
+        suppliers.companyname as supplier,
+        customers.companyname as buyer,
+        products.productname as product,
+        total_sales
+    from step_three
+    left join suppliers using(supplierid)
+    left join customers using(customerid)
+    left join products using(productid)
+    order by supplier nulls first, buyer nulls first, products nulls first
+        -- step_one: suppliers may not have products yet -> left join
+        -- step_two: customers may not have orders yet   -> left join
+        -- step_three: step_one output set may not have any orders yet -> left join
+        -- final select statement:
+            -- if supplierid does not match (i.e. null due to cube) then it should be preserved
+            -- if customerid does not match (i.e. null due to cube) then it should be preserved
+            -- if productid  does not match (i.e. null due to cube) then it should be preserved
+                --> left join
 
 
 -- Section 10: Combining queries
@@ -1319,7 +1364,7 @@ order by country asc
 
     intersect all/distinct --> keeps duplicates/removes duplicates
 
-    select <column1>, <column2>
+    select <column1>, <column2>, ...
     from table2
 
     intersect
@@ -1409,6 +1454,14 @@ select count(*) from (
         intersect distinct
         select distinct country from suppliers
     ) as x;
+    -- another more advance solution:
+    with step_one as (
+        select count(*) as num_of_pairs, customers.country
+        from customers inner join suppliers using(country)
+        group by customers.country
+        having count(*) <> 0
+    )
+    select count(*) from step_one;
 
 -- how many distinct countries we have for customers and suppliers altogether
 select count(*) from (
@@ -1422,9 +1475,9 @@ select count(*) from (
 --      Helsinki has 4 customers & 1 supplier
 --      Istanbul has 1 customer & 0 supplier
 -- Outcome: cities -> Ny, Helsinki
-select city from customers
+select distinct city from customers
 intersect distinct
-select city from suppliers;
+select distinct city from suppliers
 
 --(???) the count of number of customers and suppliers pairs that are in the same city
 select count(*) from
@@ -1441,24 +1494,26 @@ select city from suppliers) as customer_supplier_pairs
 
 -- Lecture 53: EXCEPT
 -- documenation: https://www.postgresql.org/docs/13/sql-select.html
+-- EXCEPT operator
+-- The EXCEPT operator returns DINSTINCT rows from the first (left) query that are not in the output of the second (right) query.
+-- Documentation: https://www.postgresqltutorial.com/postgresql-except/
+-- Documentation: https://stackoverflow.com/questions/43599511/psql-except-vs-except-all
 -- Purpose: Find the items in the first query but not in the second one
 -- Syntax:
     select <column1>, <column2>, ...
     from table1
 
-    except all/distinct --> removes duplicates (e.g. except distinct)
+    except
 
     select <column1>, <column2>
     from table2
 -- must have same number of columns
 -- column types must line up
 
--- Documentation: https://stackoverflow.com/questions/43599511/psql-except-vs-except-all
-
 -- Find all countries that we have customers in but no suppliers
 -- order by country in asc
 select distinct country from customers
-except all
+except
 select distinct country from suppliers
 order by country asc;
 
@@ -1466,7 +1521,7 @@ order by country asc;
 -- Teachers solution:
 select count(*) from
 (select country from customers
- except all
+ except
  select country from suppliers
 ) as customers_without_suppliers
     --> returns 68.
@@ -1477,18 +1532,13 @@ select count(*) from
             except all
             select country from suppliers;
     -- So, we need to utilize distinct to solve this issue:
-    select count(*) from customers where country in 
-    (select distinct country from customers
-    except all
-    select distinct country from suppliers);
-
-    -- Find the number of customers within a country without suppliers
     select count(*) from customers where country in
     (select distinct country from customers
-    except all
+    except
     select distinct country from suppliers);
         -- which returns 22
-        --Another solution is to use left join:
+    -- Find the number of customers within a country without suppliers
+    --Another solution is to use left join:
         select
             count(*) as num_of_customers
         from customers left join suppliers using(country)
@@ -1498,6 +1548,31 @@ select count(*) from
         select count(*) as num_of_customers from customers
         left join suppliers using(country)
         where suppliers.country is null;
+    -- Find the number of customers within a country without suppliers
+    with step_one as (
+        select distinct country from customers
+        except
+        select distinct country from suppliers
+    ), step_two as (
+        select count(*) as num_customers, country from customers
+        group by country
+        having country in (select * from step_one)
+        order by country asc
+    )
+    select sum(num_customers) as total_num_of_customers from step_two;
+    -- another solution:
+    with step_one as (
+        select
+            distinct customers.country
+        from customers left join suppliers using(country)
+        where suppliers.country is null
+    ),  step_two as (
+        select count(*) as num_customers, country from customers
+        group by country
+        having country in (select * from step_one)
+        order by country asc
+    )
+    select sum(num_customers) as total_num_of_customers from step_two;
 
 -- Cities which have a supplier with no customer
 select city from suppliers
@@ -1600,14 +1675,12 @@ order by companyname asc, contactname asc
         -- even though it should not be picked.
 
    -- works!
-   select
-	companyname, contactname
-    from customers as c left join (
-	    select distinct customerid from customers inner join orders using(customerid)
-	    where orderdate::date between '1997-04-01'::date and '1997-04-30'::date
-    ) as x using(customerid)
-    where x.customerid is null
-    order by companyname asc, contactname asc
+    select companyname, contactname from customers
+    where customerid not in (
+        select customerid from orders
+        where orderdate::date between '1997-04-01'::date and '1997-04-30'::date
+    )
+    order by companyname asc, contactname asc;
 
 -- What products did not have an order in April, 1997. order by productname ascending order
 -- order by productname in asc (??? does not work)
@@ -1651,14 +1724,11 @@ order by productname asc;
         order by productname asc;
 
     -- Solution 3: using NOT IN
-    select
-        productname
-    from products
+    select productname from products
     where productid not in (
-        select distinct productid from products
-        inner join order_details using(productid)
-        inner join orders using(orderid)
-        where orderdate between date('April-01-1997') and date('April-30-1997')
+        select productid from orders
+        inner join order_details using(orderid)
+        where orderdate::date between cast('1997-04-01' as date) and cast('1997-04-30' as date)
     )
     order by productname asc;
 
@@ -1667,10 +1737,9 @@ order by productname asc;
         productname
     from products
     where productid <> all (
-        select distinct productid from products
-        inner join order_details using(productid)
-        inner join orders using(orderid)
-        where orderdate between date('April-01-1997') and date('April-30-1997')
+        select productid from orders
+        inner join order_details using(orderid)
+        where orderdate::date between cast('1997-04-01' as date) and cast('1997-04-30' as date)
     )
     order by productname asc;
 
@@ -1904,7 +1973,7 @@ where ((unitprice*quantity)-discount) > all (
 order by companyname asc;
     -- My interpretation:
     -- Find all customers, which made a purchase with
-    -- an amount greater than that of the average total purchase amount 
+    -- an amount greater than that of the average total purchase amount
     -- of all the individual customers
     -- order by companyname asc
 
@@ -2244,14 +2313,14 @@ UPDATE performance_test
 SET name = md5(location);
 
 -- takes above 900ms after data cached
-EXPLAIN ANALYZE SELECT *
+EXPLAIN SELECT *
 FROM  performance_test
 WHERE location LIKE 'df%' AND name LIKE 'cf%';
 
 
 CREATE INDEX idx_performance_test_location_name
 ON performance_test(location,name);
--- This index would not be used in:
+-- This index would NOT be used in:
     EXPLAIN SELECT *
     FROM  performance_test
     WHERE location LIKE 'df%' AND name LIKE 'cf%';
@@ -2305,22 +2374,40 @@ WHERE name LIKE 'Flat%';
     from production.product
     WHERE product.name LIKE 'Flat%';
         -- This did not work either; trgm_idx_production_product_name is not in the query plan.
+    -- Refer to indexing like query in postgresql:
+    -- https://stackoverflow.com/questions/1566717/postgresql-like-query-performance-variations
+    create index gist_trgm_idx_production_product_name
+    on production.product using gist(name gist_trgm_ops);
+
+    EXPLAIN select *
+    from production.product
+    WHERE product.name LIKE 'Flat%';
+    "Bitmap Heap Scan on product  (cost=4.22..14.78 rows=10 width=139)"
+    "  Recheck Cond: ((name)::text ~~ 'Flat%'::text)"
+    "  ->  Bitmap Index Scan on gist_trgm_idx_production_product_name  (cost=0.00..4.22 rows=10 width=0)"
+    "        Index Cond: ((name)::text ~~ 'Flat%'::text)"
 
 -- this is back to sequential scan
 -- "Seq Scan on product  (cost=0.00..17.56 rows=3 width=139)"
 EXPLAIN select *
 from production.product
 WHERE UPPER(NAME) LIKE UPPER('Flat%');
+    -- create an expression scan
+    CREATE INDEX idx_product_upper_name
+    ON production.product (UPPER(name));
+        -- idx_product_upper_name is NOT used in the select expression!
+        -- https://stackoverflow.com/questions/1566717/postgresql-like-query-performance-variations
+        CREATE INDEX tbl_col_gist_trgm_idx ON tbl USING gist (col gist_trgm_ops);
+        create index gist_trgm_idx_product_upper_name on production.product using gist(upper(name) gist_trgm_ops);
 
--- create an expression scan
-CREATE INDEX idx_product_upper_name
-ON production.product (UPPER(name));
-
--- now we get a bitmap index scan
--- "  ->  Bitmap Index Scan on idx_product_upper_name  (cost=0.00..4.30 rows=3 width=0)"
-EXPLAIN select *
-from production.product
-WHERE UPPER(NAME) LIKE UPPER('Flat%');
+        EXPLAIN select *
+        from production.product
+        WHERE UPPER(NAME) LIKE UPPER('Flat%');
+            "Bitmap Heap Scan on product  (cost=4.17..11.28 rows=3 width=139)"
+            "  Recheck Cond: (upper((name)::text) ~~ 'FLAT%'::text)"
+            "  ->  Bitmap Index Scan on gist_trgm_idx_product_upper_name  (cost=0.00..4.17 rows=3 width=0)"
+            "        Index Cond: (upper((name)::text) ~~ 'FLAT%'::text)"
+            -- gist_trgm_idx_product_upper_name index is indeed used in the query plan
 
 --your turn
 CREATE INDEX idx_person_fullname
